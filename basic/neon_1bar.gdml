@@ -3,10 +3,10 @@
 
 <!DOCTYPE gdml [
 <!ENTITY geometry SYSTEM "neon_geometry.gdml">
-<!ENTITY materials SYSTEM "materials.xml">
+<!ENTITY materials SYSTEM "http://sultan.unizar.es/materials/materials.xml">
 ]>
 
-<gdml xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://service-spi.web.cern.ch/service-spi/app/releases/GDML/schema/gdml.xsd">
+t<gdml xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://service-spi.web.cern.ch/service-spi/app/releases/GDML/schema/gdml.xsd">
 
 <!-- All values should be in mm -->
 
