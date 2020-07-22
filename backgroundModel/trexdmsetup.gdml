@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="UTF-8" standalone="no" ?>
-
+<!-- ##VERSION TREX-DM backgroundModel version 1.0 -->
 <!DOCTYPE gdml [
-<!ENTITY materials SYSTEM "trexdmmaterials.xml">
+ <!ENTITY materials SYSTEM "https://sultan.unizar.es/materials/materials.xml"> 
 <!ENTITY geometry SYSTEM "trexdmgeometry.gdml">
 ]>
 
