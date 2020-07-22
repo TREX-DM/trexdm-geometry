@@ -1,0 +1,1230 @@
+  <!-- {{{ General definitions. -->
+  <define>
+
+    <!-- {{{ Constants. -->
+
+    <constant name="fieldcage_length" value="ring_length+2.0*ring_width+2.0*teflon_thickness"/> <!--outer length-->
+    <!--electronic variables -->
+    <constant name="copperboxdistance" value="10.0" />
+    <constant name="connectordistance" value="15.0" />
+    <constant name="connectorshieldingdistance" value="16.0" />
+    <constant name="condistancein" value="6.0" />
+    <constant name="copperboxpos" value="49.5" />
+    <constant name="cornerboxposX" value="0.5*copper_box_length" />
+    <constant name="cornerboxposY" value="0.5*copper_box_width" />
+    <constant name="consh1posX" value="58.9" />
+    <constant name="consh2posX" value="60.1" />
+    <constant name="conshposY" value="13.47" />
+    <constant name="consil1posX" value="97.48" />  
+    <constant name="consil2posX" value="103.8" />  
+    <constant name="consil3posX" value="13.35" />  
+    <constant name="consil4posX" value="19.71" />  
+    <constant name="consil1posY" value="14.2" />
+    <constant name="consil2posY" value="20.57" />
+    <constant name="consil3posY" value="98.33" />
+    <constant name="consil4posY" value="104.7" />
+
+    <!-- Micromegas variables: mesh + gap + readout + PCB -->
+    <constant name="mm_mesh" value="0.0005"/>
+    <constant name="mm_gap" value="0.000128"/>
+    <constant name="mm_readout" value="0.000015"/>
+    <constant name="mm_pcb" value="readout_thickness"/>
+    <constant name="mm_thick" value="mm_mesh+mm_gap+mm_readout+mm_pcb"/>
+
+    <!-- }}} -->
+
+    <!-- {{{ Position vectors. -->
+    <position name="CenterPos" unit="mm" x="0" y="0" z="0"/>
+
+    <position name="BasePos1" unit="mm" x="0" y="0" z="0.5*vessel_length-base_height-0.5*base_thickness"/>
+    <position name="BasePos2" unit="mm" x="0" y="0" z="-0.5*vessel_length+base_height+0.5*base_thickness"/>
+
+
+    <!-- The outer copper shielding -->
+    <position name="OutCopperShieldPos" unit="mm" x="0" y="outcoppershield_width-Inoutcoppershield_width" z="0" />
+    <position name="OutCopperShieldRealPos" unit="mm" x="0" y="-0.5*outcoppershield_width+vessel_radius+vessel_thickness" z="0" />
+    <position name="OutCopperTopShieldPos" unit="mm" x="0" y="vessel_radius+vessel_thickness+0.5*outcoppertopshield_thickness" z="0" />
+
+    
+    <!-- The outer lead shielding -->
+    <position name="OutLeadShieldPos" unit="mm" x="0" y="outleadshield_width-outcoppershield_width" z="0" />
+    <position name="OutLeadShieldRealPos" unit="mm" x="0" y="-0.5*outleadshield_width+vessel_radius+vessel_thickness" z="0" />
+    <position name="OutLeadTopShieldPos" unit="mm" x="0" y="vessel_radius+vessel_thickness+outcoppertopshield_thickness+0.5*outleadtopshield_thickness" z="0" />
+
+
+    <!-- The external polyethylene shielding -->
+    <position name="PEbaseShieldPos" unit="mm" x="0" y="-outleadshield_width+vessel_radius+vessel_thickness-0.5*PEbaseshield_thickness" z="0" />
+    <position name="PEtopShieldPos" unit="mm" x="0" y="vessel_radius+vessel_thickness+outcoppertopshield_thickness+outleadtopshield_thickness+0.5*PEtopshield_thickness" z="0" />
+
+
+    <!-- Water tank -->
+    <position name="WaterTankPos" unit="mm" x="0" y="0.5*watertank_height+watertank_gap-outleadshield_width+vessel_radius+vessel_thickness-PEbaseshield_thickness" z="0" />
+
+
+    <!-- Micromegas readouts -->
+    <position name="mmpcb_pos_1" unit="mm" x="0" y="0" z="0.5*vessel_length-base_height-base_thickness-0.5*mm_pcb"/>
+    <position name="mmpcb_pos_2" unit="mm" x="0" y="0" z="-0.5*vessel_length+base_height+base_thickness+0.5*mm_pcb"/>
+    <position name="mmreadout_pos_1" unit="mm" x="0" y="0" z="0.5*vessel_length-base_height-base_thickness-mm_pcb-0.5*mm_readout"/>    
+    <position name="mmreadout_pos_2" unit="mm" x="0" y="0" z="-0.5*vessel_length+base_height+base_thickness+mm_pcb+0.5*mm_readout"/>
+    <position name="mmgap_pos_1" unit="mm" x="0" y="0" z="0.5*vessel_length-base_height-base_thickness-mm_pcb-mm_readout-0.5*mm_gap"/>  
+    <position name="mmgap_pos_2" unit="mm" x="0" y="0" z="-0.5*vessel_length+base_height+base_thickness+mm_pcb+mm_readout+0.5*mm_gap"/>
+    <position name="mmmesh_pos_1" unit="mm" x="0" y="0" z="0.5*vessel_length-base_height-base_thickness-mm_pcb-mm_readout-mm_gap-0.5*mm_mesh"/>  
+    <position name="mmmesh_pos_2" unit="mm" x="0" y="0" z="-0.5*vessel_length+base_height+base_thickness+mm_pcb+mm_readout+mm_gap+0.5*mm_mesh"/>
+
+
+    <!-- Flat cables (limandes) -->
+    <position name="LimandePos1" unit="mm" x="0.5*consil1posX+0.5*consil2posX" y="-0.5*consil1posY-0.5*consil2posY" z="0.5*vessel_length-connectordistance+0.5*limande_thickness"/>
+    <position name="LimandePos2" unit="mm" x="0.5*consil3posX+0.5*consil4posX" y="-0.5*consil3posY-0.5*consil4posY" z="0.5*vessel_length-connectordistance+0.5*limande_thickness"/>
+    <position name="LimandePos3" unit="mm" x="0.5*consil1posX+0.5*consil2posX" y="-0.5*consil1posY-0.5*consil2posY" z="-0.5*vessel_length+connectordistance-0.5*limande_thickness"/>
+    <position name="LimandePos4" unit="mm" x="0.5*consil3posX+0.5*consil4posX" y="-0.5*consil3posY-0.5*consil4posY" z="-0.5*vessel_length+connectordistance-0.5*limande_thickness"/>
+
+    <!-- Copper box shielding (between readout and the top of the vessel) -->
+    <position name="CopBoxShPos1" unit="mm" x="copperboxpos" y="-copperboxpos" z="0.5*vessel_length-copperboxdistance-0.5*copper_box_thickness"/>
+    <position name="CopBoxShPos2" unit="mm" x="copperboxpos" y="-copperboxpos" z="-0.5*vessel_length+copperboxdistance+0.5*copper_box_thickness"/>
+
+    <position name="CornerBox1" unit="mm" x="-cornerboxposX" y="-cornerboxposY" z="0"/>
+    <position name="CornerBox2" unit="mm" x="cornerboxposX" y="-cornerboxposY" z="0"/>
+
+    <position name="ConSh1Pos" unit="mm" x="consh1posX" y="-conshposY" z="0.5*copper_box_thickness-connectordistance+copperboxdistance-0.5*connectorshieldingdistance"/>
+    <position name="ConSh2Pos" unit="mm" x="-consh2posX" y="-conshposY" z="0.5*copper_box_thickness-connectordistance+copperboxdistance-0.5*connectorshieldingdistance"/>
+
+    <position name="ConSi1Pos1" unit="mm" x="consil1posX" y="-consil1posY" z="0.5*vessel_length-connectordistance-0.5*connectorsil_thickness"/>
+    <position name="ConSi1Pos2" unit="mm" x="consil2posX" y="-consil2posY" z="0.5*vessel_length-connectordistance-0.5*connectorsil_thickness"/>
+    <position name="ConSi1Pos3" unit="mm" x="consil3posX" y="-consil3posY" z="0.5*vessel_length-connectordistance-0.5*connectorsil_thickness"/>
+    <position name="ConSi1Pos4" unit="mm" x="consil4posX" y="-consil4posY" z="0.5*vessel_length-connectordistance-0.5*connectorsil_thickness"/>
+    <position name="ConSi1Pos5" unit="mm" x="consil1posX" y="-consil1posY" z="-0.5*vessel_length+connectordistance+0.5*connectorsil_thickness"/>
+    <position name="ConSi1Pos6" unit="mm" x="consil2posX" y="-consil2posY" z="-0.5*vessel_length+connectordistance+0.5*connectorsil_thickness"/>
+    <position name="ConSi1Pos7" unit="mm" x="consil3posX" y="-consil3posY" z="-0.5*vessel_length+connectordistance+0.5*connectorsil_thickness"/>
+    <position name="ConSi1Pos8" unit="mm" x="consil4posX" y="-consil4posY" z="-0.5*vessel_length+connectordistance+0.5*connectorsil_thickness"/>
+
+    <position name="ConSi1Pos12" unit="mm" x="0.5*consil1posX+0.5*consil2posX" y="-0.5*consil1posY-0.5*consil2posY" z="0.5*vessel_length-connectordistance-0.5*connectorsil_thickness"/>
+    <position name="ConSi1Pos34" unit="mm" x="0.5*consil3posX+0.5*consil4posX" y="-0.5*consil3posY-0.5*consil4posY" z="0.5*vessel_length-connectordistance-0.5*connectorsil_thickness"/>
+    <position name="ConSi1Pos56" unit="mm" x="0.5*consil1posX+0.5*consil2posX" y="-0.5*consil1posY-0.5*consil2posY" z="-0.5*vessel_length+connectordistance+0.5*connectorsil_thickness"/>
+    <position name="ConSi1Pos78" unit="mm" x="0.5*consil3posX+0.5*consil4posX" y="-0.5*consil3posY-0.5*consil4posY" z="-0.5*vessel_length+connectordistance+0.5*connectorsil_thickness"/>
+
+    <position name="ConSi1PosMed1" unit="mm" x="0" y="0.5*condistancein+0.5*connectorsil_width" z="0"/>
+    <position name="ConSi1PosMed2" unit="mm" x="0" y="-0.5*condistancein-0.5*connectorsil_width" z="0"/>
+    
+    <!-- Field cage -->
+    <position name="ring1_position_01" unit="mm" x="0" y="0" z="ring_pitch*1" />
+    <position name="ring1_position_02" unit="mm" x="0" y="0" z="ring_pitch*2" />
+    <position name="ring1_position_03" unit="mm" x="0" y="0" z="ring_pitch*3" />
+    <position name="ring1_position_04" unit="mm" x="0" y="0" z="ring_pitch*4" />
+    <position name="ring1_position_05" unit="mm" x="0" y="0" z="ring_pitch*5" />
+    <position name="ring1_position_06" unit="mm" x="0" y="0" z="ring_pitch*6" />
+    <position name="ring1_position_07" unit="mm" x="0" y="0" z="ring_pitch*7" />
+    <position name="ring1_position_08" unit="mm" x="0" y="0" z="ring_pitch*8" />
+    <position name="ring1_position_09" unit="mm" x="0" y="0" z="ring_pitch*9" />
+    <position name="ring1_position_10" unit="mm" x="0" y="0" z="ring_pitch*10" />
+    <position name="ring1_position_11" unit="mm" x="0" y="0" z="ring_pitch*11" />
+    <position name="ring1_position_12" unit="mm" x="0" y="0" z="ring_pitch*12" />
+    <position name="ring1_position_13" unit="mm" x="0" y="0" z="ring_pitch*13" />
+    <position name="ring1_position_14" unit="mm" x="0" y="0" z="ring_pitch*14" />
+    <position name="ring1_position_15" unit="mm" x="0" y="0" z="ring_pitch*15" />
+    <position name="ring1_position_16" unit="mm" x="0" y="0" z="ring_pitch*16" />
+    <position name="ring1_position_17" unit="mm" x="0" y="0" z="ring_pitch*17" />
+    <position name="ring1_position_18" unit="mm" x="0" y="0" z="ring_pitch*18" />
+    <position name="ring1_position_19" unit="mm" x="0" y="0" z="ring_pitch*19" />
+    <position name="ring1_position_20" unit="mm" x="0" y="0" z="ring_pitch*20" />
+    <position name="ring2_position_01" unit="mm" x="0" y="0" z="-ring_pitch*1" />
+    <position name="ring2_position_02" unit="mm" x="0" y="0" z="-ring_pitch*2" />
+    <position name="ring2_position_03" unit="mm" x="0" y="0" z="-ring_pitch*3" />
+    <position name="ring2_position_04" unit="mm" x="0" y="0" z="-ring_pitch*4" />
+    <position name="ring2_position_05" unit="mm" x="0" y="0" z="-ring_pitch*5" />
+    <position name="ring2_position_06" unit="mm" x="0" y="0" z="-ring_pitch*6" />
+    <position name="ring2_position_07" unit="mm" x="0" y="0" z="-ring_pitch*7" />
+    <position name="ring2_position_08" unit="mm" x="0" y="0" z="-ring_pitch*8" />
+    <position name="ring2_position_09" unit="mm" x="0" y="0" z="-ring_pitch*9" />
+    <position name="ring2_position_10" unit="mm" x="0" y="0" z="-ring_pitch*10" />
+    <position name="ring2_position_11" unit="mm" x="0" y="0" z="-ring_pitch*11" />
+    <position name="ring2_position_12" unit="mm" x="0" y="0" z="-ring_pitch*12" />
+    <position name="ring2_position_13" unit="mm" x="0" y="0" z="-ring_pitch*13" />
+    <position name="ring2_position_14" unit="mm" x="0" y="0" z="-ring_pitch*14" />
+    <position name="ring2_position_15" unit="mm" x="0" y="0" z="-ring_pitch*15" />
+    <position name="ring2_position_16" unit="mm" x="0" y="0" z="-ring_pitch*16" />
+    <position name="ring2_position_17" unit="mm" x="0" y="0" z="-ring_pitch*17" />
+    <position name="ring2_position_18" unit="mm" x="0" y="0" z="-ring_pitch*18" />
+    <position name="ring2_position_19" unit="mm" x="0" y="0" z="-ring_pitch*19" />
+    <position name="ring2_position_20" unit="mm" x="0" y="0" z="-ring_pitch*20" />
+    
+    <position name="Ring1pos" unit="mm" x="0" y="0" z="-0.5*vessel_length+base_height+base_thickness+readout_thickness+degrador_gap" />
+    <position name="Ring2pos" unit="mm" x="0" y="0" z="0.5*vessel_length-base_height-base_thickness-readout_thickness-degrador_gap" />
+
+
+    <!-- }}} -->
+
+    <!-- {{{ Rotations. -->
+    <rotation name="RotateY90" unit="deg" x="0" y="90" z="0"/>
+    <rotation name="RotateZ" unit="deg" x="0" y="0" z="90"/>
+    <rotation name="RotateY" unit="deg" x="0" y="180" z="0"/>
+    <rotation name="RotateYZ" unit="deg" x="0" y="180" z="90"/>
+    <rotation name="RotateZp45" unit="deg" x="0" y="0" z="45"/>
+    <rotation name="RotateZ45" unit="deg" x="0" y="0" z="-45"/>
+    <rotation name="RotateYZ45" unit="deg" x="0" y="180" z="45"/>
+    <!-- }}} -->
+
+  </define>
+  <!-- }}} -->
+
+    <!-- {{{ Definition of solid volumes -->
+    
+    <solids>
+       <box name="WorldSolid" x="world_size" y="world_size" z="world_size" lunit="mm"/>
+
+       <!-- #################################### -->
+
+
+
+       <!-- The copper vessel -->
+       <tube name="VesselSolid1" startphi="0" deltaphi="360" rmin="0" rmax="vessel_radius+vessel_thickness" z="vessel_length+2.0*vessel_thickness" aunit="deg" lunit="mm" />
+
+       <tube name="VesselSolid2" startphi="0" deltaphi="360" rmin="0" rmax="vessel_radius" z="vessel_length" aunit="deg" lunit="mm" />
+
+<tube name="VesselSolid0" startphi="0" deltaphi="360" rmin="0" rmax="vessel_radius+vessel_thickness+air_thickness" z="vessel_length+2.0*vessel_thickness+2.0*air_thickness" aunit="deg" lunit="mm" /> <!--volume of 1cm around vessel-->
+
+
+       <subtraction name="VesselSolid">
+            <first ref="VesselSolid1"/>
+            <second ref="VesselSolid2"/>
+       </subtraction>
+
+
+<!--virtual volume to study radon outside the vessel -->
+
+    <subtraction name="InAirSolid">
+            <first ref="VesselSolid0"/>
+            <second ref="VesselSolid1"/>
+       </subtraction>
+
+
+
+       <!-- #################################### -->
+
+
+
+       <!-- The outer copper shielding -->
+       <box name="OutCopperShieldSolid1" x="outcoppershield_thickness" y="outcoppershield_width" z="outcoppershield_length" lunit="mm" />
+       <box name="OutCopperShieldSolid2" x="Inoutcoppershield_thickness" y="Inoutcoppershield_width" z="Inoutcoppershield_length" lunit="mm" />
+
+       <box name="OutCopperTopShieldSolid" x="outcoppertopshield_width" y="outcoppertopshield_thickness" z="outcoppertopshield_length" lunit="mm" />
+
+       <subtraction name="OutCopperShieldSolid">
+            <first ref="OutCopperShieldSolid1"/>
+            <second ref="OutCopperShieldSolid2"/>
+	    <positionref ref="OutCopperShieldPos"/>
+       </subtraction>
+
+
+       <!-- The outer lead shielding -->
+       <box name="OutLeadShieldSolid1" x="outleadshield_thickness" y="outleadshield_width" z="outleadshield_length" lunit="mm" />
+       <box name="OutLeadShieldSolid2" x="outcoppershield_thickness" y="outleadshield_width" z="outcoppershield_length" lunit="mm" />
+
+       <box name="OutLeadTopShieldSolid" x="outleadtopshield_width" y="outleadtopshield_thickness" z="outleadtopshield_length" lunit="mm" />
+
+
+       <subtraction name="OutLeadShieldSolid">
+            <first ref="OutLeadShieldSolid1"/>
+            <second ref="OutLeadShieldSolid2"/>
+	    <positionref ref="OutLeadShieldPos"/>
+       </subtraction>
+
+
+       <!-- The external polyethylene shielding -->
+       <box name="PEbaseShieldSolid" x="PEbaseshield_width" y="PEbaseshield_thickness" z="PEbaseshield_length" lunit="mm" />
+       <box name="PEtopShieldSolid" x="PEtopshield_width" y="PEtopshield_thickness" z="PEtopshield_length" lunit="mm" />
+
+
+       <!-- Water tanks -->
+       <box name="WaterTankSolid1" x="watertank_width" y="watertank_height" z="watertank_length" lunit="mm" />
+       <box name="WaterTankSolid2" x="PEtopshield_width" y="watertank_height" z="PEtopshield_length" lunit="mm" />
+
+
+       <subtraction name="WaterTankSolid">
+            <first ref="WaterTankSolid1"/>
+            <second ref="WaterTankSolid2"/>
+       </subtraction>
+
+       <!-- #################################### -->
+
+       <!-- The central cathode + the target (or gas) + the copper frame + the teflon frame -->
+
+       <box name="CathodeSolid" x="cathodeMylar_length" y="cathodeMylar_length" z="cathodeMylar_thickness" lunit="mm" />
+
+      <box name="CathodeSolid2" x="cathodeCopperFrame_length" y="cathodeCopperFrame_length" z="cathodeCopperFrame_thickness" lunit="mm" />
+      <box name="CathodeSolid2_1" x="cathodeMylar_length" y="cathodeMylar_length" z="cathodeCopperFrame_thickness+1.0" lunit="mm" />
+
+       <subtraction name="CathodeCopperFrameSolid">
+            <first ref="CathodeSolid2"/>
+            <second ref="CathodeSolid2_1"/>
+       </subtraction>
+
+      <box name="CathodeSolid3" x="cathodeTeflonFrame_length" y="cathodeTeflonFrame_length" z="cathodeTeflonFrame_thickness" lunit="mm" />
+      <box name="CathodeSolid3_1" x="cathodeTeflonFrame_length2" y="cathodeTeflonFrame_length2" z="cathodeTeflonFrame_thickness+1.0" lunit="mm" />
+
+       <subtraction name="CathodeSolid4">
+            <first ref="CathodeSolid3"/>
+            <second ref="CathodeSolid3_1"/>
+       </subtraction>
+
+       <subtraction name="CathodeTeflonFrameSolid">
+            <first ref="CathodeSolid4"/>
+            <second ref="CathodeSolid2"/>
+       </subtraction>
+
+       <union name="CathodeUnionSolid1">
+            <first ref="CathodeTeflonFrameSolid"/>
+            <second ref="CathodeCopperFrameSolid"/>
+       </union>
+
+       <union name="CathodeUnionSolid">
+            <first ref="CathodeUnionSolid1"/>
+            <second ref="CathodeSolid"/>
+       </union>
+
+
+      <box name="TargetSolid" x="target_length" y="target_length" z="vessel_length-2.0*base_height-2.0*base_thickness-2.0*readout_thickness" lunit="mm" />
+
+       <subtraction name="gasSolid">
+            <first ref="TargetSolid"/>
+            <second ref="CathodeUnionSolid"/>
+       </subtraction>
+
+
+       <!-- #################################### -->
+
+       <!-- The teflon cover around the central cathode + calibration tube -->
+      <tube name="CatTeflonSolid1" startphi="0" deltaphi="360" rmin="0" rmax="vessel_radius" z="central_teflon_thickness" aunit="deg" lunit="mm" />
+
+      <box name="CatTeflonSolid2" x="fieldcage_length" y="fieldcage_length" z="central_teflon_thickness" lunit="mm" />
+
+      
+
+       <subtraction name="CatTeflonSolid">
+            <first ref="CatTeflonSolid1"/>
+            <second ref="CatTeflonSolid2"/>
+       </subtraction>
+
+
+       <!-- #################################### -->
+
+       <!-- The support of the Micromegas readouts -->
+       <tube name="BaseSolid" startphi="0" deltaphi="360" rmin="0" rmax="0.5*base_diameter" z="base_thickness" aunit="deg" lunit="mm" />
+
+       <!-- #################################### -->
+
+       <!-- The Micromegas readouts -->
+       <box name="MMMeshSolid" x="target_length" y="target_length" z="mm_mesh" lunit="mm" />
+
+       <box name="MMGapSolid" x="target_length" y="target_length" z="mm_gap" lunit="mm" />
+
+       <box name="MMReadoutSolid" x="target_length" y="target_length" z="mm_readout" lunit="mm" />
+
+       <box name="MMPCBSolid" x="target_length" y="target_length" z="mm_pcb" lunit="mm" />
+
+       <!-- #################################### -->
+
+       <!-- The flat cables -->
+      <box name="LimandeSolid" x="limande_width" y="limande_length" z="limande_thickness" lunit="mm" />
+
+
+       <!-- #################################### -->
+
+       <!-- The copper box shielding -->
+      <box name="CopBoxSolid1" x="copper_box_length" y="copper_box_width" z="copper_box_thickness" lunit="mm" />
+
+      <box name="CopCornerSolid" x="corner_box_side" y="corner_box_side" z="copper_box_thickness" lunit="mm" />
+
+      <box name="ConShSolid" x="connector_shielding_length" y="connector_shielding_width" z="connector_shielding_thickness" lunit="mm" />
+
+      <box name="TefSilSolid1" x="teflon_consil_length" y="teflon_consil_width" z="teflon_consil_thickness" lunit="mm" />
+
+      <box name="ConSilSolid" x="connectorsil_length" y="connectorsil_width" z="connectorsil_thickness" lunit="mm" />
+
+       
+
+       <subtraction name="CopBoxSolid2">
+            <first ref="CopBoxSolid1"/>
+            <second ref="CopCornerSolid"/>
+	    <positionref ref="CornerBox1"/>
+            <rotationref ref="RotateZ45"/>
+       </subtraction>
+
+       <subtraction name="CopBoxSolid3">
+            <first ref="CopBoxSolid2"/>
+            <second ref="CopCornerSolid"/>
+	    <positionref ref="CornerBox2"/>
+            <rotationref ref="RotateZ45"/>
+       </subtraction>
+
+       <subtraction name="CopBoxSolid4">
+            <first ref="CopBoxSolid3"/>
+            <second ref="ConShSolid"/>
+	    <positionref ref="ConSh1Pos"/>
+       </subtraction>
+
+       <subtraction name="CopBoxSolid">
+            <first ref="CopBoxSolid4"/>
+            <second ref="ConShSolid"/>
+	    <positionref ref="ConSh2Pos"/>
+       </subtraction>
+
+
+       <subtraction name="TefSilSolid2">
+            <first ref="TefSilSolid1"/>
+            <second ref="ConSilSolid"/>
+	    <positionref ref="ConSi1PosMed1"/>
+       </subtraction>
+
+       <subtraction name="TefSilSolid">
+            <first ref="TefSilSolid2"/>
+            <second ref="ConSilSolid"/>
+	    <positionref ref="ConSi1PosMed2"/>
+       </subtraction>
+
+
+
+       <!-- #################################### -->       
+
+       <!-- The field cage -->
+       <box name="FieldCageSolid1" x="fieldcage_length" y="fieldcage_length" z="vessel_length-2.0*base_height-2.0*base_thickness-2.0*readout_thickness-2.0*degrador_gap-2.0*lastring_thickness" lunit="mm" />
+       <box name="FieldCageSolid2" x="ring_length+2.0*ring_width" y="ring_length+2.0*ring_width" z="vessel_length-2.0*base_height-2.0*base_thickness-2.0*readout_thickness-2.0*degrador_gap-2.0*lastring_thickness" lunit="mm" />
+       
+       <subtraction name="FieldCageSolid">
+            <first ref="FieldCageSolid1"/>
+            <second ref="FieldCageSolid2"/>
+       </subtraction>
+
+
+
+       <!-- #################################### --> 
+
+       <!-- The copper rings -->       
+       <box name="RingSolid1" x="ring_length+2.0*ring_width" y="ring_length+2.0*ring_width" z="ring_thickness" lunit="mm" />
+       <box name="RingSolid2" x="ring_length" y="ring_length" z="ring_thickness" lunit="mm" />
+       
+       <subtraction name="RingSolid">
+            <first ref="RingSolid1"/>
+            <second ref="RingSolid2"/>
+       </subtraction>
+       
+       <box name="LastRingSolid1" x="ring_length+2.0*lastring_width" y="ring_length+2.0*lastring_width" z="lastring_thickness" lunit="mm" />
+       <box name="LastRingSolid2" x="ring_length" y="ring_length" z="lastring_thickness" lunit="mm" />
+       
+       <subtraction name="LastRingSolid">
+            <first ref="LastRingSolid1"/>
+            <second ref="LastRingSolid2"/>
+       </subtraction>
+       
+       <!-- piling up the rings -->
+       
+       <union name="Ring1Solid_1" >
+        <first ref="LastRingSolid" />
+        <second ref="RingSolid" />
+        <positionref ref="ring1_position_01" />
+       </union>
+       
+       <union name="Ring1Solid_2" >
+        <first ref="Ring1Solid_1" />
+        <second ref="RingSolid" />
+        <positionref ref="ring1_position_02" />
+       </union>
+       
+       <union name="Ring1Solid_3" >
+        <first ref="Ring1Solid_2" />
+        <second ref="RingSolid" />
+        <positionref ref="ring1_position_03" />
+       </union>
+       
+       <union name="Ring1Solid_4" >
+        <first ref="Ring1Solid_3" />
+        <second ref="RingSolid" />
+        <positionref ref="ring1_position_04" />
+       </union>
+       
+       <union name="Ring1Solid_5" >
+        <first ref="Ring1Solid_4" />
+        <second ref="RingSolid" />
+        <positionref ref="ring1_position_05" />
+       </union>
+       
+       <union name="Ring1Solid_6" >
+        <first ref="Ring1Solid_5" />
+        <second ref="RingSolid" />
+        <positionref ref="ring1_position_06" />
+       </union>
+       
+       <union name="Ring1Solid_7" >
+        <first ref="Ring1Solid_6" />
+        <second ref="RingSolid" />
+        <positionref ref="ring1_position_07" />
+       </union>
+       
+       <union name="Ring1Solid_8" >
+        <first ref="Ring1Solid_7" />
+        <second ref="RingSolid" />
+        <positionref ref="ring1_position_08" />
+       </union>
+       
+       <union name="Ring1Solid_9" >
+        <first ref="Ring1Solid_8" />
+        <second ref="RingSolid" />
+        <positionref ref="ring1_position_09" />
+       </union>
+
+       <union name="Ring1Solid_10" >
+        <first ref="Ring1Solid_9" />
+        <second ref="RingSolid" />
+        <positionref ref="ring1_position_10" />
+       </union>
+
+       <union name="Ring1Solid_11" >
+        <first ref="Ring1Solid_10" />
+        <second ref="RingSolid" />
+        <positionref ref="ring1_position_11" />
+       </union>
+
+       <union name="Ring1Solid_12" >
+        <first ref="Ring1Solid_11" />
+        <second ref="RingSolid" />
+        <positionref ref="ring1_position_12" />
+       </union>
+
+       <union name="Ring1Solid_13" >
+        <first ref="Ring1Solid_12" />
+        <second ref="RingSolid" />
+        <positionref ref="ring1_position_13" />
+       </union>
+
+       <union name="Ring1Solid_14" >
+        <first ref="Ring1Solid_13" />
+        <second ref="RingSolid" />
+        <positionref ref="ring1_position_14" />
+       </union>
+
+       <union name="Ring1Solid_15" >
+        <first ref="Ring1Solid_14" />
+        <second ref="RingSolid" />
+        <positionref ref="ring1_position_15" />
+       </union>
+
+       <union name="Ring1Solid_16" >
+        <first ref="Ring1Solid_15" />
+        <second ref="RingSolid" />
+        <positionref ref="ring1_position_16" />
+       </union>
+
+       <union name="Ring1Solid_17" >
+        <first ref="Ring1Solid_16" />
+        <second ref="RingSolid" />
+        <positionref ref="ring1_position_17" />
+       </union>
+
+       <union name="Ring1Solid_18" >
+        <first ref="Ring1Solid_17" />
+        <second ref="RingSolid" />
+        <positionref ref="ring1_position_18" />
+       </union>
+
+       <union name="Ring1Solid_19" >
+        <first ref="Ring1Solid_18" />
+        <second ref="RingSolid" />
+        <positionref ref="ring1_position_19" />
+       </union>
+
+       <union name="Ring1Solid_20" >
+        <first ref="Ring1Solid_19" />
+        <second ref="RingSolid" />
+        <positionref ref="ring1_position_20" />
+       </union>
+       
+       <union name="Ring2Solid_1" >
+        <first ref="LastRingSolid" />
+        <second ref="RingSolid" />
+        <positionref ref="ring2_position_01" />
+       </union>
+       
+       <union name="Ring2Solid_2" >
+        <first ref="Ring2Solid_1" />
+        <second ref="RingSolid" />
+        <positionref ref="ring2_position_02" />
+       </union>
+       
+       <union name="Ring2Solid_3" >
+        <first ref="Ring2Solid_2" />
+        <second ref="RingSolid" />
+        <positionref ref="ring2_position_03" />
+       </union>
+       
+       <union name="Ring2Solid_4" >
+        <first ref="Ring2Solid_3" />
+        <second ref="RingSolid" />
+        <positionref ref="ring2_position_04" />
+       </union>
+       
+       <union name="Ring2Solid_5" >
+        <first ref="Ring2Solid_4" />
+        <second ref="RingSolid" />
+        <positionref ref="ring2_position_05" />
+       </union>
+       
+       <union name="Ring2Solid_6" >
+        <first ref="Ring2Solid_5" />
+        <second ref="RingSolid" />
+        <positionref ref="ring2_position_06" />
+       </union>
+       
+       <union name="Ring2Solid_7" >
+        <first ref="Ring2Solid_6" />
+        <second ref="RingSolid" />
+        <positionref ref="ring2_position_07" />
+       </union>
+       
+       <union name="Ring2Solid_8" >
+        <first ref="Ring2Solid_7" />
+        <second ref="RingSolid" />
+        <positionref ref="ring2_position_08" />
+       </union>
+       
+       <union name="Ring2Solid_9" >
+        <first ref="Ring2Solid_8" />
+        <second ref="RingSolid" />
+        <positionref ref="ring2_position_09" />
+       </union>
+
+       <union name="Ring2Solid_10" >
+        <first ref="Ring2Solid_9" />
+        <second ref="RingSolid" />
+        <positionref ref="ring2_position_10" />
+       </union>
+
+       <union name="Ring2Solid_11" >
+        <first ref="Ring2Solid_10" />
+        <second ref="RingSolid" />
+        <positionref ref="ring2_position_11" />
+       </union>
+
+       <union name="Ring2Solid_12" >
+        <first ref="Ring2Solid_11" />
+        <second ref="RingSolid" />
+        <positionref ref="ring2_position_12" />
+       </union>
+
+       <union name="Ring2Solid_13" >
+        <first ref="Ring2Solid_12" />
+        <second ref="RingSolid" />
+        <positionref ref="ring2_position_13" />
+       </union>
+
+       <union name="Ring2Solid_14" >
+        <first ref="Ring2Solid_13" />
+        <second ref="RingSolid" />
+        <positionref ref="ring2_position_14" />
+       </union>
+
+       <union name="Ring2Solid_15" >
+        <first ref="Ring2Solid_14" />
+        <second ref="RingSolid" />
+        <positionref ref="ring2_position_15" />
+       </union>
+
+       <union name="Ring2Solid_16" >
+        <first ref="Ring2Solid_15" />
+        <second ref="RingSolid" />
+        <positionref ref="ring2_position_16" />
+       </union>
+
+       <union name="Ring2Solid_17" >
+        <first ref="Ring2Solid_16" />
+        <second ref="RingSolid" />
+        <positionref ref="ring2_position_17" />
+       </union>
+
+       <union name="Ring2Solid_18" >
+        <first ref="Ring2Solid_17" />
+        <second ref="RingSolid" />
+        <positionref ref="ring2_position_18" />
+       </union>
+
+       <union name="Ring2Solid_19" >
+        <first ref="Ring2Solid_18" />
+        <second ref="RingSolid" />
+        <positionref ref="ring2_position_19" />
+       </union>
+
+       <union name="Ring2Solid_20" >
+        <first ref="Ring2Solid_19" />
+        <second ref="RingSolid" />
+        <positionref ref="ring2_position_20" />
+       </union>
+
+
+
+
+   <!-- #################################### -->
+
+       <!-- Gas outside the target -->
+
+       <subtraction name="OuterGasSolid1">
+            <first ref="VesselSolid2"/>
+            <second ref="FieldCageSolid"/>
+       </subtraction>
+
+
+       <subtraction name="OuterGasSolid5">
+            <first ref="OuterGasSolid1"/>
+            <second ref="MMPCBSolid"/>
+           <positionref ref="mmpcb_pos_1"/>
+       </subtraction>
+        <subtraction name="OuterGasSolid6">
+            <first ref="OuterGasSolid5"/>
+            <second ref="MMPCBSolid"/>
+           <positionref ref="mmpcb_pos_2"/>
+       </subtraction>
+
+       <subtraction name="OuterGasSolid7">
+            <first ref="OuterGasSolid6"/>
+            <second ref="MMReadoutSolid"/>
+          <positionref ref="mmreadout_pos_1"/>
+       </subtraction>
+      
+       <subtraction name="OuterGasSolid8">
+            <first ref="OuterGasSolid7"/>
+            <second ref="MMReadoutSolid"/>
+          <positionref ref="mmreadout_pos_2"/>
+       </subtraction>
+     
+       <subtraction name="OuterGasSolid9">
+            <first ref="OuterGasSolid8"/>
+            <second ref="MMGapSolid"/>
+          <positionref ref="mmgap_pos_1"/>
+       </subtraction>
+      
+       <subtraction name="OuterGasSolid10">
+            <first ref="OuterGasSolid9"/>
+           <second ref="MMGapSolid"/>
+          <positionref ref="mmgap_pos_2"/>
+       </subtraction>
+
+       <subtraction name="OuterGasSolid11">
+            <first ref="OuterGasSolid10"/>
+            <second ref="MMMeshSolid"/>
+          <positionref ref="mmmesh_pos_1"/>
+       </subtraction>
+      
+       <subtraction name="OuterGasSolid12">
+            <first ref="OuterGasSolid11"/>
+        <second ref="MMMeshSolid"/>
+          <positionref ref="mmmesh_pos_2"/>
+       </subtraction>
+
+
+       <subtraction name="OuterGasSolid13">
+            <first ref="OuterGasSolid12"/>
+            <second ref="BaseSolid"/>
+          <positionref ref="BasePos1"/>
+       </subtraction>
+     
+       <subtraction name="OuterGasSolid14">
+            <first ref="OuterGasSolid13"/>
+         <second ref="BaseSolid"/>
+          <positionref ref="BasePos2"/>
+       </subtraction>
+ 
+      
+       <subtraction name="OuterGasSolid15">
+            <first ref="OuterGasSolid14"/>
+            <second ref="Ring1Solid_20"/>
+          <positionref ref="Ring1pos"/>
+       </subtraction>
+      
+       <subtraction name="OuterGasSolid16">
+            <first ref="OuterGasSolid15"/>
+         <second ref="Ring2Solid_20"/>
+          <positionref ref="Ring2pos"/>
+       </subtraction>
+
+      <subtraction name="OuterGasSolid17">
+            <first ref="OuterGasSolid16"/>
+         <second ref="Ring2Solid_20"/>
+          <positionref ref="Ring2pos"/>
+       </subtraction>
+       
+      <subtraction name="OuterGasSolid18">
+            <first ref="OuterGasSolid17"/>
+         <second ref="CatTeflonSolid"/>
+       </subtraction>
+     
+ 
+
+       <subtraction name="OuterGasSolid19">
+            <first ref="OuterGasSolid18"/>
+         <second ref="TargetSolid"/>
+       </subtraction>
+
+       <subtraction name="OuterGasSolid20">
+            <first ref="OuterGasSolid19"/>
+         <second ref="CathodeUnionSolid"/>
+       </subtraction>
+
+
+       <subtraction name="OuterGasSolid21">
+            <first ref="OuterGasSolid20"/>
+            <second ref="CopBoxSolid1"/>
+	    <positionref ref="CopBoxShPos1"/>
+            <rotationref ref="RotateZp45" />
+       </subtraction>
+
+
+       <subtraction name="OuterGasSolid22">
+            <first ref="OuterGasSolid21"/>
+            <second ref="CopBoxSolid1"/>
+	    <positionref ref="CopBoxShPos2"/>
+            <rotationref ref="RotateYZ45" />
+       </subtraction>
+
+
+
+    </solids>
+<!--%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%% -->
+    <!-- }}} -->
+
+<structure>
+    <!-- {{{ Volumes definition (material and solid assignement) -->
+       
+        
+       <!-- "Target" replaced by "gas" -->
+       <volume name="gasVolume">
+            <materialref ref="Ne_iC4H10"/>
+            <solidref ref="gasSolid"/>
+       </volume>
+      
+         <volume name="OutGasVolume">
+            <materialref ref="Ne_iC4H10"/>
+            <solidref ref="OuterGasSolid22"/>
+       </volume>
+        
+      <!--Field Cage volumes -->
+
+       <volume name="FieldCageVolume">
+            <materialref ref="PTFE"/>
+            <solidref ref="FieldCageSolid"/>
+       </volume>
+
+    
+       <volume name="RingVolume1">
+            <materialref ref="Copper"/>
+            <solidref ref="Ring1Solid_20"/>
+       </volume>
+       
+       <volume name="RingVolume2">
+            <materialref ref="Copper"/>
+            <solidref ref="Ring2Solid_20"/>
+       </volume>
+
+
+       <!--Cathode volumes -->
+
+     <volume name="CathodeVolume">
+            <materialref ref="Mylar"/>
+            <solidref ref="CathodeSolid"/>
+       </volume>
+
+       <volume name="CathodeCopperFrameVolume">
+            <materialref ref="Copper"/>
+            <solidref ref="CathodeCopperFrameSolid"/>
+       </volume>
+
+       <volume name="CathodeTeflonFrameVolume">
+            <materialref ref="PTFE"/>
+            <solidref ref="CathodeTeflonFrameSolid"/>
+       </volume>
+
+       <volume name="CatTeflonVolume">
+            <materialref ref="PTFE"/>
+            <solidref ref="CatTeflonSolid"/>
+       </volume>
+     
+      <!-- Readout volumes -->
+       <volume name="BaseVolume">
+            <materialref ref="Copper"/>
+            <solidref ref="BaseSolid"/>
+       </volume>
+
+       <volume name="MMMeshVolume">
+            <materialref ref="Stainlesssteel"/>
+            <solidref ref="MMMeshSolid"/>
+       </volume>
+
+       <volume name="MMGapVolume">
+            <materialref ref="Ne_iC4H10"/>
+            <solidref ref="MMGapSolid"/>
+       </volume>
+
+       <volume name="MMReadoutVolume">
+            <materialref ref="Copper"/>
+            <solidref ref="MMReadoutSolid"/>
+       </volume>
+
+       <volume name="MMPCBVolume">
+            <materialref ref="PTFE"/>
+            <solidref ref="MMPCBSolid"/>
+       </volume>
+
+      
+      <!--Vessel and an air layer-->
+
+          <volume name="VesselVolume">
+            <materialref ref="Copper"/>
+            <solidref ref="VesselSolid"/>
+       </volume>
+
+          <volume name="InAirVolume">
+            <materialref ref="Air"/>
+            <solidref ref="InAirSolid"/>
+       </volume>
+       
+     <!-- Shielding-->
+
+       <volume name="OutCopperShieldVolume">
+            <materialref ref="Copper"/>
+            <solidref ref="OutCopperShieldSolid"/>
+       </volume>
+
+       <volume name="OutLeadShieldVolume">
+            <materialref ref="Lead"/>
+            <solidref ref="OutLeadShieldSolid"/>
+       </volume>
+
+       <volume name="OutCopperTopShieldVolume">
+            <materialref ref="Copper"/>
+            <solidref ref="OutCopperTopShieldSolid"/>
+       </volume>
+
+       <volume name="OutLeadTopShieldVolume">
+            <materialref ref="Lead"/>
+            <solidref ref="OutLeadTopShieldSolid"/>
+       </volume>
+
+       <volume name="PEbaseShieldVolume">
+            <materialref ref="PE"/>
+            <solidref ref="PEbaseShieldSolid"/>
+       </volume>
+
+       <volume name="PEtopShieldVolume">
+            <materialref ref="PE"/>
+            <solidref ref="PEtopShieldSolid"/>
+       </volume>
+
+       <volume name="WaterTankVolume">
+            <materialref ref="Water"/>
+            <solidref ref="WaterTankSolid"/>
+       </volume>
+
+      
+      <!-- Limade, electronic and its shielding volumes -->
+
+
+       <volume name="LimandeVolume">
+            <materialref ref="Kapton"/>
+            <solidref ref="LimandeSolid"/>
+       </volume>
+
+       <volume name="CopBoxVolume">
+            <materialref ref="Copper"/>
+            <solidref ref="CopBoxSolid"/>
+       </volume>
+
+       <volume name="ConShVolume">
+            <materialref ref="Air"/>
+            <solidref ref="ConShSolid"/>
+       </volume>
+
+       <volume name="TefSilVolume">
+            <materialref ref="PTFE"/>
+            <solidref ref="TefSilSolid"/>
+       </volume>
+
+       <volume name="ConSilVolume">
+            <materialref ref="PDMS"/>
+            <solidref ref="ConSilSolid"/>
+       </volume>
+
+       
+
+    <!-- }}} -->
+
+    <!-- {{{ Physical volume definition (volume and position assignment) -->
+  
+    <volume name="World">
+    	<materialref ref="Vacuum"/>
+        <solidref ref="WorldSolid"/>
+
+	<!-- "Target" replaced by "gas" -->
+        <physvol name="gas">
+             <volumeref ref="gasVolume"/>
+	     <positionref ref="CenterPos"/>
+        </physvol>
+
+        
+        <physvol name="OutGas"> <!--gas inside the vessel but not in the active volume -->
+           <volumeref ref="OutGasVolume"/>
+	   <positionref ref="CenterPos"/>
+        </physvol>
+
+	    <!--Central Cathode and frames -->
+
+        <physvol name="Cathode">
+             <volumeref ref="CathodeVolume"/>
+	     <positionref ref="CenterPos"/>
+        </physvol>
+
+        <physvol name="CathodeCopperFrame">
+             <volumeref ref="CathodeCopperFrameVolume"/>
+	     <positionref ref="CenterPos"/>
+        </physvol>
+
+        <physvol name="CathodeTeflonFrame">
+             <volumeref ref="CathodeTeflonFrameVolume"/>
+	     <positionref ref="CenterPos"/>
+        </physvol>
+
+        <physvol name="CatTeflon">
+             <volumeref ref="CatTeflonVolume"/>
+	     <positionref ref="CenterPos"/>
+        </physvol>
+
+      <!-- Field Cage and rings -->
+
+        <physvol name="FieldCage">
+           <volumeref ref="FieldCageVolume"/>
+	   <positionref ref="CenterPos"/>
+        </physvol>
+
+
+        <physvol name="Ring1">
+           <volumeref ref="RingVolume1"/>
+	   <positionref ref="Ring1pos"/>
+        </physvol>
+          
+        <physvol name="Ring2">
+           <volumeref ref="RingVolume2"/>
+	   <positionref ref="Ring2pos"/>
+        </physvol>
+
+         <!-- Readouts -->
+        <physvol name="Base1">
+             <volumeref ref="BaseVolume"/>
+	     <positionref ref="BasePos1"/>
+        </physvol>
+
+        <physvol name="Base2">
+             <volumeref ref="BaseVolume"/>
+	     <positionref ref="BasePos2"/>
+        </physvol>
+
+        <physvol name="MMMesh_1">
+             <volumeref ref="MMMeshVolume"/>
+	     <positionref ref="mmmesh_pos_1"/>
+        </physvol>
+
+        <physvol name="MMGap_1">
+             <volumeref ref="MMGapVolume"/>
+	     <positionref ref="mmgap_pos_1"/>
+        </physvol>
+
+        <physvol name="MMReadout_1">
+             <volumeref ref="MMReadoutVolume"/>
+	     <positionref ref="mmreadout_pos_1"/>
+        </physvol>
+
+        <physvol name="MMPCB_1">
+             <volumeref ref="MMPCBVolume"/>
+	     <positionref ref="mmpcb_pos_1"/>
+        </physvol>
+
+        <physvol name="MMMesh_2">
+             <volumeref ref="MMMeshVolume"/>
+	     <positionref ref="mmmesh_pos_2"/>
+        </physvol>
+
+        <physvol name="MMGap_2">
+             <volumeref ref="MMGapVolume"/>
+	     <positionref ref="mmgap_pos_2"/>
+        </physvol>
+
+        <physvol name="MMReadout_2">
+             <volumeref ref="MMReadoutVolume"/>
+	     <positionref ref="mmreadout_pos_2"/>
+        </physvol>
+
+        <physvol name="MMPCB_2">
+             <volumeref ref="MMPCBVolume"/>
+	     <positionref ref="mmpcb_pos_2"/>
+        </physvol>
+    
+      <!--Vessel and air around it -->	     	    
+        <physvol name="Vessel">
+             <volumeref ref="VesselVolume"/>
+	     <positionref ref="CenterPos"/>
+        </physvol>
+
+          <physvol name="InAir"> <!--Layer of air around the vessel -->
+             <volumeref ref="InAirVolume"/>
+	     <positionref ref="CenterPos"/>
+        </physvol>
+    	   
+    <!--shielding -->
+
+        <physvol name="OutCopperShield">
+             <volumeref ref="OutCopperShieldVolume"/>
+	     <positionref ref="OutCopperShieldRealPos"/>
+        </physvol>
+
+        <physvol name="OutLeadShield">
+             <volumeref ref="OutLeadShieldVolume"/>
+	     <positionref ref="OutLeadShieldRealPos"/>
+        </physvol>
+
+        <physvol name="OutCopperTopShield">
+             <volumeref ref="OutCopperTopShieldVolume"/>
+	     <positionref ref="OutCopperTopShieldPos"/>
+        </physvol>
+
+        <physvol name="OutLeadTopShield">
+             <volumeref ref="OutLeadTopShieldVolume"/>
+	     <positionref ref="OutLeadTopShieldPos"/>
+        </physvol>
+
+        <physvol name="PEbaseShield">
+             <volumeref ref="PEbaseShieldVolume"/>
+	     <positionref ref="PEbaseShieldPos"/>
+        </physvol>
+
+        <physvol name="PEtopShield">
+             <volumeref ref="PEtopShieldVolume"/>
+	     <positionref ref="PEtopShieldPos"/>
+        </physvol>
+
+        <physvol name="WaterTank">
+             <volumeref ref="WaterTankVolume"/>
+	     <positionref ref="WaterTankPos"/>
+        </physvol>
+
+
+       <!-- Limandes -->
+        <physvol name="Limande_1">
+             <volumeref ref="LimandeVolume"/>
+	     <positionref ref="LimandePos1"/>
+             <rotationref ref="RotateZp45" />
+        </physvol>
+
+        <physvol name="Limande_2">
+             <volumeref ref="LimandeVolume"/>
+	     <positionref ref="LimandePos2"/>
+             <rotationref ref="RotateZp45" />
+        </physvol>
+
+        <physvol name="Limande_3">
+             <volumeref ref="LimandeVolume"/>
+	     <positionref ref="LimandePos3"/>
+             <rotationref ref="RotateZp45" />
+        </physvol>
+
+        <physvol name="Limande_4">
+             <volumeref ref="LimandeVolume"/>
+	     <positionref ref="LimandePos4"/>
+             <rotationref ref="RotateZp45" />
+        </physvol>
+
+      <!--connectors and electronic shielding -->
+
+        <physvol name="CopBox1">
+             <volumeref ref="CopBoxVolume"/>
+	     <positionref ref="CopBoxShPos1"/>
+             <rotationref ref="RotateZ45" />
+        </physvol>
+
+        <physvol name="CopBox2">
+             <volumeref ref="CopBoxVolume"/>
+	     <positionref ref="CopBoxShPos2"/>
+             <rotationref ref="RotateYZ45" />
+        </physvol>
+
+        <physvol name="TefSil11">
+             <volumeref ref="TefSilVolume"/>
+	     <positionref ref="ConSi1Pos12"/>
+             <rotationref ref="RotateZ45" />
+        </physvol>
+
+        <physvol name="TefSil12">
+             <volumeref ref="TefSilVolume"/>
+	     <positionref ref="ConSi1Pos34"/>
+             <rotationref ref="RotateZ45" />
+        </physvol>
+
+        <physvol name="TefSil21">
+             <volumeref ref="TefSilVolume"/>
+	     <positionref ref="ConSi1Pos56"/>
+             <rotationref ref="RotateZ45" />
+        </physvol>
+
+        <physvol name="TefSil22">
+             <volumeref ref="TefSilVolume"/>
+	     <positionref ref="ConSi1Pos78"/>
+             <rotationref ref="RotateZ45" />
+        </physvol>
+
+        <physvol name="ConSil11">
+             <volumeref ref="ConSilVolume"/>
+	     <positionref ref="ConSi1Pos1"/>
+             <rotationref ref="RotateZ45" />
+        </physvol>
+
+        <physvol name="ConSil12">
+             <volumeref ref="ConSilVolume"/>
+	     <positionref ref="ConSi1Pos2"/>
+             <rotationref ref="RotateZ45" />
+        </physvol>
+
+        <physvol name="ConSil13">
+             <volumeref ref="ConSilVolume"/>
+	     <positionref ref="ConSi1Pos3"/>
+             <rotationref ref="RotateZ45" />
+        </physvol>
+
+        <physvol name="ConSil14">
+             <volumeref ref="ConSilVolume"/>
+	     <positionref ref="ConSi1Pos4"/>
+             <rotationref ref="RotateZ45" />
+        </physvol>
+
+        <physvol name="ConSil21">
+             <volumeref ref="ConSilVolume"/>
+	     <positionref ref="ConSi1Pos5"/>
+             <rotationref ref="RotateZ45" />
+        </physvol>
+
+        <physvol name="ConSil22">
+             <volumeref ref="ConSilVolume"/>
+	     <positionref ref="ConSi1Pos6"/>
+             <rotationref ref="RotateZ45" />
+        </physvol>
+
+        <physvol name="ConSil23">
+             <volumeref ref="ConSilVolume"/>
+	     <positionref ref="ConSi1Pos7"/>
+             <rotationref ref="RotateZ45" />
+        </physvol>
+
+        <physvol name="ConSil24">
+             <volumeref ref="ConSilVolume"/>
+	     <positionref ref="ConSi1Pos8"/>
+             <rotationref ref="RotateZ45" />
+        </physvol>
+
+
+    </volume>
+
+    <!-- }}} -->
+</structure>
+

@@ -1,0 +1,134 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
+
+<!DOCTYPE gdml [
+<!ENTITY materials SYSTEM "trexdmmaterials.xml">
+<!ENTITY geometry SYSTEM "trexdmgeometry.gdml">
+]>
+
+<gdml xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:noNamespaceSchemaLocation="http://service-spi.web.cern.ch/service-spi/app/releases/GDML/schema/gdml.xsd">
+
+  <!-- All lenghts are in mm -->
+    <define>
+        <!-- World -->
+    <constant name="world_size" value="10000.0"/>
+        <!-- Copper External shielding (Base) -->
+    <variable name="outcoppershield_length" value="900.0"/>
+    <variable name="outcoppershield_width" value="750.0"/>
+    <variable name="outcoppershield_thickness" value="700.0"/>
+        <!-- Inner Copper External shielding (substract from copper external shielding) -->
+    <variable name="Inoutcoppershield_length" value="800.0"/>
+    <variable name="Inoutcoppershield_width" value="700.0"/>
+    <variable name="Inoutcoppershield_thickness" value="600.0"/>
+        <!-- Lead External shielding (Base) -->
+    <variable name="outleadshield_length" value="1300.0"/>
+    <variable name="outleadshield_width" value="950.0"/>
+    <variable name="outleadshield_thickness" value="1100.0"/>
+        <!-- Copper External shielding (Top) -->
+    <variable name="outcoppertopshield_length" value="1300.0"/>
+    <variable name="outcoppertopshield_width" value="1300.0"/>
+    <variable name="outcoppertopshield_thickness" value="50.0"/>
+        <!-- Lead External shielding (Top) -->
+    <variable name="outleadtopshield_length" value="1300.0"/>
+    <variable name="outleadtopshield_width" value="1100.0"/>
+    <variable name="outleadtopshield_thickness" value="200.0"/>
+        <!-- Polyethylene External shielding (Base) -->
+    <variable name="PEbaseshield_length" value="1400.0"/>
+    <variable name="PEbaseshield_width" value="1200.0"/>
+    <variable name="PEbaseshield_thickness" value="400.0"/>
+        <!-- Polyethylene External shielding (Top) -->
+    <variable name="PEtopshield_length" value="1900.0"/>
+    <variable name="PEtopshield_width" value="1600.0"/>
+    <variable name="PEtopshield_thickness" value="400.0"/>
+        <!-- Water tank -->
+    <variable name="watertank_height" value="1800.0"/>
+    <variable name="watertank_length" value="2700.0"/>
+    <variable name="watertank_width" value="2400.0"/>
+    <variable name="watertank_gap" value="200.0"/>
+
+    <!-- ############################################## -->
+        <!-- Vessel -->
+    <variable name="vessel_length" value="530.0"/>
+    <variable name="vessel_radius" value="192.5"/>
+    <variable name="vessel_thickness" value="60.0"/>  <!-- 60.0 -->
+    <variable name="air_thickness" value="5.0"/> <!--5.00 a  virtual layer around the vessel to study Rn222-->
+        <!-- Central cathode -->
+    <variable name="cathodeMylar_length" value="224.0"/>
+    <variable name="cathodeMylar_thickness" value="0.004"/>
+    <variable name="cathodeCopperFrame_length" value="238.0"/>
+    <variable name="cathodeCopperFrame_thickness" value="1.5"/>
+    <variable name="cathodeTeflonFrame_length" value="246.0"/>
+    <variable name="cathodeTeflonFrame_thickness" value="10.0"/>
+    <variable name="cathodeTeflonFrame_length2" value="206.0"/>
+        <!-- Teflon protection -->
+    <variable name="central_teflon_thickness" value="50.0"/>
+        <!-- Target gas -->
+    <variable name="target_pressure" value="4"/> <!-- in bar -->
+    <variable name="target_temperature" value="300.0"/> <!-- K -->
+    <variable name="target_quencher" value="2.0"/> <!-- % -->
+    <variable name="target_length" value="252.0"/>
+    <!-- ############################################## -->
+        <!-- Micromegas base -->
+    <variable name="base_height" value="100.0"/>
+    <variable name="base_diameter" value="375.0"/>
+    <variable name="base_thickness" value="3.0"/>
+        <!-- Micromegas readout planes -->
+    <variable name="readout_thickness" value="1.6"/>
+        <!-- Samtec conectors -->
+    <variable name="conector_position" value="160.0"/>
+    <variable name="conector_length" value="50.8"/>
+    <variable name="conector_width" value="14.2"/>
+        <!-- Flat cables -->
+    <variable name="limande_length" value="61.0"/>
+    <variable name="limande_width" value="35.0"/>
+    <variable name="limande_thickness" value="0.7"/>
+        <!-- Copper box shielding -->
+    <variable name="copper_box_length" value="258.8"/>
+    <variable name="copper_box_width" value="118.8"/>
+    <variable name="copper_box_thickness" value="81.0"/>
+        <!-- Corner box shielding (substract from copper box) -->
+    <variable name="corner_box_side" value="50.0"/>
+        <!-- Silicone connectors -->
+    <variable name="connectorsil_length" value="60.0"/>
+    <variable name="connectorsil_width" value="3.0"/>
+    <variable name="connectorsil_thickness" value="6.0"/>
+        <!-- Silicone connectors shielding -->
+    <variable name="connector_shielding_length" value="67.0"/>
+    <variable name="connector_shielding_width" value="18.0"/>
+    <variable name="connector_shielding_thickness" value="16.0"/>
+        <!-- Teflon piece holds silicone connectors -->
+    <variable name="teflon_consil_length" value="67.0"/>
+    <variable name="teflon_consil_width" value="18.0"/>
+    <variable name="teflon_consil_thickness" value="5.5"/>
+    <!-- ############################################## -->
+        <!-- Field degrador -->
+    <variable name="degrador_width" value="1.5"/>
+    <variable name="degrador_thickness" value="160.0"/>
+    <variable name="degrador_gap" value="13.5"/>
+        <!-- Teflon cover 3mm-->
+    <variable name="teflon_thickness" value="3.0"/>
+        <!-- Drift cage rings -->
+    <variable name="ring_number" value="38"/>
+    <variable name="ring_length" value="252.0"/><!-- that is also the XY size of field cage==target length -->
+    <variable name="ring_width" value="1.0"/>
+    <variable name="ring_thickness" value="2.0"/>
+    <variable name="ring_pitch" value="7.0"/>
+        <!-- Last drift cage ring -->
+    <variable name="lastring_width" value="9.0"/>
+    <variable name="lastring_thickness" value="3.0"/>
+    <!-- ############################################## -->
+</define>
+
+    &materials;
+
+    &geometry;
+
+    <setup name="Default" version="1.0">
+        <world ref="World"/>
+    </setup>
+
+    <!-- {{{ commented }}} -->
+
+
+</gdml>
+<?xml version="1.0" encoding="UTF-8" standalone="no" ?>
+
