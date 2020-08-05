@@ -1,8 +1,8 @@
 <?xml version="1.0" encoding="utf-8" standalone="no" ?>
-<!-- ##VERSION TREX-DM Simple geometry Version 1.0## -->
+<!-- ##VERSION TREX-DM Basic geometry Version 1.1 (${GAS} - ${PRESSURE}bar - Quencher: ${QUENCHER})## -->
 
 <!DOCTYPE gdml [
-<!ENTITY geometry SYSTEM "neon_geometry.gdml">
+<!ENTITY geometry SYSTEM "geometry.gdml">
 <!ENTITY materials SYSTEM "http://sultan.unizar.es/materials/materials.xml">
 ]>
 
@@ -13,18 +13,16 @@
     <define>
         <constant name="world_size" value="20000" />
 
+            <!-- Very approximative values -->
+        <variable name="targetGasDensity" value="${PRESSURE}*0.9"/>  <!-- mg/cm3 -->
+        <variable name="quencherDensity" value="${PRESSURE}*0.05"/> <!-- mg/cm3 -->
+        <variable name="quencherFraction" value="${QUENCHER}"/>
+        <variable name="gasTemperature" value="300"/> <!-- K -->
+        <variable name="gasPressure" value="${PRESSURE}"/> <!-- bar -->
+
         <!-- The TPC gas target -->
         <constant name="gasRadius" value="250" />
         <constant name="gasLength" value="500" />
-
-		<!-- I am using rough numbers for gas densities/properties -->
-
-		<!-- Density is not always proportional to pressure. We must obtain and define the density for that pressure. -->
-		<variable name="targetGasDensity" value="0.45"/>  <!-- mg/cm3 at 0.5 bar -->
-        <variable name="quencherDensity" value="0.025"/> <!-- mg/cm3 (Corresponds to 2% Iso approx) -->
-        <variable name="quencherFraction" value="0.02"/>
-        <variable name="gasTemperature" value="300"/> <!-- K -->
-        <variable name="gasPressure" value="0.5"/> <!-- bar -->
 
         <!-- The vessel definitions -->
         <constant name="vesselThickness" value="60" />

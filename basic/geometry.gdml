@@ -41,7 +41,7 @@
 
     <!-- {{{ Volumes definition (material and solid assignment) -->
     <volume name="gasVolume">
-        <materialref ref="Neon_ISO"/>
+        <materialref ref="${GAS}"/>
         <solidref ref="gasSolid"/>
     </volume>
 
