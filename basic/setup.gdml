@@ -13,7 +13,7 @@
     <define>
         <constant name="world_size" value="20000" />
 
-            <!-- Very approximative values -->
+        <!-- Very approximative values. May need revision. 0.9 is for Neon. -->
         <variable name="targetGasDensity" value="${PRESSURE}*0.9"/>  <!-- mg/cm3 -->
         <variable name="quencherDensity" value="${PRESSURE}*0.05"/> <!-- mg/cm3 -->
         <variable name="quencherFraction" value="${QUENCHER}"/>
@@ -21,27 +21,27 @@
         <variable name="gasPressure" value="${PRESSURE}"/> <!-- bar -->
 
         <!-- The TPC gas target -->
-        <constant name="gasRadius" value="250" />
-        <constant name="gasLength" value="500" />
+        <constant name="gasRadius" value="192.5" />
+        <constant name="gasLength" value="525" />
 
         <!-- The vessel definitions -->
         <constant name="vesselThickness" value="60" />
 
         <!-- The vessel definitions -->
-		<constant name="cathodeSize" value="243" />
-        <constant name="cathodeThickness" value="0.05" /> -->
+		<constant name="cathodeSize" value="206" />
+        <constant name="cathodeThickness" value="0.05" />
 
         <!-- The field cage definitions -->
-		<constant name="fieldCageSize" value="250" />
-		<constant name="fieldCageLength" value="380" />
-        <constant name="fieldCageThickness" value="0.05" /> -->
+		<constant name="fieldCageSize" value="247" />
+		<constant name="fieldCageLength" value="316" />
+        <constant name="fieldCageThickness" value="0.05" />
 
         <!-- The mm support definitions -->
-		<constant name="mmSupportRadius" value="243" />
-		<constant name="mmSupportThickness" value="5" />
+        <constant name="mmSupportRadius" value="187.5" />
+		<constant name="mmSupportThickness" value="2.5" />
 
-        <position name="mmSupportNorthPos" x="0" y="0" z="190" />
-        <position name="mmSupportSouthPos" x="0" y="0" z="-190" /> -->
+        <position name="mmSupportNorthPos" x="0" y="0" z="158" />
+        <position name="mmSupportSouthPos" x="0" y="0" z="-158" />
     </define>
 
     &materials;
