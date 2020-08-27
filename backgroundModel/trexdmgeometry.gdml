@@ -794,12 +794,12 @@
         
        <!-- "Target" replaced by "gas" -->
        <volume name="gasVolume">
-            <materialref ref="Ne_iC4H10"/>
+            <materialref ref="${GAS}"/>
             <solidref ref="gasSolid"/>
        </volume>
       
          <volume name="OutGasVolume">
-            <materialref ref="Ne_iC4H10"/>
+            <materialref ref="${GAS}"/>
             <solidref ref="OuterGasSolid22"/>
        </volume>
         
@@ -856,7 +856,7 @@
        </volume>
 
        <volume name="MMGapVolume">
-            <materialref ref="Ne_iC4H10"/>
+            <materialref ref="${GAS}"/>
             <solidref ref="MMGapSolid"/>
        </volume>
 
@@ -1221,7 +1221,7 @@
 	     <positionref ref="ConSi1Pos8"/>
              <rotationref ref="RotateZ45" />
         </physvol>
-cd
+cdgit 
 
     </volume>
 
