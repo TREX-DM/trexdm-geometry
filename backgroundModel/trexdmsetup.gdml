@@ -65,7 +65,7 @@
     <variable name="targetGasDensity" value="${PRESSURE}*0.9"/>  <!-- mg/cm3 -->
     <variable name="quencherDensity" value="${PRESSURE}*0.05"/> <!-- mg/cm3 -->
     <variable name="quencherFraction" value="${QUENCHER}"/> <!-- % -->
-    <variable name="gasPressure" value="{PRESSURE}"/> <!-- in bar -->
+    <variable name="gasPressure" value="${PRESSURE}"/> <!-- in bar -->
     <variable name="gasTemperature" value="300.0"/> <!-- K -->
     <variable name="target_length" value="252.0"/>
     <!-- ############################################## -->
