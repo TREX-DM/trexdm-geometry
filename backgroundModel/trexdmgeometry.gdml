@@ -395,10 +395,10 @@
        </subtraction>
 
 
-
        <!-- #################################### --> 
 
-       <!-- The copper rings -->       
+      
+	<!-- The copper rings -->       
        <box name="RingSolid1" x="ring_length+2.0*ring_width" y="ring_length+2.0*ring_width" z="ring_thickness" lunit="mm" />
        <box name="RingSolid2" x="ring_length" y="ring_length" z="ring_thickness" lunit="mm" />
        
@@ -657,8 +657,27 @@
         <positionref ref="ring2_position_20" />
        </union>
 
+      <!-- The kapton printed circuit of the Field Cage -->
+       <box name="KaptonFCSolid1" x="ring_length+2.0*ring_width" y="ring_length+2.0*ring_width" z="vessel_length-2.0*base_height-2.0*base_thickness-2.0*readout_thickness-2.0*degrador_gap-2.0*lastring_thickness" lunit="mm" />
+       <box name="KaptonFCSolid2" x="ring_length" y="ring_length" z="vessel_length-2.0*base_height-2.0*base_thickness-2.0*readout_thickness-2.0*degrador_gap-2.0*lastring_thickness" lunit="mm" />
+       
+	<subtraction name="KaptonFCSolid3">
+            <first ref="KaptonFCSolid1"/>
+            <second ref="KaptonFCSolid2"/>
+       </subtraction>
+
+       <subtraction name="KaptonFCSolid4">
+            <first ref="KaptonFCSolid3"/>
+           <second ref="Ring1Solid_20"/>
+            <positionref ref="Ring1pos"/>
+       </subtraction>
 
 
+      <subtraction name="KaptonFCSolid">
+            <first ref="KaptonFCSolid4"/>
+           <second ref="Ring1Solid_20"/>
+            <positionref ref="Ring2pos"/>
+       </subtraction>
 
    <!-- #################################### -->
 
@@ -742,11 +761,11 @@
          <second ref="Ring2Solid_20"/>
           <positionref ref="Ring2pos"/>
        </subtraction>
+      
 
       <subtraction name="OuterGasSolid17">
             <first ref="OuterGasSolid16"/>
-         <second ref="Ring2Solid_20"/>
-          <positionref ref="Ring2pos"/>
+         <second ref="KaptonFCSolid"/>
        </subtraction>
        
       <subtraction name="OuterGasSolid18">
@@ -810,7 +829,11 @@
             <solidref ref="FieldCageSolid"/>
        </volume>
 
-    
+       <volume name="KaptonFCVolume">
+            <materialref ref="Kapton"/>
+            <solidref ref="KaptonFCSolid"/>
+       </volume>
+
        <volume name="RingVolume1">
             <materialref ref="Copper"/>
             <solidref ref="Ring1Solid_20"/>
@@ -999,7 +1022,11 @@
            <volumeref ref="FieldCageVolume"/>
 	   <positionref ref="CenterPos"/>
         </physvol>
-
+      
+         <physvol name="KaptonFC">
+           <volumeref ref="KaptonFCVolume"/>
+	   <positionref ref="CenterPos"/>
+        </physvol>
 
         <physvol name="Ring1">
            <volumeref ref="RingVolume1"/>
