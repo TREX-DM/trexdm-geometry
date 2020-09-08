@@ -3,7 +3,7 @@
 
     <!-- {{{ Constants. -->
 
-    <constant name="fieldcage_length" value="ring_length+2.0*ring_width+2.0*teflon_thickness"/> <!--outer length-->
+    <constant name="fieldcage_length" value="ring_length+2.0*kapton_thickness+2.0*teflon_thickness"/> <!--outer length-->
     <!--electronic variables -->
     <constant name="copperboxdistance" value="10.0" />
     <constant name="connectordistance" value="15.0" />
@@ -387,7 +387,7 @@
 
        <!-- The field cage -->
        <box name="FieldCageSolid1" x="fieldcage_length" y="fieldcage_length" z="vessel_length-2.0*base_height-2.0*base_thickness-2.0*readout_thickness-2.0*degrador_gap-2.0*lastring_thickness" lunit="mm" />
-       <box name="FieldCageSolid2" x="ring_length+2.0*ring_width" y="ring_length+2.0*ring_width" z="vessel_length-2.0*base_height-2.0*base_thickness-2.0*readout_thickness-2.0*degrador_gap-2.0*lastring_thickness" lunit="mm" />
+       <box name="FieldCageSolid2" x="ring_length+2.0*kapton_thickness" y="ring_length+2.0*kapton_thickness" z="vessel_length-2.0*base_height-2.0*base_thickness-2.0*readout_thickness-2.0*degrador_gap-2.0*lastring_thickness" lunit="mm" />
        
        <subtraction name="FieldCageSolid">
             <first ref="FieldCageSolid1"/>
@@ -658,7 +658,7 @@
        </union>
 
       <!-- The kapton printed circuit of the Field Cage -->
-       <box name="KaptonFCSolid1" x="ring_length+2.0*ring_width" y="ring_length+2.0*ring_width" z="vessel_length-2.0*base_height-2.0*base_thickness-2.0*readout_thickness-2.0*degrador_gap-2.0*lastring_thickness" lunit="mm" />
+       <box name="KaptonFCSolid1" x="ring_length+2.0*kapton_thickness" y="ring_length+2.0*kapton_thickness" z="vessel_length-2.0*base_height-2.0*base_thickness-2.0*readout_thickness-2.0*degrador_gap-2.0*lastring_thickness" lunit="mm" />
        <box name="KaptonFCSolid2" x="ring_length" y="ring_length" z="vessel_length-2.0*base_height-2.0*base_thickness-2.0*readout_thickness-2.0*degrador_gap-2.0*lastring_thickness" lunit="mm" />
        
 	<subtraction name="KaptonFCSolid3">

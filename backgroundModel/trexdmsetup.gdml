@@ -111,9 +111,10 @@
         <!-- Drift cage rings -->
     <variable name="ring_number" value="38"/>
     <variable name="ring_length" value="252.0"/><!-- that is also the XY size of field cage==target length -->
-    <variable name="ring_width" value="1.0"/>
+    <variable name="ring_width" value="0.015"/>
     <variable name="ring_thickness" value="2.0"/>
     <variable name="ring_pitch" value="7.0"/>
+    <variable name="kapton_thickness" value="0.1"/>
         <!-- Last drift cage ring -->
     <variable name="lastring_width" value="9.0"/>
     <variable name="lastring_thickness" value="3.0"/>
