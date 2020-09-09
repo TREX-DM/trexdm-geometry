@@ -813,12 +813,12 @@
         
        <!-- "Target" replaced by "gas" -->
        <volume name="gasVolume">
-            <materialref ref="${GAS}"/>
+            <materialref ref="${GDML_GAS}"/>
             <solidref ref="gasSolid"/>
        </volume>
       
          <volume name="OutGasVolume">
-            <materialref ref="${GAS}"/>
+            <materialref ref="${GDML_GAS}"/>
             <solidref ref="OuterGasSolid22"/>
        </volume>
         
@@ -879,7 +879,7 @@
        </volume>
 
        <volume name="MMGapVolume">
-            <materialref ref="${GAS}"/>
+            <materialref ref="${GDML_GAS}"/>
             <solidref ref="MMGapSolid"/>
        </volume>
 
