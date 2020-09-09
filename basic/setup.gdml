@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8" standalone="no" ?>
-<!-- ##VERSION TREX-DM Basic geometry Version 1.1 (${GAS} - ${PRESSURE}bar - Quencher: ${QUENCHER})## -->
+<!-- ##VERSION TREX-DM Basic geometry Version 1.1 (${GDML_GAS} - ${GDML_PRESSURE}bar - Quencher: ${GDML_QUENCHER})## -->
 
 <!DOCTYPE gdml [
 <!ENTITY geometry SYSTEM "geometry.gdml">
@@ -14,11 +14,11 @@
         <constant name="world_size" value="20000" />
 
         <!-- Very approximative values. May need revision. 0.9 is for Neon. -->
-        <variable name="targetGasDensity" value="${PRESSURE}*0.9"/>  <!-- mg/cm3 -->
-        <variable name="quencherDensity" value="${PRESSURE}*0.05"/> <!-- mg/cm3 -->
-        <variable name="quencherFraction" value="${QUENCHER}"/>
+        <variable name="targetGasDensity" value="${GDML_PRESSURE}*0.9"/>  <!-- mg/cm3 -->
+        <variable name="quencherDensity" value="${GDML_PRESSURE}*0.05"/> <!-- mg/cm3 -->
+        <variable name="quencherFraction" value="${GDML_QUENCHER}"/>
         <variable name="gasTemperature" value="300"/> <!-- K -->
-        <variable name="gasPressure" value="${PRESSURE}"/> <!-- bar -->
+        <variable name="gasPressure" value="${GDML_PRESSURE}"/> <!-- bar -->
 
         <!-- The TPC gas target -->
         <constant name="gasRadius" value="192.5" />
