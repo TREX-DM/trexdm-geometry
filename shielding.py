@@ -1,3 +1,4 @@
+import vtk
 import pyg4ometry
 from pyg4ometry import geant4 as g4
 
@@ -111,6 +112,25 @@ leadShieldingPV = g4.PhysicalVolume(
 
 reg.setWorld(wl.name)
 
-w = pyg4ometry.gdml.Writer()
-w.addDetector(reg)
-w.write('shielding.gdml')
+
+
+import argparse
+parser = argparse.ArgumentParser()
+parser.add_argument("--vis", action="store_true")
+parser.add_argument("--gdml", action="store_true")
+args = parser.parse_args()
+
+if args.gdml:
+    w = pyg4ometry.gdml.Writer()
+    w.addDetector(reg)
+    w.write('shielding.gdml')
+
+if args.vis:
+    v = pyg4ometry.visualisation.VtkViewerColouredMaterial()
+    #v.addLogicalVolume(g4.LogicalVolume(gasSolid, air, "gasLogical", reg))
+    #v.addSolid(gasSolid)
+    #v.addSolid(copperVesselSolid)
+    v.addLogicalVolumeRecursive(wl)
+    
+    v.addAxes(200)
+    v.view()
