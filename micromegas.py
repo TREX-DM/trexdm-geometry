@@ -3,9 +3,12 @@ import pyg4ometry
 from pyg4ometry import geant4 as g4
 import numpy as np
 
-def generate_micromegas_assembly(registry=None):
+def generate_micromegas_assembly(name="micromegas_assembly", registry=None, is_right_side=True):
     """
     Generates the micromegas assembly with all its components.
+    param name: Name of the assembly volume.
+    param registry: Registry to use for the Geant4 objects. If None, a new registry is created.
+    param is_right_side: If True, the assembly is for the right side, otherwise for the left side. The sides are mirrored.
     Returns the assembly volume.
     """
 
@@ -321,7 +324,7 @@ def generate_micromegas_assembly(registry=None):
 
     ### JOIN THE SOLIDS INTO THE ASSEMBLY
     micromegas_assembly = g4.AssemblyVolume(
-        name="micromegas_assembly",
+        name=name,
         registry=reg,
         addRegistry=True
     )
@@ -359,8 +362,15 @@ def generate_micromegas_assembly(registry=None):
     )
 
     # Create the physical volumes and add them to the assembly
+    side_rot = np.array([0, 0, 0])
+    if not is_right_side:
+        side_rot = np.array([np.pi, 0, 0])
+    side_z_dir = 1
+    if is_right_side:
+        side_z_dir = -1
+    
     mMBase_PV = g4.PhysicalVolume(
-        rotation=[0, 0, 0],
+        rotation=side_rot.tolist(),
         position=[0, 0, 0],
         name="mMBase_PV",
         logicalVolume=mMBase_LV,
@@ -372,7 +382,7 @@ def generate_micromegas_assembly(registry=None):
     teflonspacerpad_pos_z = mMBaseThickness/2 + mMBaseBracketThickness + mMTeflonSpacerPadThickness/2
     mMTeflonSpacerPad1_PV = g4.PhysicalVolume(
         rotation=[0, 0, 0],
-        position=[0, teflonspacerpad_pos_xory, -teflonspacerpad_pos_z],
+        position=[0, teflonspacerpad_pos_xory, side_z_dir*teflonspacerpad_pos_z],
         name="mMTeflonSpacerPad1_PV",
         logicalVolume=mMTeflonSpacerPad_LV,
         motherVolume=micromegas_assembly,
@@ -380,7 +390,7 @@ def generate_micromegas_assembly(registry=None):
     )
     mMTeflonSpacerPad2_PV = g4.PhysicalVolume(
         rotation=[0, 0, 0],
-        position=[0, -teflonspacerpad_pos_xory, -teflonspacerpad_pos_z],
+        position=[0, -teflonspacerpad_pos_xory, side_z_dir*teflonspacerpad_pos_z],
         name="mMTeflonSpacerPad2_PV",
         logicalVolume=mMTeflonSpacerPad_LV,
         motherVolume=micromegas_assembly,
@@ -388,7 +398,7 @@ def generate_micromegas_assembly(registry=None):
     )
     mMTeflonSpacerPad3_PV = g4.PhysicalVolume(
         rotation=[0, 0, 90*np.pi/180],
-        position=[teflonspacerpad_pos_xory, 0, -teflonspacerpad_pos_z],
+        position=[teflonspacerpad_pos_xory, 0, side_z_dir*teflonspacerpad_pos_z],
         name="mMTeflonSpacerPad3_PV",
         logicalVolume=mMTeflonSpacerPad_LV,
         motherVolume=micromegas_assembly,
@@ -396,7 +406,7 @@ def generate_micromegas_assembly(registry=None):
     )
     mMTeflonSpacerPad4_PV = g4.PhysicalVolume(
         rotation=[0, 0, 90*np.pi/180],
-        position=[-teflonspacerpad_pos_xory, 0, -teflonspacerpad_pos_z],
+        position=[-teflonspacerpad_pos_xory, 0, side_z_dir*teflonspacerpad_pos_z],
         name="mMTeflonSpacerPad4_PV",
         logicalVolume=mMTeflonSpacerPad_LV,
         motherVolume=micromegas_assembly,
@@ -408,7 +418,7 @@ def generate_micromegas_assembly(registry=None):
 
     mMBaseClosingBracket1_PV = g4.PhysicalVolume(
         rotation=[0, 0, 0],
-        position=[0, closingbracket_pos_xory, -closingbracket_pos_z],
+        position=[0, closingbracket_pos_xory, side_z_dir*closingbracket_pos_z],
         name="mMBaseClosingBracket1_PV",
         logicalVolume=mMBaseClosingBracket_LV,
         motherVolume=micromegas_assembly,
@@ -416,7 +426,7 @@ def generate_micromegas_assembly(registry=None):
     )
     mMBaseClosingBracket2_PV = g4.PhysicalVolume(
         rotation=[0, 0, 0],
-        position=[0, -closingbracket_pos_xory, -closingbracket_pos_z],
+        position=[0, -closingbracket_pos_xory, side_z_dir*closingbracket_pos_z],
         name="mMBaseClosingBracket2_PV",
         logicalVolume=mMBaseClosingBracket_LV,
         motherVolume=micromegas_assembly,
@@ -424,7 +434,7 @@ def generate_micromegas_assembly(registry=None):
     )
     mMBaseClosingBracket_3_PV = g4.PhysicalVolume(
         rotation=[0, 0, 90*np.pi/180],
-        position=[closingbracket_pos_xory, 0, -closingbracket_pos_z],
+        position=[closingbracket_pos_xory, 0, side_z_dir*closingbracket_pos_z],
         name="mMBaseClosingBracket3_PV",
         logicalVolume=mMBaseClosingBracket_LV,
         motherVolume=micromegas_assembly,
@@ -432,7 +442,7 @@ def generate_micromegas_assembly(registry=None):
     )
     mMBaseClosingBracket_4_PV = g4.PhysicalVolume(
         rotation=[0, 0, 90*np.pi/180],
-        position=[-closingbracket_pos_xory, 0, -closingbracket_pos_z],
+        position=[-closingbracket_pos_xory, 0, side_z_dir*closingbracket_pos_z],
         name="mMBaseClosingBracket4_PV",
         logicalVolume=mMBaseClosingBracket_LV,
         motherVolume=micromegas_assembly,
@@ -440,16 +450,16 @@ def generate_micromegas_assembly(registry=None):
     )
     ### Rollers. In the CAD design there are 4 (one on each side), but in the real life there are only 2
     mMBaseTeflonRoller1_PV = g4.PhysicalVolume(
-        rotation=[90*3.1416/180, 0, 0],
-        position=[-mMBaseSquareLength/2, 0, -(mMBaseThickness/2 + rollerCutShift)],
+        rotation=(np.array([90*3.1416/180, 0, 0]) + side_rot).tolist(),
+        position=[-mMBaseSquareLength/2, 0, side_z_dir*(mMBaseThickness/2 + rollerCutShift)],
         name="mMBaseTeflonRoller1_PV",
         logicalVolume=roller_LV,
         motherVolume=micromegas_assembly,
         registry=reg
     )
     mMBaseTeflonRoller2_PV = g4.PhysicalVolume(
-        rotation=[-90*3.1416/180, 0, np.pi],
-        position=[mMBaseSquareLength/2, 0, -(mMBaseThickness/2 + rollerCutShift)],
+        rotation=(np.array([-90*3.1416/180, 0, np.pi]) + side_rot).tolist(),
+        position=[mMBaseSquareLength/2, 0, side_z_dir*(mMBaseThickness/2 + rollerCutShift)],
         name="mMBaseTeflonRoller2_PV",
         logicalVolume=roller_LV,
         motherVolume=micromegas_assembly,
@@ -461,21 +471,22 @@ def generate_micromegas_assembly(registry=None):
     mMSupportDistanceToCenter_XorY = 220.79/2 #mm
     mMSupport_pos_z = mMBaseThickness/2 + mMTapSeparatorBaseThickness/2 + mMTapSeparatorColumnHeightB + mMTapSeparatorColumnHeightC + mMTapSeparatorColumnBtoBase + mMTriangularSupportThickness
     mMSupport1_PV = g4.PhysicalVolume(
-        rotation=[0, 0, -45*np.pi/180],  # 45 degrees rotation
-        position=[mMSupportDistanceToCenter_XorY, -mMSupportDistanceToCenter_XorY, -mMSupport_pos_z],
+        rotation=(np.array([0, 0, side_z_dir*45*np.pi/180]) + side_rot).tolist(),  # 45 degrees rotation
+        position=[-side_z_dir*mMSupportDistanceToCenter_XorY, side_z_dir*mMSupportDistanceToCenter_XorY, side_z_dir*mMSupport_pos_z],
         name="mMSupport1_PV",
         logicalVolume=mMSupport_LV,
         motherVolume=micromegas_assembly,
         registry=reg
     )
     mMSupport2_PV = g4.PhysicalVolume(
-        rotation=[0, 0, 135*np.pi/180],  # 45 degrees rotation
-        position=[-mMSupportDistanceToCenter_XorY, mMSupportDistanceToCenter_XorY, -mMSupport_pos_z],
+        rotation=(np.array([0, 0, -side_z_dir*135*np.pi/180]) + side_rot).tolist(),  # 45 degrees rotation
+        position=[side_z_dir*mMSupportDistanceToCenter_XorY, -side_z_dir*mMSupportDistanceToCenter_XorY, side_z_dir*mMSupport_pos_z],
         name="mMSupport2_PV",
         logicalVolume=mMSupport_LV,
         motherVolume=micromegas_assembly,
         registry=reg
     )
+    #print("height of the support: ", mMSupport_pos_z-mMBaseThickness/2+mMTapSeparatorBaseThickness/2, " mm")
 
     return reg
 
@@ -486,7 +497,7 @@ if __name__ == "__main__":
     parser.add_argument("--gdml", action="store_true")
     args = parser.parse_args()
     
-    reg = generate_micromegas_assembly()
+    reg = generate_micromegas_assembly(is_right_side=False)
     micromegas_assembly = reg.findLogicalVolumeByName("micromegas_assembly")[0]
     print(micromegas_assembly)
 
@@ -501,6 +512,6 @@ if __name__ == "__main__":
         v = pyg4ometry.visualisation.VtkViewerColouredMaterial()
 
         v.addLogicalVolume(micromegas_assembly.logicalVolume())
-
+        v.addLogicalVolume(micromegas_assembly)
         v.addAxes(300)
         v.view()

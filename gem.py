@@ -3,7 +3,7 @@ import pyg4ometry
 from pyg4ometry import geant4 as g4
 import numpy as np
 
-def generate_gem_assembly(registry=None):
+def generate_gem_assembly(name="gem_assembly", registry=None, is_right_side=True):
     """
     Generates the GEM assembly with all its components.
     Returns the assembly volume.
@@ -300,7 +300,7 @@ def generate_gem_assembly(registry=None):
 
     ### JOIN THE SOLIDS INTO THE ASSEMBLY ###
     gem_assembly = g4.AssemblyVolume(
-        name="gem_assembly",
+        name=name,
         registry=reg,
         addRegistry=True
     )
@@ -324,6 +324,30 @@ def generate_gem_assembly(registry=None):
         registry=reg
     )
 
+    gemFrame_LV = g4.LogicalVolume(
+        name="gemFrame_LV",
+        solid=gemFrame,
+        material=copper,
+        registry=reg
+    )
+    
+    gemmMSeparatorFixer_LV = g4.LogicalVolume(
+        name="gemmMSeparatorFixer_LV",
+        solid=gemmMSeparatorFixer,
+        material=copper,
+        registry=reg
+    )
+    
+    gemmMSeparator_LV = g4.LogicalVolume(
+        name="gemmMSeparator_LV",
+        solid=gemmMSeparator,
+        material=teflon,
+        registry=reg
+    )
+
+    # Add the physical volumes to the assembly
+    side_z_dir = 1 if is_right_side else -1
+
     gemKaptonFoil_PV = g4.PhysicalVolume(
         name="gemKaptonFoil_PV",
         rotation=[0, 0, 0],
@@ -335,7 +359,7 @@ def generate_gem_assembly(registry=None):
     gemTop_PV = g4.PhysicalVolume(
         name="gemTop_PV",
         rotation=[0, 0, 0],
-        position=[0, 0, gemCopperFoilThickness/2 + gemKaptonFoilThickness/2],
+        position=[0, 0, side_z_dir*(gemCopperFoilThickness/2 + gemKaptonFoilThickness/2)],
         logicalVolume=gemTop_LV,
         motherVolume=gem_assembly,
         registry=reg
@@ -343,36 +367,25 @@ def generate_gem_assembly(registry=None):
     gemBottom_PV = g4.PhysicalVolume(
         name="gemBottom_PV",
         rotation=[0, 0, 0],
-        position=[0, 0, -(gemCopperFoilThickness/2 + gemKaptonFoilThickness/2)],
+        position=[0, 0, -side_z_dir*(gemCopperFoilThickness/2 + gemKaptonFoilThickness/2)],
         logicalVolume=gemBottom_LV,
         motherVolume=gem_assembly,
-        registry=reg
-    )
-    gemFrame_LV = g4.LogicalVolume(
-        name="gemFrame_LV",
-        solid=gemFrame,
-        material=copper,
         registry=reg
     )
     gemFrame_PV = g4.PhysicalVolume(
         name="gemFrame_PV",
         rotation=[0, 0, 0],
-        position=[0, 0, gemKaptonFoilThickness + gemFrameThickness/2],
+        position=[0, 0, side_z_dir*(gemKaptonFoilThickness + gemFrameThickness/2)],
         logicalVolume=gemFrame_LV,
         motherVolume=gem_assembly,
         registry=reg
     )
 
-    separator1_pos = np.array([ 0, gemmMSeparatorDistance/2 + gemmMSeparatorWidth/2, -(gemmMSeparatorThickness/2+gemKaptonFoilThickness) ])
-    fixer_wrt_separator1_pos = np.array([ 0, gemmMSeparatorFixerToSeparatorDistance + gemmMSeparatorWidth/2 + gemmMSeparatorFixerWidth/2, gemmMSeparatorThickness/2 + gemmMSeparatorFixerThickness/2 ])
-    separator2_pos = np.array([ 0, -(gemmMSeparatorDistance/2 + gemmMSeparatorWidth/2), -(gemmMSeparatorThickness/2+gemKaptonFoilThickness) ])
-    fixer_wrt_separator2_pos = np.array([ 0, -(gemmMSeparatorFixerToSeparatorDistance + gemmMSeparatorWidth/2 + gemmMSeparatorFixerWidth/2), gemmMSeparatorThickness/2 + gemmMSeparatorFixerThickness/2 ])
-    gemmMSeparator_LV = g4.LogicalVolume(
-        name="gemmMSeparator_LV",
-        solid=gemmMSeparator,
-        material=teflon,
-        registry=reg
-    )
+    separator1_pos = np.array([ 0, gemmMSeparatorDistance/2 + gemmMSeparatorWidth/2, -side_z_dir*(gemmMSeparatorThickness/2+gemKaptonFoilThickness)])
+    fixer_wrt_separator1_pos = np.array([ 0, gemmMSeparatorFixerToSeparatorDistance + gemmMSeparatorWidth/2 + gemmMSeparatorFixerWidth/2, side_z_dir*(gemmMSeparatorThickness/2 + gemmMSeparatorFixerThickness/2)])
+    separator2_pos = np.array([ 0, -(gemmMSeparatorDistance/2 + gemmMSeparatorWidth/2), -side_z_dir*(gemmMSeparatorThickness/2+gemKaptonFoilThickness)])
+    fixer_wrt_separator2_pos = np.array([ 0, -(gemmMSeparatorFixerToSeparatorDistance + gemmMSeparatorWidth/2 + gemmMSeparatorFixerWidth/2), side_z_dir*(gemmMSeparatorThickness/2 + gemmMSeparatorFixerThickness/2)])
+    
     gemmMSeparator1_PV = g4.PhysicalVolume(
         name="gemmMSeparator1_PV",
         rotation=[0, 0, 0],
@@ -381,12 +394,7 @@ def generate_gem_assembly(registry=None):
         motherVolume=gem_assembly,
         registry=reg
     )
-    gemmMSeparatorFixer_LV = g4.LogicalVolume(
-        name="gemmMSeparatorFixer_LV",
-        solid=gemmMSeparatorFixer,
-        material=copper,
-        registry=reg
-    )
+
     gemmMSeparatorFixer1_PV = g4.PhysicalVolume(
         name="gemmMSeparatorFixer1_PV",
         rotation=[0, 0, 0],
@@ -422,7 +430,7 @@ if __name__ == "__main__":
     parser.add_argument("--gdml", action="store_true")
     args = parser.parse_args()
     
-    reg = generate_gem_assembly()
+    reg = generate_gem_assembly(is_right_side=False)
     gem_assembly = reg.findLogicalVolumeByName("gem_assembly")[0]
     print(gem_assembly)
 
