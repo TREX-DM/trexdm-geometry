@@ -3,47 +3,46 @@ import pyg4ometry
 from pyg4ometry import geant4 as g4
 import numpy as np
 
+gemKaptonFoilLength = 280.0 # mm
+gemKaptonFoilThickness = 0.05 # 50um
+gemKaptonFeedthroughLength = 15.81 # mm
+gemKaptonFeedthroughWidth = 12.0 # mm
+gemCopperFoilLength = 245.0 # mm
+gemCopperFoilThickness = 0.005 # 5um
+
+gemCopperFeedthroughLength = 22.41 # mm
+gemCopperFeedthroughWidth = 2 # mm
+gemCopperFeedthroughInnerRadius = 4.0 # mm
+gemCopperFeedthroughOuterRadius = 5.0 # mm
+gemDistanceBetweenFeedthroughs = 34.0 # mm, this is the distance between the two closer edges of the kaptonfeedthroughs
+
+
+gemFrameLength = 280.0 # mm. Length of the outer square of the frame
+gemFrameWidth = 12.5 # mm
+gemFrameThickness = 4.0 # mm
+
+gemFrameFeedthroughIndentationLength = 14.0 # mm
+gemFrameFeedthroughIndentationDepth = 0.5 # mm
+
+gemmMSeparatorLength = 242.5 # mm
+gemmMSeparatorWidth = 16.0 # mm
+gemmMSeparatorThickness = 5.5 # mm. There is a protusion to tense the GEM foil that is 2mm more. This is not taken into account...
+gemmMSeparatorExtensionLength = 16.0 # mm
+gemmMSeparatorExtensionWidth = 10.0 # mm
+gemmMSeparatorExtensionDistance = 128.0 # mm, this is the distance from the closer edges of the extensions
+
+gemmMSeparatorFixerLength = 151.2 # mm
+gemmMSeparatorFixerWidth = 12.25 # mm
+gemmMSeparatorFixerThickness = 3.0 # mm
+gemmMSeparatorFixerToSeparatorDistance = 3.64 # mm, this is the closer edges of the fixer to the separator
+
+gemmMSeparatorDistance = 248.0 # mm, this is the distance between the two closer edges of the separators
+
 def generate_gem_assembly(name="gem_assembly", registry=None, is_right_side=True):
     """
     Generates the GEM assembly with all its components.
     Returns the assembly volume.
     """
-
-    ### ------------------ GEM foil and support frame ------------------ ###
-    gemKaptonFoilLength = 280.0 # mm
-    gemKaptonFoilThickness = 0.05 # 50um
-    gemKaptonFeedthroughLength = 15.81 # mm
-    gemKaptonFeedthroughWidth = 12.0 # mm
-    gemCopperFoilLength = 245.0 # mm
-    gemCopperFoilThickness = 0.005 # 5um
-
-    gemCopperFeedthroughLength = 22.41 # mm
-    gemCopperFeedthroughWidth = 2 # mm
-    gemCopperFeedthroughInnerRadius = 4.0 # mm
-    gemCopperFeedthroughOuterRadius = 5.0 # mm
-    gemDistanceBetweenFeedthroughs = 34.0 # mm, this is the distance between the two closer edges of the kaptonfeedthroughs
-
-
-    gemFrameLength = 280.0 # mm. Length of the outer square of the frame
-    gemFrameWidth = 12.5 # mm
-    gemFrameThickness = 4.0 # mm
-
-    gemFrameFeedthroughIndentationLength = 14.0 # mm
-    gemFrameFeedthroughIndentationDepth = 0.5 # mm
-
-    gemmMSeparatorLength = 242.5 # mm
-    gemmMSeparatorWidth = 16.0 # mm
-    gemmMSeparatorThickness = 5.5 # mm. There is a protusion to tense the GEM foil that is 2mm more. This is not taken into account...
-    gemmMSeparatorExtensionLength = 16.0 # mm
-    gemmMSeparatorExtensionWidth = 10.0 # mm
-    gemmMSeparatorExtensionDistance = 128.0 # mm, this is the distance from the closer edges of the extensions
-
-    gemmMSeparatorFixerLength = 151.2 # mm
-    gemmMSeparatorFixerWidth = 12.25 # mm
-    gemmMSeparatorFixerThickness = 3.0 # mm
-    gemmMSeparatorFixerToSeparatorDistance = 3.64 # mm, this is the closer edges of the fixer to the separator
-
-    gemmMSeparatorDistance = 248.0 # mm, this is the distance between the two closer edges of the separators
 
     # Registry
     if registry is None:

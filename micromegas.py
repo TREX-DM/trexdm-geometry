@@ -3,6 +3,55 @@ import pyg4ometry
 from pyg4ometry import geant4 as g4
 import numpy as np
 
+mMBaseSquareLength = 324.0 # 324 mm is the full length, so half is 162 mm
+mMBBaseCornerRadius = 187.0 # 187 mm is the radius of the corners
+mMBaseThickness = 4.0 # 4 mm is the thickness of the base
+mMBaseRecessSquareLength = 180.0 # mm
+mMBaseRecessThickness = 2.5 # mm
+
+mMBaseBracketLength = 210 # mm 
+mMBaseBracketWidth = 37 # mm
+mMBaseBracketThickness = 7.8 # mm
+mMBaseEndToBracketDistance = 15.6 # mm, this is the distance from the end of the base to the bracket
+
+mMTeflonSpacerPadLength = 202 # mm
+mMTeflonSpacerPadWidth = 18 # mm
+mMTeflonSpacerPadThickness = 4.2 *2 # mm. In the CAD it is 4.2 mm, but in the real one there are two pads, so we double the thickness
+
+mMTriangularSupportThickness = 15 # mm
+mMTriangularSupportSquareLength = 40 # mm
+
+mMTapSeparatorBaseLength = 90 # mm
+mMTapSeparatorBaseHeight = 37 # mm
+mMTapSeparatorBaseThickness = 10 # mm
+
+mMTapSeparatorBaseCutLength = 28 # mm
+mMTapSeparatorBaseCutHeight = 15 # mm
+
+
+mMTapSeparatorColumnHeightA = 45# mm
+mMTapSeparatorColumnHeightB = 57.2 # mm
+mMTapSeparatorColumnHeightC = 3 # mm
+
+mMTapSeparatorColumnLengthA = 34 # mm
+mMTapSeparatorColumnLengthB = 18 # mm
+mMTapSeparatorColumnLengthC = 12 # mm. this is a diameter in reality
+
+mMTapSeparatorColumnThicknessA = 15 # mm
+mMTapSeparatorColumnThicknessB = 12
+mMTapSeparatorColumnThicknessC = mMTapSeparatorColumnLengthC # mm. this is a diameter in reality
+
+mMTapSeparatorColumnProtrusionAtoB = 2.5 # mm
+mMTapSeparatorColumnBtoBase = -1 # mm. In the CAD it is -1 mm, but it is adjustable in real life. Negative means that the column B starts below the base, positive means that it starts above the base.
+
+mMTapSeparatorColumnCtoTriangularSupport = 5.45 + 5.05 # mm. 5.05mm should be the columnCradius (6mm) but the hole of the triangular support is smaller (5.05mm radius) in the CAD
+
+rollerCylinderRadius = 5.0 # mm
+rollerCylinderLength = 164.0 # mm
+rollerCutShift = 1.0 # mm, this is the shift of the cut to avoid the cylinder to be cut in the middle
+
+mMTapSeparatorFinalHeight = mMTapSeparatorBaseThickness + mMTapSeparatorColumnHeightB + mMTapSeparatorColumnBtoBase + mMTapSeparatorColumnHeightC + mMTriangularSupportThickness
+
 def generate_micromegas_assembly(name="micromegas_assembly", registry=None, is_right_side=True):
     """
     Generates the micromegas assembly with all its components.
@@ -11,54 +60,6 @@ def generate_micromegas_assembly(name="micromegas_assembly", registry=None, is_r
     param is_right_side: If True, the assembly is for the right side, otherwise for the left side. The sides are mirrored.
     Returns the assembly volume.
     """
-
-    mMBaseSquareLength = 324.0 # 324 mm is the full length, so half is 162 mm
-    mMBBaseCornerRadius = 187.0 # 187 mm is the radius of the corners
-    mMBaseThickness = 4.0 # 4 mm is the thickness of the base
-    mMBaseRecessSquareLength = 180.0 # mm
-    mMBaseRecessThickness = 2.5 # mm
-
-    mMBaseBracketLength = 210 # mm 
-    mMBaseBracketWidth = 37 # mm
-    mMBaseBracketThickness = 7.8 # mm
-    mMBaseEndToBracketDistance = 15.6 # mm, this is the distance from the end of the base to the bracket
-
-    mMTeflonSpacerPadLength = 202 # mm
-    mMTeflonSpacerPadWidth = 18 # mm
-    mMTeflonSpacerPadThickness = 4.2 *2 # mm. In the CAD it is 4.2 mm, but in the real one there are two pads, so we double the thickness
-
-    mMTriangularSupportThickness = 15 # mm
-    mMTriangularSupportSquareLength = 40 # mm
-
-    mMTapSeparatorBaseLength = 90 # mm
-    mMTapSeparatorBaseHeight = 37 # mm
-    mMTapSeparatorBaseThickness = 10 # mm
-
-    mMTapSeparatorBaseCutLength = 28 # mm
-    mMTapSeparatorBaseCutHeight = 15 # mm
-
-
-    mMTapSeparatorColumnHeightA = 45# mm
-    mMTapSeparatorColumnHeightB = 57.2 # mm
-    mMTapSeparatorColumnHeightC = 3 # mm
-
-    mMTapSeparatorColumnLengthA = 34 # mm
-    mMTapSeparatorColumnLengthB = 18 # mm
-    mMTapSeparatorColumnLengthC = 12 # mm. this is a diameter in reality
-
-    mMTapSeparatorColumnThicknessA = 15 # mm
-    mMTapSeparatorColumnThicknessB = 12
-    mMTapSeparatorColumnThicknessC = mMTapSeparatorColumnLengthC # mm. this is a diameter in reality
-
-    mMTapSeparatorColumnProtrusionAtoB = 2.5 # mm
-    mMTapSeparatorColumnBtoBase = -1 # mm. In the CAD it is -1 mm, but it is adjustable in real life. Negative means that the column B starts below the base, positive means that it starts above the base.
-
-    mMTapSeparatorColumnCtoTriangularSupport = 5.45 + 5.05 # mm. 5.05mm should be the columnCradius (6mm) but the hole of the triangular support is smaller (5.05mm radius) in the CAD
-
-    rollerCylinderRadius = 5.0 # mm
-    rollerCylinderLength = 164.0 # mm
-    rollerCutShift = 1.0 # mm, this is the shift of the cut to avoid the cylinder to be cut in the middle
-
 
     # Registry
     if registry is None:

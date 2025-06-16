@@ -3,6 +3,25 @@ import pyg4ometry
 from pyg4ometry import geant4 as g4
 
 
+copperTopThickness = 50
+
+copperCageThickness = 50.0
+copperCageOutSizeX = 700.0
+copperCageOutSizeY = 750.0
+copperCageOutSizeZ = 900.0
+
+outerGasSizeX  = copperCageOutSizeX - 2 * copperCageThickness
+outerGasSizeY  = copperCageOutSizeY - copperCageThickness
+outerGasSizeZ  = copperCageOutSizeZ - 2 * copperCageThickness
+
+leadSizeX = 200 + copperCageOutSizeX + 200
+leadSizeY = 200 + copperCageOutSizeY + copperTopThickness + 200
+leadSizeZ = 200 + copperCageOutSizeZ + 200
+
+copperTopSizeX  = leadSizeX
+copperTopSizeY  = copperCageThickness
+copperTopSizeZ  = leadSizeZ
+
 def generate_shielding_assembly(name="shielding_assembly", registry=None):
     """
     Generates the shielding geometry for the TREX-DM detector.
@@ -22,28 +41,6 @@ def generate_shielding_assembly(name="shielding_assembly", registry=None):
     lead = g4.MaterialPredefined("G4_Pb", reg)
     air = g4.MaterialPredefined("G4_AIR", reg)
     """
-        
-    copperTopThickness = 50
-
-    copperCageThickness = 50.0
-    copperCageOutSizeX = 700.0
-    copperCageOutSizeY = 750.0
-    copperCageOutSizeZ = 900.0
-
-    outerGasSizeX  = copperCageOutSizeX - 2 * copperCageThickness
-    outerGasSizeY  = copperCageOutSizeY - copperCageThickness
-    outerGasSizeZ  = copperCageOutSizeZ - 2 * copperCageThickness
-
-    leadSizeX = 200 + copperCageOutSizeX + 200
-    leadSizeY = 200 + copperCageOutSizeY + copperTopThickness + 200
-    leadSizeZ = 200 + copperCageOutSizeZ + 200
-
-    copperTopSizeX  = leadSizeX
-    copperTopSizeY  = copperCageThickness
-    copperTopSizeZ  = leadSizeZ
-
-
-
 
     copperCageOutSolid = g4.solid.Box(
             "copperCageOutSolid",
