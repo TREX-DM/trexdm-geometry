@@ -78,7 +78,6 @@ def generate_micromegas_assembly(name="micromegas_assembly", registry=None, is_r
     copper = g4.nist_material_2geant4Material("G4_Cu")
     teflon = g4.nist_material_2geant4Material("G4_TEFLON")
     kapton = g4.nist_material_2geant4Material("G4_KAPTON")
-    galactic = g4.nist_material_2geant4Material("G4_Galactic")
     
 
     ### Micromegas base
@@ -501,9 +500,9 @@ if __name__ == "__main__":
     
     reg = generate_micromegas_assembly(is_right_side=False)
     micromegas_assembly = reg.findLogicalVolumeByName("micromegas_assembly")[0]
-    print(micromegas_assembly)
 
     if args.gdml:
+        galactic = g4.nist_material_2geant4Material("G4_Galactic")
         assembly_LV = micromegas_assembly.logicalVolume(material=galactic)
         reg.setWorld(assembly_LV.name)
         w = pyg4ometry.gdml.Writer()
@@ -512,8 +511,6 @@ if __name__ == "__main__":
 
     if args.vis:
         v = pyg4ometry.visualisation.VtkViewerColouredMaterial()
-
         v.addLogicalVolume(micromegas_assembly.logicalVolume())
-        v.addLogicalVolume(micromegas_assembly)
         v.addAxes(300)
         v.view()

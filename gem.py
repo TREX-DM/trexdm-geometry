@@ -60,7 +60,6 @@ def generate_gem_assembly(name="gem_assembly", registry=None, is_right_side=True
     copper = g4.nist_material_2geant4Material("G4_Cu")
     teflon = g4.nist_material_2geant4Material("G4_TEFLON")
     kapton = g4.nist_material_2geant4Material("G4_KAPTON")
-    galactic = g4.nist_material_2geant4Material("G4_Galactic")
     
     ### Corners Cut to save the vessel radius ###
     mMBBaseCornerRadius = 187.0 # 187 mm is the radius of the corners
@@ -423,6 +422,7 @@ def generate_gem_assembly(name="gem_assembly", registry=None, is_right_side=True
     )
 
     return reg
+
 if __name__ == "__main__":
     import argparse
     parser = argparse.ArgumentParser()
@@ -432,9 +432,9 @@ if __name__ == "__main__":
     
     reg = generate_gem_assembly(is_right_side=False)
     gem_assembly = reg.findLogicalVolumeByName("gem_assembly")[0]
-    print(gem_assembly)
 
     if args.gdml:
+        galactic = g4.nist_material_2geant4Material("G4_Galactic")
         assembly_LV = gem_assembly.logicalVolume(material=galactic)
         reg.setWorld(assembly_LV.name)
         w = pyg4ometry.gdml.Writer()
@@ -443,8 +443,6 @@ if __name__ == "__main__":
 
     if args.vis:
         v = pyg4ometry.visualisation.VtkViewerColouredMaterial()
-
         v.addLogicalVolume(gem_assembly.logicalVolume())
-
         v.addAxes(300)
         v.view()
