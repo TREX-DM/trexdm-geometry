@@ -20,9 +20,9 @@ calibrationHolePos1 = [vesselRadius+0.5*vesselThickness, 0, 80]
 calibrationHolePos2 = [vesselRadius+0.5*vesselThickness, 0, -80] # x = vesselRadius+0.5*vesselThickness, why not ???
 
 calibrationShieldingRadius = 25
-calibrationShieldingLength = 60
+calibrationShieldingLength = 30
 
-calibrationShieldingCutLength = 60.1 # extra 0.1 mm to avoid precision errors in subtraction
+calibrationShieldingCutLength = calibrationShieldingLength + 0.1 # extra 0.1 mm to avoid precision errors in subtraction
 calibrationShieldingCutHeight = 24
 calibrationShieldingCutThickness = 3
 calibrationShieldingCutSeparation = 22
@@ -218,37 +218,38 @@ gasSolid = g4.solid.Subtraction(
     registry=reg
 )
 
-import argparse
-parser = argparse.ArgumentParser()
-parser.add_argument("--vis", action="store_true")
-parser.add_argument("--gdml", action="store_true")
-args = parser.parse_args()
+if __name__ == "__main__":
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--vis", action="store_true")
+    parser.add_argument("--gdml", action="store_true")
+    args = parser.parse_args()
 
-if args.gdml:
-    reg.setWorld(copperVesselVolume.name)
-    w = pyg4ometry.gdml.Writer()
-    w.addDetector(reg)
-    w.write('vessel.gdml')
+    if args.gdml:
+        reg.setWorld(copperVesselVolume.name)
+        w = pyg4ometry.gdml.Writer()
+        w.addDetector(reg)
+        w.write('vessel.gdml')
 
-if args.vis:
-    v = pyg4ometry.visualisation.VtkViewer()
-    #v.addLogicalVolume(g4.LogicalVolume(gasSolid, air, "gasLogical", reg))
-    #v.addSolid(gasSolid)
-    """
-    v.addSolid(copperVesselSolid_LERE_LIRI)
-    v.addSolid(calibrationShieldingSolid,
-               rotation=[0, 90*3.1416/180,-6.59*3.1416/180],
-               position=[vesselRadius-5-0.5*calibrationShieldingCutLength, -9.15, 80-15.68] # -5 in x to avoid the internal tap
-            )
-    v.addSolid(calibrationShieldingSolid,
-            rotation=[0, 90*3.1416/180, 66.6*3.1416/180],
-            position=[vesselRadius-5-0.5*calibrationShieldingCutLength, 0, -80]
-    )
-    """
-    #v.addSolid(vesselSolid)
-    #v.addSolid(calibrationShieldingSolid)
-    v.addSolid(gasSolid)
-    
-    v.addAxes(200)
-    v.view()
+    if args.vis:
+        v = pyg4ometry.visualisation.VtkViewer()
+        #v.addLogicalVolume(g4.LogicalVolume(gasSolid, air, "gasLogical", reg))
+        #v.addSolid(gasSolid)
+        """
+        v.addSolid(copperVesselSolid_LERE_LIRI)
+        v.addSolid(calibrationShieldingSolid,
+                rotation=[0, 90*3.1416/180,-6.59*3.1416/180],
+                position=[vesselRadius-5-0.5*calibrationShieldingCutLength, -9.15, 80-15.68] # -5 in x to avoid the internal tap
+                )
+        v.addSolid(calibrationShieldingSolid,
+                rotation=[0, 90*3.1416/180, 66.6*3.1416/180],
+                position=[vesselRadius-5-0.5*calibrationShieldingCutLength, 0, -80]
+        )
+        """
+        #v.addSolid(vesselSolid)
+        #v.addSolid(calibrationShieldingSolid)
+        v.addSolid(gasSolid)
+        
+        v.addAxes(200)
+        v.view()
 

@@ -66,7 +66,7 @@ def generate_gem_assembly(name="gem_assembly", registry=None, is_right_side=True
     mMBBaseCornerRadius = 187.0 # 187 mm is the radius of the corners
     mMBaseThickness = 4.0 # 4 mm is the thickness of the base
     mMBaseCornersCut = g4.solid.Tubs(
-        name="mMBaseCornersCut",
+        name="mMBaseCornersCutForGem",
         pRMin=0,
         pRMax=mMBBaseCornerRadius,
         pDz=mMBaseThickness,
