@@ -52,6 +52,7 @@ def generate_gem_assembly(name="gem_assembly", registry=None, is_right_side=True
         reg = registry
     # Materials
     # Use this for the pyg4ometry coloured material visualisation
+    """
     copper = g4.MaterialPredefined("G4_Cu")
     teflon = g4.MaterialPredefined("G4_TEFLON")
     kapton = g4.MaterialPredefined("G4_KAPTON")
@@ -61,7 +62,7 @@ def generate_gem_assembly(name="gem_assembly", registry=None, is_right_side=True
     teflon = g4.nist_material_2geant4Material("G4_TEFLON")
     kapton = g4.nist_material_2geant4Material("G4_KAPTON")
     galactic = g4.nist_material_2geant4Material("G4_Galactic")
-    """
+    
     ### Corners Cut to save the vessel radius ###
     mMBBaseCornerRadius = 187.0 # 187 mm is the radius of the corners
     mMBaseThickness = 4.0 # 4 mm is the thickness of the base

@@ -68,6 +68,7 @@ def generate_micromegas_assembly(name="micromegas_assembly", registry=None, is_r
 
     # Materials
     # Use this for the pyg4ometry coloured material visualisation
+    """
     copper = g4.MaterialPredefined("G4_Cu")
     teflon = g4.MaterialPredefined("G4_TEFLON")
     kapton = g4.MaterialPredefined("G4_KAPTON")
@@ -77,7 +78,7 @@ def generate_micromegas_assembly(name="micromegas_assembly", registry=None, is_r
     teflon = g4.nist_material_2geant4Material("G4_TEFLON")
     kapton = g4.nist_material_2geant4Material("G4_KAPTON")
     galactic = g4.nist_material_2geant4Material("G4_Galactic")
-    """
+    
 
     ### Micromegas base
     mMBaseBracket = g4.solid.Box(

@@ -4,98 +4,90 @@ from pyg4ometry import geant4 as g4
 import numpy as np
 
 import vessel
+from vessel import generate_vessel_assembly
+from shielding import generate_shielding_assembly
 from gem import generate_gem_assembly
 from micromegas import generate_micromegas_assembly
 
+reg = g4.Registry()
 
-worldSolid = g4.solid.Box(
-    name="worldSolid",
-    pX=5,
-    pY=5,
-    pZ=5,
-    lunit="m",
-    registry=vessel.reg
-)
+galactic = g4.MaterialPredefined("G4_Galactic")
+# world solid and logical
+ws   = g4.solid.Box("ws",5,5,5,reg, "m")
+wl   = g4.LogicalVolume(ws, galactic,"wl",reg)
 
-world_LV = g4.LogicalVolume(
-    name="world_LV",
-    solid=worldSolid,
-    material=vessel.air,
-    registry=vessel.reg
-)
+generate_shielding_assembly(registry=reg)
+generate_gem_assembly(registry=reg, is_right_side=True)
+generate_micromegas_assembly(registry=reg, is_right_side=True)
+generate_vessel_assembly = generate_vessel_assembly(registry=reg)
+gem_assembly = reg.findLogicalVolumeByName("gem_assembly")[0]
+micromegas_assembly = reg.findLogicalVolumeByName("micromegas_assembly")[0]
+vessel_assembly = reg.findLogicalVolumeByName("vessel_assembly")[0]
+shielding_assembly = reg.findLogicalVolumeByName("shielding_assembly")[0]
+outerGas_LV = reg.findLogicalVolumeByName("outerGasVolume")[0]
+innerGas_LV = reg.findLogicalVolumeByName("gas_LV")[0]
 
 
-vessel_LV = g4.LogicalVolume(
-    name="vessel_LV",
-    solid=vessel.vesselSolid,
-    material=vessel.copper,
-    registry=vessel.reg
-)
 
-gas_LV = g4.LogicalVolume(
-    name="gas_LV",
-    solid=vessel.gasSolid,
-    material=vessel.air,
-    registry=vessel.reg
-)
-
-generate_gem_assembly(registry=vessel.reg, is_right_side=True)
-generate_micromegas_assembly(registry=vessel.reg, is_right_side=True)
-gem_assembly = vessel.reg.findLogicalVolumeByName("gem_assembly")[0]
-micromegas_assembly = vessel.reg.findLogicalVolumeByName("micromegas_assembly")[0]
-
-vessel_PV = g4.PhysicalVolume(
-    name="vessel_PV",
-    logicalVolume=vessel_LV,
-    motherVolume=world_LV,
-    position=[0, 0, 0],
-    rotation=[0, 0, 0],
-    registry=vessel.reg
-)
-gas_PV = g4.PhysicalVolume(
-    name="gas_PV",
-    logicalVolume=gas_LV,
-    motherVolume=world_LV,
-    position=[0, 0, 0],
-    rotation=[0, 0, 0],
-    registry=vessel.reg
-)
 gemRight_PV = g4.PhysicalVolume(
     name="gemRight_PV",
     logicalVolume=gem_assembly,
-    motherVolume=gas_LV,
+    motherVolume=innerGas_LV,
     rotation=[0, 0, 0],
     position=[0, 0, -(vessel.vesselLength/2 - 84.2 - 4 - 5.5)],
-    registry=vessel.reg
+    registry=reg
 )
 micromegasRight_PV = g4.PhysicalVolume(
     name="micromegasRight_PV",
     logicalVolume=micromegas_assembly,
-    motherVolume=gas_LV,
+    motherVolume=innerGas_LV,
     rotation=[0, 0, 0],
     position=[0, 0, -(vessel.vesselLength/2 - 84.2 - 0.5*4)],
-    registry=vessel.reg
+    registry=reg
 )
 gemLeft_PV = g4.PhysicalVolume(
     name="gemLeft_PV",
     logicalVolume=gem_assembly,
-    motherVolume=gas_LV,
+    motherVolume=innerGas_LV,
     rotation=[np.pi, 0, 0],
     position=[0, 0, vessel.vesselLength/2 - 84.2 - 4 - 5.5],
-    registry=vessel.reg
+    registry=reg
 )
 
 micromegasLeft_PV = g4.PhysicalVolume(
     name="micromegasLeft_PV",
     logicalVolume=micromegas_assembly,
-    motherVolume=gas_LV,
+    motherVolume=innerGas_LV,
     rotation=[np.pi, 0, 0],
     position=[0, 0, vessel.vesselLength/2 - 84.2 - 0.5*4],
-    registry=vessel.reg
+    registry=reg
+)
+
+vesselassembly_PV = g4.PhysicalVolume(
+    name="vesselassembly_PV",
+    logicalVolume=vessel_assembly,
+    motherVolume=outerGas_LV,
+    rotation=[0, 0, 0],
+    position=[0, 0, 0],
+    registry=reg
+)
+
+shielding_PV = g4.PhysicalVolume(
+    name="shielding_PV",
+    logicalVolume=shielding_assembly,
+    motherVolume=wl,
+    rotation=[0, 0, 0],
+    position=[0, 0, 0],
+    registry=reg
 )
 
 
+reg.setWorld(wl.name)
+w = pyg4ometry.gdml.Writer()
+w.addDetector(reg)
+w.write('trexdm.gdml')
+
 v = pyg4ometry.visualisation.VtkViewerColouredMaterial()
-v.addLogicalVolume(world_LV)
-v.addAxes(500)
+v.addLogicalVolumeRecursive(wl)
+v.addAxes(1000)
 v.view()
