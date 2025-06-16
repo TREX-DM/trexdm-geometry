@@ -31,6 +31,7 @@ calibrationExternalTapRadius = 40
 
 calibrationInternalTapLength = 5
 calibrationInternalTapRadius = 25
+
 def generate_vessel_assembly(name="vessel_assembly", registry=None):
     """
     Generates the vessel geometry for the TREX-DM detector.
@@ -281,31 +282,20 @@ if __name__ == "__main__":
     parser.add_argument("--gdml", action="store_true")
     args = parser.parse_args()
 
+    reg = generate_vessel_assembly("vessel_assembly")
+    vessel_assembly = reg.findLogicalVolumeByName("vessel_assembly")[0]
+
     if args.gdml:
-        reg.setWorld(copperVesselVolume.name)
+        galactic = g4.nist_material_2geant4Material("G4_Galactic")
+        assembly_LV = vessel_assembly.logicalVolume(material=galactic)
+        reg.setWorld(assembly_LV.name)
         w = pyg4ometry.gdml.Writer()
         w.addDetector(reg)
         w.write('vessel.gdml')
 
     if args.vis:
         v = pyg4ometry.visualisation.VtkViewer()
-        #v.addLogicalVolume(g4.LogicalVolume(gasSolid, air, "gasLogical", reg))
-        #v.addSolid(gasSolid)
-        """
-        v.addSolid(copperVesselSolid_LERE_LIRI)
-        v.addSolid(calibrationShieldingSolid,
-                rotation=[0, 90*3.1416/180,-6.59*3.1416/180],
-                position=[vesselRadius-5-0.5*calibrationShieldingCutLength, -9.15, 80-15.68] # -5 in x to avoid the internal tap
-                )
-        v.addSolid(calibrationShieldingSolid,
-                rotation=[0, 90*3.1416/180, 66.6*3.1416/180],
-                position=[vesselRadius-5-0.5*calibrationShieldingCutLength, 0, -80]
-        )
-        """
-        #v.addSolid(vesselSolid)
-        #v.addSolid(calibrationShieldingSolid)
-        v.addSolid(gasSolid)
-        
+        v.addLogicalVolume(vessel_assembly)
         v.addAxes(200)
         v.view()
 

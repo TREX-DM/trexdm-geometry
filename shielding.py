@@ -123,24 +123,26 @@ def generate_shielding_assembly(name="shielding_assembly", registry=None):
     return reg
 
 
+if __name__ == "__main__":
+    import argparse
+    parser = argparse.ArgumentParser()
+    parser.add_argument("--vis", action="store_true")
+    parser.add_argument("--gdml", action="store_true")
+    args = parser.parse_args()
 
-import argparse
-parser = argparse.ArgumentParser()
-parser.add_argument("--vis", action="store_true")
-parser.add_argument("--gdml", action="store_true")
-args = parser.parse_args()
+    reg = generate_shielding_assembly("shielding_assembly")
+    shielding_assembly = reg.findLogicalVolumeByName("shielding_assembly")[0]
 
-if args.gdml:
-    w = pyg4ometry.gdml.Writer()
-    w.addDetector(reg)
-    w.write('shielding.gdml')
+    if args.gdml:
+        galactic = g4.nist_material_2geant4Material("G4_Galactic")
+        assembly_LV = shielding_assembly.logicalVolume(material=galactic)
+        reg.setWorld(assembly_LV.name)
+        w = pyg4ometry.gdml.Writer()
+        w.addDetector(reg)
+        w.write('shielding.gdml')
 
-if args.vis:
-    v = pyg4ometry.visualisation.VtkViewerColouredMaterial()
-    #v.addLogicalVolume(g4.LogicalVolume(gasSolid, air, "gasLogical", reg))
-    #v.addSolid(gasSolid)
-    #v.addSolid(copperVesselSolid)
-    v.addLogicalVolumeRecursive(wl)
-    
-    v.addAxes(200)
-    v.view()
+    if args.vis:
+        v = pyg4ometry.visualisation.VtkViewerColouredMaterial()
+        v.addLogicalVolume(shielding_assembly)
+        v.addAxes(200)
+        v.view()
