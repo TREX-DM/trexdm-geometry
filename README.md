@@ -1,23 +1,2 @@
-# New geometry description
-## GEM
-The GEM is composed of the following physical volumes:
-* gemKaptonFoil
-* gemTop
-* gemBottom
-* gemFrame
-* gemmMSeparator1
-* gemmMSeparator2
-* gemmMSeparatorFixer1
-* gemmMSeparatorFixer2
-
-![gem](./docs/images/gem_visualization.png)
-
-## Micromegas
-The Micromegas assembly is meant to contain the Micromegas readout supporting structure, the Micromegas readout itself and the limandes. It is composed of the following physical volumes:
-* mMBase
-* mMTeflonSpacerPad1 (to 4)
-* mMBaseClosingBracket1 (to 4)
-* mMBaseTeflonRoller1 (to 2)
-* mMSupport1 (to 2)
-
-![mM](./docs/images/micromegas_visualization.png)
+# TREX-DM geometry
+This repository is meant to contain all the geometry related files for use in the TREX-DM experiment simulations. As we use [restG4](https://github.com/rest-for-physics/restG4) (an interface to [Geant4](https://geant4.web.cern.ch/) software) for montecarlo simulations of radiation transport, the geometry of the experiment must be written at the endpoint in [gdml](https://indico.cern.ch/event/408139/contributions/979922/attachments/815913/1118019/GDML_CHEP06.pdf) format. 
