@@ -7,6 +7,7 @@ import vessel
 import shielding
 import gem
 import micromegas
+import fieldcage
 
 reg = g4.Registry()
 
@@ -20,11 +21,13 @@ shielding.generate_shielding_assembly(registry=reg)
 vessel.generate_vessel_assembly(registry=reg)
 micromegas.generate_micromegas_assembly(registry=reg, is_right_side=True)
 gem.generate_gem_assembly(registry=reg, is_right_side=True)
+fieldcage.generate_fieldcage_assembly(registry=reg)
 
 shielding_assembly = reg.findLogicalVolumeByName("shielding_assembly")[0]
 vessel_assembly = reg.findLogicalVolumeByName("vessel_assembly")[0]
 micromegas_assembly = reg.findLogicalVolumeByName("micromegas_assembly")[0]
 gem_assembly = reg.findLogicalVolumeByName("gem_assembly")[0]
+fieldcage_assembly = reg.findLogicalVolumeByName("fieldcage_assembly")[0]
 
 # Find the logical volumes needed for mounting the assemblies together
 outerGas_LV = reg.findLogicalVolumeByName("outerGasVolume")[0]
@@ -84,6 +87,14 @@ shielding_PV = g4.PhysicalVolume(
     registry=reg
 )
 
+fieldcage_PV = g4.PhysicalVolume(
+    name="fieldcage_PV",
+    logicalVolume=fieldcage_assembly,
+    motherVolume=innerGas_LV,
+    rotation=[0, 0, 0],
+    position=[0, 0, 0],
+    registry=reg
+)
 
 reg.setWorld(wl.name)
 w = pyg4ometry.gdml.Writer()
