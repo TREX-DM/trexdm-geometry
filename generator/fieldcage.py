@@ -41,9 +41,39 @@ supportInnerLength = cornersLength
 supportCornersThickness = 75 # mm
 supportColumnsThickness = 15 # mm
 
+ringsBoardLength = cornersInnerLength
+ringsBoardWidth = 0.05 # 50um
+ringsBoardInnerLength = cornersInnerLength - 2 * ringsBoardWidth
+ringsBoardThickness = cornersThickness # 144 mm
+
+ringLength = ringsBoardInnerLength
+ringWidth = 0.1 # 100um
+ringInnerLength = ringsBoardInnerLength - 2 * ringWidth
+ringThickness = 2 # mm
+ringNumber = 21
+ringSeparation = 5 #int((ringsBoardThickness - ringNumber * ringThickness) / ringNumber) # mm
+if (ringSeparation+ringThickness)*(ringNumber-1)+ringThickness > ringsBoardThickness:
+    raise ValueError("The ring separation is too large for the number of rings and the board thickness. Please adjust the parameters.")
+
+resistorShieldingLength = 20 # mm
+resistorShieldingWidth = 19 # mm
+resistorShieldingThickness = ringsBoardThickness # 144 mm
+resistorShieldingSlotLength = 8.43 # mm
+resistorShieldingSlotWidth = 1 # mm
+resistorShieldingSlotWidthShift = 0.5 # mm, I dont know why it is not centered (then heightShift would be 0)
+
+resistorLength = 3.1 # mm
+resistorWidth = 0.6 # mm
+resistorThickness = 140 # mm
+resistorDistanceToShieldingSlotEdge = 2.5 # mm
+if resistorThickness > resistorShieldingThickness:
+    raise ValueError("The resistor thickness cannot be larger than its shielding thickness. Please adjust the parameters.")
+if resistorDistanceToShieldingSlotEdge + resistorLength > resistorShieldingSlotLength:
+    raise ValueError("The resistor does not fit inside the slot with this distance to slot edge. Please adjust the parameters.")
+
 def generate_fieldcage_assembly(name="fieldcage_assembly", registry=None):
     """
-    Generate the field cage assembly for the TReX-DM geometry.
+    Generate the field cage assembly for the TREX-DM geometry.
     """
     # Registry
     if registry is None:
@@ -276,6 +306,86 @@ def generate_fieldcage_assembly(name="fieldcage_assembly", registry=None):
         registry=reg
     )
     
+    ringsBoard0 = g4.solid.Box(
+        name="ringsBoard0",
+        pX=ringsBoardLength,
+        pY=ringsBoardLength,
+        pZ=ringsBoardThickness,
+        lunit="mm",
+        registry=reg
+    )
+    ringsBoardCut = g4.solid.Box(
+        name="ringsBoardCut",
+        pX=ringsBoardInnerLength,
+        pY=ringsBoardInnerLength,
+        pZ=ringsBoardThickness + 0.01,  # Slightly larger to ensure cut
+        lunit="mm",
+        registry=reg
+    )
+    ringsBoard = g4.solid.Subtraction(
+        name="ringsBoard",
+        obj1=ringsBoard0,
+        obj2=ringsBoardCut,
+        tra2=[[0, 0, 0], [0, 0, 0]],
+        registry=reg
+    )
+    
+    ring0 = g4.solid.Box(
+        name="ring0",
+        pX=ringLength,
+        pY=ringLength,
+        pZ=ringThickness,
+        lunit="mm",
+        registry=reg
+    )
+    ringCut = g4.solid.Box(
+        name="ringCut",
+        pX=ringInnerLength,
+        pY=ringInnerLength,
+        pZ=ringThickness + 0.01,  # Slightly larger to ensure cut
+        lunit="mm",
+        registry=reg
+    )
+    ring = g4.solid.Subtraction(
+        name="ring",
+        obj1=ring0,
+        obj2=ringCut,
+        tra2=[[0, 0, 0], [0, 0, 0]],
+        registry=reg
+    )
+    
+    resistorShielding0 = g4.solid.Box(
+        name="resistorShielding0",
+        pX=resistorShieldingLength,
+        pY=resistorShieldingWidth,
+        pZ=resistorShieldingThickness,
+        lunit="mm",
+        registry=reg
+    )
+    resistorShieldingSlotCut = g4.solid.Box(
+        name="resistorShieldingSlotCut",
+        pX=resistorShieldingSlotLength,
+        pY=resistorShieldingSlotWidth,
+        pZ=resistorShieldingThickness,
+        lunit="mm",
+        registry=reg
+    )
+    resistorShielding = g4.solid.Subtraction(
+        name="resistorShielding",
+        obj1=resistorShielding0,
+        obj2=resistorShieldingSlotCut,
+        tra2=[[0, 0, 0], [-resistorShieldingLength/2 + resistorShieldingSlotLength/2, resistorShieldingSlotWidthShift, 0]],
+        registry=reg
+    )
+    resistor = g4.solid.Box(
+        name="resistor",
+        pX=resistorLength,
+        pY=resistorWidth,
+        pZ=resistorThickness,
+        lunit="mm",
+        registry=reg
+    )
+
     # Create the field cage assembly
     fieldcage_assembly = g4.AssemblyVolume(name=name, registry=reg)
     
@@ -325,6 +435,48 @@ def generate_fieldcage_assembly(name="fieldcage_assembly", registry=None):
         name="closerFrame_LV",
         solid=closerFrame,
         material=teflon,
+        registry=reg
+    )
+    ringsBoard_LV = g4.LogicalVolume(
+        name="ringsBoard_LV",
+        solid=ringsBoard,
+        material=kapton,
+        registry=reg
+    )
+    ring_LV = g4.LogicalVolume(
+        name="ring_LV",
+        solid=ring,
+        material=copper,
+        registry=reg
+    )
+    
+    resistorShielding_LV = g4.LogicalVolume(
+        name="resistorShielding_LV",
+        solid=resistorShielding,
+        material=teflon,
+        registry=reg
+    )
+    resistor_LV = g4.LogicalVolume(
+        name="resistor_LV",
+        solid=resistor,
+        material=copper, # TODO: change to a more appropriate material
+        registry=reg
+    )
+    resistorAssembly = g4.AssemblyVolume(name="resistorAssembly", registry=reg)
+    resistorShielding_PV = g4.PhysicalVolume(
+        name="resistorShielding_PV",
+        rotation=[0, 0, 0],
+        position=[0, 0, 0],
+        logicalVolume=resistorShielding_LV,
+        motherVolume=resistorAssembly,
+        registry=reg
+    )
+    resistor_PV = g4.PhysicalVolume(
+        name="resistor_PV",
+        rotation=[0, 0, 0],
+        position=[-resistorShieldingLength/2 + resistorDistanceToShieldingSlotEdge + resistorLength/2, resistorShieldingSlotWidthShift - resistorShieldingSlotWidth/2 + resistorWidth/2, 0],
+        logicalVolume=resistor_LV,
+        motherVolume=resistorAssembly,
         registry=reg
     )
     
@@ -426,6 +578,60 @@ def generate_fieldcage_assembly(name="fieldcage_assembly", registry=None):
         rotation=[0, 0, 0],
         position=[0, 0, sideSeparatorThickness/2 + cathodeSideFrameThickness + cornersThickness + closerFrameThickness/2],
         logicalVolume=closerFrame_LV,
+        motherVolume=fieldcage_assembly,
+        registry=reg
+    )
+    
+    ringsBoardLeft_PV = g4.PhysicalVolume(
+        name="ringsBoardLeft_PV",
+        rotation=[0, 0, 0],
+        position=[0, 0, -(sideSeparatorThickness/2 + cathodeSideFrameThickness + ringsBoardThickness/2)],
+        logicalVolume=ringsBoard_LV,
+        motherVolume=fieldcage_assembly,
+        registry=reg
+    )
+    ringsBoardRight_PV = g4.PhysicalVolume(
+        name="ringsBoardRight_PV",
+        rotation=[0, 0, 0],
+        position=[0, 0, sideSeparatorThickness/2 + cathodeSideFrameThickness + ringsBoardThickness/2],
+        logicalVolume=ringsBoard_LV,
+        motherVolume=fieldcage_assembly,
+        registry=reg
+    )
+    
+    for i in range(ringNumber):
+        distance = (ringSeparation + ringThickness) * i # to the beginning of the board
+        g4.PhysicalVolume(
+            name=f"ringLeft{i+1}_PV",
+            rotation=[0, 0, 0],
+            position=[0, 0, -(sideSeparatorThickness/2 + cathodeSideFrameThickness + ringThickness/2 + distance)],
+            logicalVolume=ring_LV,
+            motherVolume=fieldcage_assembly,
+            registry=reg
+        )
+        g4.PhysicalVolume(
+            name=f"ringRight{i+1}_PV",
+            rotation=[0, 0, 0],
+            position=[0, 0, sideSeparatorThickness/2 + cathodeSideFrameThickness + ringThickness/2 + distance],
+            logicalVolume=ring_LV,
+            motherVolume=fieldcage_assembly,
+            registry=reg
+        )
+
+    resistorAssemblyLeft_PV = g4.PhysicalVolume(
+        name="resistorAssemblyLeft_PV",
+        rotation=[0, 0, 0],
+        position=[(cornersSlotHeight/2-resistorShieldingLength/2), cornersInnerLength/2+resistorShieldingWidth/2, (sideSeparatorThickness/2 + cathodeSideFrameThickness + resistorShieldingThickness/2)],
+        logicalVolume=resistorAssembly,
+        motherVolume=fieldcage_assembly,
+        registry=reg
+    )
+
+    resistorAssemblyRight_PV = g4.PhysicalVolume(
+        name="resistorAssemblyRight_PV",
+        rotation=[0, np.pi, 0],
+        position=[-(cornersSlotHeight/2-resistorShieldingLength/2), cornersInnerLength/2+resistorShieldingWidth/2, -(sideSeparatorThickness/2 + cathodeSideFrameThickness + resistorShieldingThickness/2)],
+        logicalVolume=resistorAssembly,
         motherVolume=fieldcage_assembly,
         registry=reg
     )
