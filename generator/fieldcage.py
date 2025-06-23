@@ -71,6 +71,39 @@ if resistorThickness > resistorShieldingThickness:
 if resistorDistanceToShieldingSlotEdge + resistorLength > resistorShieldingSlotLength:
     raise ValueError("The resistor does not fit inside the slot with this distance to slot edge. Please adjust the parameters.")
 
+supportCornersWidth = 18 # mm. In the CAD the top corners have 20mm of width on one of its sides but we simplify it
+supportCornersInnerLength = cornersLength
+supportCornersLength = supportCornersInnerLength + 2 * supportCornersWidth
+supportCornersThickness = 75 # mm
+supportCornersEdgeCutLength = 379.72 # mm, the corners are cut at the edges to fit inside the vessel
+supportCornersEdgeCutAngle = 45 # degrees, the corners are cut at 45 degrees
+
+supportColumnHeight = 169 # mm
+supportColumnHeightShift = -7.5 # mm, the columns are not centered in the corners, they are shifted by this amount
+supportColumnWidth = supportCornersWidth
+supportColumnThickness = 15 # mm
+
+# in the CAD the bottom and top beams are slightly different, but we simplify it by using the same dimensions (this are the ones from the bottom beam)
+supportBeamLength = 185 # the top one is 184
+supportBeamWidth = 18 # the top one is 15
+supportBeamThickness = 15 # the top one is also 15
+
+supportTopSideBeamLength = 150
+supportTopSideBeamWidth = supportCornersWidth # mm
+supportTopSideBeamThickness = 25 # mm
+supportTopSideAuxBeamThickness = ringsBoardThickness
+supportTopSideAuxBeamWidth = 6
+supportTopSideAuxBeamLength = 20
+
+handleWidth = 32
+handleHeight = 140
+handleThickness = supportColumnThickness # 15mm
+handleSlotHeight = 108
+handleSlotWidth = 20
+
+vacuumCylinderLength = 45
+vacuumCylinderRadius = 20 # mm
+
 def generate_fieldcage_assembly(name="fieldcage_assembly", registry=None):
     """
     Generate the field cage assembly for the TREX-DM geometry.
@@ -386,6 +419,163 @@ def generate_fieldcage_assembly(name="fieldcage_assembly", registry=None):
         registry=reg
     )
 
+    supportCorners0 = g4.solid.Box(
+        name="supportCorners0",
+        pX=supportCornersLength,
+        pY=supportCornersLength,
+        pZ=supportCornersThickness,
+        lunit="mm",
+        registry=reg
+    )
+    supportCornersCut = g4.solid.Box(
+        name="supportCornersCut",
+        pX=supportCornersInnerLength,
+        pY=supportCornersInnerLength,
+        pZ=supportCornersThickness + 0.01,  # Slightly larger to ensure cut
+        lunit="mm",
+        registry=reg
+    )
+    supportCornersEdgeCut = g4.solid.Box(
+        name="supportCornersEdgeCut",
+        pX=supportCornersEdgeCutLength,
+        pY=supportCornersEdgeCutLength,
+        pZ=supportCornersThickness + 0.01,  # Slightly larger to ensure cut
+        lunit="mm",
+        registry=reg
+    )
+
+    supportCornersBase = g4.solid.Subtraction(
+        name="supportCornersBase",
+        obj1=supportCorners0,
+        obj2=supportCornersCut,
+        tra2=[[0, 0, 0], [0, 0, 0]],
+        registry=reg
+    )
+    supportCornersBaseEdgeCutted = g4.solid.Intersection(
+        name="supportCornersBaseEdgeCutted",
+        obj1=supportCornersBase,
+        obj2=supportCornersEdgeCut,
+        tra2=[[0, 0, supportCornersEdgeCutAngle*np.pi/180], [0, 0, 0]],
+        registry=reg
+    )
+
+    supportCornersColumnCut = g4.solid.Box(
+        name="supportCornersColumnCut",
+        pX=supportCornersLength,  # cut both sides at the same time
+        pY=supportColumnHeight,
+        pZ=supportCornersThickness,
+        lunit="mm",
+        registry=reg
+    )
+    supportCornersColumnCutted = g4.solid.Subtraction(
+        name="supportCornersColumnCutted",
+        obj1=supportCornersBaseEdgeCutted,
+        obj2=supportCornersColumnCut,
+        tra2=[[0, 0, 0], [0, supportColumnHeightShift, 0]],
+        registry=reg
+    )
+
+    supportCornersBeamCut = g4.solid.Box(
+        name="supportCornersBeamCut",
+        pX=cornersSlotHeight+2*1, # the slot is 1mm larger (at the left and right) than the corners slot length
+        pY=supportCornersLength, # cut both sides (top and bottom) at the same time
+        pZ=supportCornersThickness,
+        lunit="mm",
+        registry=reg
+    )
+
+    supportCorners = g4.solid.Subtraction(
+        name="supportCorners",
+        obj1=supportCornersColumnCutted,
+        obj2=supportCornersBeamCut,
+        tra2=[[0, 0, 0], [0, 0, 0]],
+        registry=reg
+    )
+
+    supportColumn = g4.solid.Box(
+        name="supportColumn",
+        pX=supportColumnWidth,
+        pY=supportColumnHeight,
+        pZ=supportColumnThickness,
+        lunit="mm",
+        registry=reg
+    )
+
+    supportBeam = g4.solid.Box(
+        name="supportBeam",
+        pX=supportBeamLength,
+        pY=supportBeamWidth,
+        pZ=supportBeamThickness,
+        lunit="mm",
+        registry=reg
+    )
+
+    handle0 = g4.solid.Box(
+        name="handle0",
+        pX=handleWidth,
+        pY=handleHeight,
+        pZ=handleThickness,
+        lunit="mm",
+        registry=reg
+    )
+    handleSlot = g4.solid.Box(
+        name="handleSlot",
+        pX=handleSlotWidth,
+        pY=handleSlotHeight,
+        pZ=handleThickness,
+        lunit="mm",
+        registry=reg
+    )
+    handle = g4.solid.Subtraction(
+        name="handle",
+        obj1=handle0,
+        obj2=handleSlot,
+        tra2=[[0, 0, 0], [handleWidth/2-handleSlotWidth/2, 0, 0]],
+        registry=reg
+    )
+
+    supportTopSideBeam0 = g4.solid.Box(
+        name="supportTopSideBeam0",
+        pX=supportTopSideBeamLength,
+        pY=supportTopSideBeamWidth,
+        pZ=supportTopSideBeamThickness,
+        lunit="mm",
+        registry=reg
+    )
+    supportTopSideAuxBeam = g4.solid.Box(
+        name="supportTopSideAuxBeam",
+        pX=supportTopSideAuxBeamLength,
+        pY=supportTopSideAuxBeamWidth,
+        pZ=supportTopSideAuxBeamThickness,
+        lunit="mm",
+        registry=reg
+    )
+
+    supportTopSideBeam = g4.solid.Union(
+        name="supportTopSideBeam",
+        obj1=supportTopSideBeam0,
+        obj2=supportTopSideAuxBeam,
+        tra2=[[0, 0, 0], [
+            supportTopSideBeamLength/2-supportTopSideAuxBeamLength/2,
+            -(supportTopSideBeamWidth/2+supportTopSideAuxBeamWidth/2),
+            supportTopSideAuxBeamThickness/2 - supportTopSideBeamThickness/2
+            ]],
+        registry=reg
+    )
+
+    vacuumCylinder = g4.solid.Tubs(
+        name="vacuumCylinder",
+        pRMin=0,
+        pRMax=vacuumCylinderRadius,
+        pDz=vacuumCylinderLength,
+        pSPhi=0,
+        pDPhi=360,
+        aunit="deg",
+        lunit="mm",
+        registry=reg
+    )
+
+
     # Create the field cage assembly
     fieldcage_assembly = g4.AssemblyVolume(name=name, registry=reg)
     
@@ -480,7 +670,48 @@ def generate_fieldcage_assembly(name="fieldcage_assembly", registry=None):
         registry=reg
     )
     
-    
+    supportCorners_LV = g4.LogicalVolume(
+        name="supportCorners_LV",
+        solid=supportCorners,
+        material=teflon,
+        registry=reg
+    )
+
+    supportColumn_LV = g4.LogicalVolume(
+        name="supportColumn_LV",
+        solid=supportColumn,
+        material=teflon,
+        registry=reg
+    )
+
+    supportBeam_LV = g4.LogicalVolume(
+        name="supportBeam_LV",
+        solid=supportBeam,
+        material=teflon,
+        registry=reg
+    )
+
+    supportTopSideBeam_LV = g4.LogicalVolume(
+        name="supportTopSideBeam_LV",
+        solid=supportTopSideBeam,
+        material=teflon,
+        registry=reg
+    )
+
+    handle_LV = g4.LogicalVolume(
+        name="handle_LV",
+        solid=handle,
+        material=teflon,
+        registry=reg
+    )
+
+    vacuumCylinder_LV = g4.LogicalVolume(
+        name="vacuumCylinder_LV",
+        solid=vacuumCylinder,
+        material=teflon,
+        registry=reg
+    )
+
     cathodeFoilKapton_PV = g4.PhysicalVolume(
         name="cathodeFoilKapton_PV",
         rotation=[0, 0, 0],
@@ -632,6 +863,83 @@ def generate_fieldcage_assembly(name="fieldcage_assembly", registry=None):
         rotation=[0, np.pi, 0],
         position=[-(cornersSlotHeight/2-resistorShieldingLength/2), cornersInnerLength/2+resistorShieldingWidth/2, -(sideSeparatorThickness/2 + cathodeSideFrameThickness + resistorShieldingThickness/2)],
         logicalVolume=resistorAssembly,
+        motherVolume=fieldcage_assembly,
+        registry=reg
+    )
+
+    supportCorners_PV = g4.PhysicalVolume(
+        name="supportCorners_PV",
+        rotation=[0, 0, 0],
+        position=[0, 0, 0],
+        logicalVolume=supportCorners_LV,
+        motherVolume=fieldcage_assembly,
+        registry=reg
+    )
+
+    supportColumn1_PV = g4.PhysicalVolume(
+        name="supportColumn1_PV",
+        rotation=[0, 0, 0],
+        position=[-(sideSeparatorLength/2 + supportColumnWidth/2), supportColumnHeightShift, 0],
+        logicalVolume=supportColumn_LV,
+        motherVolume=fieldcage_assembly,
+        registry=reg
+    )
+    supportColumn2_PV = g4.PhysicalVolume(
+        name="supportColumn2_PV",
+        rotation=[0, 0, 0],
+        position=[sideSeparatorLength/2 + supportColumnWidth/2, supportColumnHeightShift, 0],
+        logicalVolume=supportColumn_LV,
+        motherVolume=fieldcage_assembly,
+        registry=reg
+    )
+    supportBottomBeam_PV = g4.PhysicalVolume(
+        name="supportBeam_PV",
+        rotation=[0, 0, 0],
+        position=[0, -(cathodeSideFrameLength/2 + supportBeamWidth/2), 0],
+        logicalVolume=supportBeam_LV,
+        motherVolume=fieldcage_assembly,
+        registry=reg
+    )
+    supportTopBeam_PV = g4.PhysicalVolume(
+        name="supportTopBeam_PV",
+        rotation=[0, 0, 0],
+        position=[0, sideSeparatorLength/2+supportBeamWidth/2, 0],
+        logicalVolume=supportBeam_LV,
+        motherVolume=fieldcage_assembly,
+        registry=reg
+    )
+
+    supportTopSideBeamLeft_PV = g4.PhysicalVolume(
+        name="supportTopSideBeamLeft_PV",
+        rotation=[0, 0, 0],
+        position=[-cornersSlotHeight/2+supportTopSideBeamLength/2, cornersLength/2+supportTopSideBeamWidth/2, sideSeparatorThickness/2 + cathodeSideFrameThickness + supportTopSideBeamThickness/2],
+        logicalVolume=supportTopSideBeam_LV,
+        motherVolume=fieldcage_assembly,
+        registry=reg
+    )
+    supportTopSideBeamRight_PV = g4.PhysicalVolume(
+        name="supportTopSideBeamRight_PV",
+        rotation=[0, np.pi, 0],
+        position=[-(-cornersSlotHeight/2+supportTopSideBeamLength/2), cornersLength/2+supportTopSideBeamWidth/2, -(sideSeparatorThickness/2 + cathodeSideFrameThickness + supportTopSideBeamThickness/2)],
+        logicalVolume=supportTopSideBeam_LV,
+        motherVolume=fieldcage_assembly,
+        registry=reg
+    )
+
+    handle_PV = g4.PhysicalVolume(
+        name="handle_PV",
+        rotation=[0, 0, 0],
+        position=[-(cornersInnerLength/2 + supportColumnWidth + handleWidth/2), 0, 0],
+        logicalVolume=handle_LV,
+        motherVolume=fieldcage_assembly,
+        registry=reg
+    )
+
+    vacuumCylinder_PV = g4.PhysicalVolume(
+        name="vacuumCylinder_PV",
+        rotation=[np.pi/2, 0, 0],
+        position=[0, cornersLength/2 + supportTopSideBeamWidth + vacuumCylinderLength/2, 0],
+        logicalVolume=vacuumCylinder_LV,
         motherVolume=fieldcage_assembly,
         registry=reg
     )
