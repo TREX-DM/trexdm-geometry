@@ -14,7 +14,6 @@ cathodeFrameThickness = 10 # 2um
 cathodeFeedThroughHeight = 65 # mm
 cathodeFeedThroughWidth = 12 # mm
 cathodeFeedThroughThickness = 10 # mm
-cathodeFeedThroughDistanceToCopperFrame = 2 # mm
 
 cathodeSideFrameLength = 264 # mm
 cathodeSideFrameInnerLength = 252 # mm
@@ -774,7 +773,7 @@ def generate_fieldcage_assembly(name="fieldcage_assembly", registry=None):
     cathodeFeedthrough_PV = g4.PhysicalVolume(
         name="cathodeFeedthrough_PV",
         rotation=[0, 0, 0],
-        position=[-(cathodeFeedThroughWidth/2 + cathodeFeedThroughDistanceToCopperFrame + cathodeFrameLength/2), 0, 0],
+        position=[-(cathodeSideFrameLength/2 - cathodeFeedThroughWidth/2), 0, 0],
         logicalVolume=cathodeFeedthrough_LV,
         motherVolume=fieldcage_assembly,
         registry=reg
