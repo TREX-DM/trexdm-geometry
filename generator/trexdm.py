@@ -40,7 +40,7 @@ gemRight_PV = g4.PhysicalVolume(
     logicalVolume=gem_assembly,
     motherVolume=innerGas_LV,
     rotation=[0, 0, 0],
-    position=[0, 0, -(vessel.vesselLength/2 - micromegas.mMTapSeparatorFinalHeight - micromegas.mMBaseThickness - gem.gemmMSeparatorThickness - gem.gemKaptonFoilThickness)],
+    position=[0, 0, -(vessel.vesselLength/2 - micromegas.capSupportFinalHeight - micromegas.mMBaseThickness - gem.gemmMSeparatorThickness - gem.gemKaptonFoilThickness)],
     registry=reg
 )
 micromegasRight_PV = g4.PhysicalVolume(
@@ -48,7 +48,7 @@ micromegasRight_PV = g4.PhysicalVolume(
     logicalVolume=micromegas_assembly,
     motherVolume=innerGas_LV,
     rotation=[0, 0, 0],
-    position=[0, 0, -(vessel.vesselLength/2 - micromegas.mMTapSeparatorFinalHeight - 0.5*micromegas.mMBaseThickness)],
+    position=[0, 0, -(vessel.vesselLength/2 - micromegas.capSupportFinalHeight - 0.5*micromegas.mMBaseThickness)],
     registry=reg
 )
 gemLeft_PV = g4.PhysicalVolume(
@@ -56,7 +56,7 @@ gemLeft_PV = g4.PhysicalVolume(
     logicalVolume=gem_assembly,
     motherVolume=innerGas_LV,
     rotation=[np.pi, 0, 0],
-    position=[0, 0, vessel.vesselLength/2 - micromegas.mMTapSeparatorFinalHeight - micromegas.mMBaseThickness - gem.gemmMSeparatorThickness - gem.gemKaptonFoilThickness],
+    position=[0, 0, vessel.vesselLength/2 - micromegas.capSupportFinalHeight - micromegas.mMBaseThickness - gem.gemmMSeparatorThickness - gem.gemKaptonFoilThickness],
     registry=reg
 )
 
@@ -65,7 +65,7 @@ micromegasLeft_PV = g4.PhysicalVolume(
     logicalVolume=micromegas_assembly,
     motherVolume=innerGas_LV,
     rotation=[np.pi, 0, 0],
-    position=[0, 0, vessel.vesselLength/2 - micromegas.mMTapSeparatorFinalHeight - 0.5*micromegas.mMBaseThickness],
+    position=[0, 0, vessel.vesselLength/2 - micromegas.capSupportFinalHeight - 0.5*micromegas.mMBaseThickness],
     registry=reg
 )
 
