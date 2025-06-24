@@ -109,7 +109,7 @@ handleThickness = supportColumnThickness # 15mm
 handleSlotHeight = 108
 handleSlotWidth = 20
 
-vacuumCylinderLength = 45
+vacuumCylinderLength = 45 # this is to much, as it extrudes the gas volume
 vacuumCylinderRadius = 20 # mm
 
 def generate_fieldcage_assembly(name="fieldcage_assembly", registry=None):
@@ -995,6 +995,7 @@ def generate_fieldcage_assembly(name="fieldcage_assembly", registry=None):
         registry=reg
     )
 
+    """ # The vacuum cylinder will not be used in the field cage assembly for now
     vacuumCylinder_PV = g4.PhysicalVolume(
         name="vacuumCylinder_PV",
         rotation=[np.pi/2, 0, 0],
@@ -1003,6 +1004,7 @@ def generate_fieldcage_assembly(name="fieldcage_assembly", registry=None):
         motherVolume=fieldcage_assembly,
         registry=reg
     )
+    """
 
     return reg
 
