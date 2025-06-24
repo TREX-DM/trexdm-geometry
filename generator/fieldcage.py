@@ -1,6 +1,7 @@
 import vtk
 import pyg4ometry
 from pyg4ometry import geant4 as g4
+from pyg4ometry import transformation as tf
 import numpy as np
 
 cathodeLength = 206 # mm
@@ -93,6 +94,14 @@ supportTopSideBeamThickness = 25 # mm
 supportTopSideAuxBeamThickness = ringsBoardThickness
 supportTopSideAuxBeamWidth = 6
 supportTopSideAuxBeamLength = 20
+
+supportToVesselLength = 45
+supportToVesselHeight = 25
+supportToVesselThickness = 90
+supportToVesselCutLength = 40.31
+supportToVesselCutAngle = -29.74 # degrees
+supportToVesselCutHeightShift = -5
+supportToVesselDistanceBetweenThem = 140
 
 handleWidth = 32
 handleHeight = 140
@@ -561,6 +570,34 @@ def generate_fieldcage_assembly(name="fieldcage_assembly", registry=None):
             ]],
         registry=reg
     )
+    supportToVessel0 = g4.solid.Box(
+        name="supportToVessel0",
+        pX=supportToVesselLength,
+        pY=supportToVesselHeight,
+        pZ=supportToVesselThickness,
+        lunit="mm",
+        registry=reg
+    )
+    supportToVesselCut = g4.solid.Box(
+        name="supportToVesselCut",
+        pX=supportToVesselCutLength,
+        pY=supportToVesselCutLength,
+        pZ=supportToVesselThickness + 0.01,  # Slightly larger to ensure cut
+        lunit="mm",
+        registry=reg
+    )
+    
+    supportToVesselCutCornerToCentre = np.array([supportToVesselCutLength/2, -supportToVesselCutLength/2, 0])
+    m = tf.axisangle2matrix([0,0,1], supportToVesselCutAngle*np.pi/180)  # rotation around z-axis
+    supportToVesselCutCorner_pos = np.array([-supportToVesselLength/2, supportToVesselHeight/2 + supportToVesselCutHeightShift, 0])
+    supportToVessel = g4.solid.Subtraction(
+        name="supportToVessel",
+        obj1=supportToVessel0,
+        obj2=supportToVesselCut,
+        tra2=[[0, 0, supportToVesselCutAngle*np.pi/180], list( supportToVesselCutCorner_pos + m @ supportToVesselCutCornerToCentre)],
+        registry=reg
+    )
+
 
     vacuumCylinder = g4.solid.Tubs(
         name="vacuumCylinder",
@@ -693,6 +730,13 @@ def generate_fieldcage_assembly(name="fieldcage_assembly", registry=None):
     supportTopSideBeam_LV = g4.LogicalVolume(
         name="supportTopSideBeam_LV",
         solid=supportTopSideBeam,
+        material=teflon,
+        registry=reg
+    )
+
+    supportToVessel_LV = g4.LogicalVolume(
+        name="supportToVessel_LV",
+        solid=supportToVessel,
         material=teflon,
         registry=reg
     )
@@ -921,6 +965,23 @@ def generate_fieldcage_assembly(name="fieldcage_assembly", registry=None):
         rotation=[0, np.pi, 0],
         position=[-(-cornersSlotHeight/2+supportTopSideBeamLength/2), cornersLength/2+supportTopSideBeamWidth/2, -(sideSeparatorThickness/2 + cathodeSideFrameThickness + supportTopSideBeamThickness/2)],
         logicalVolume=supportTopSideBeam_LV,
+        motherVolume=fieldcage_assembly,
+        registry=reg
+    )
+
+    supportToVessel1_PV = g4.PhysicalVolume(
+        name="supportToVessel1_PV",
+        rotation=[0, 0, 0],
+        position=[-(supportToVesselDistanceBetweenThem/2+supportToVesselLength/2), -(supportCornersLength/2+supportToVesselHeight/2), 0],
+        logicalVolume=supportToVessel_LV,
+        motherVolume=fieldcage_assembly,
+        registry=reg
+    )
+    supportToVessel2_PV = g4.PhysicalVolume(
+        name="supportToVessel2_PV",
+        rotation=[0, np.pi, 0],
+        position=[supportToVesselDistanceBetweenThem/2+supportToVesselLength/2, -(supportCornersLength/2+supportToVesselHeight/2), 0],
+        logicalVolume=supportToVessel_LV,
         motherVolume=fieldcage_assembly,
         registry=reg
     )
