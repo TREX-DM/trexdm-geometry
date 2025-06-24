@@ -10,9 +10,9 @@ vesselLength = 530
 vesselThickness = 60
 
 calibrationHoleRadius = 20
-
-calibrationHolePos1 = [vesselRadius+0.5*vesselThickness, 0, 80]
-calibrationHolePos2 = [vesselRadius+0.5*vesselThickness, 0, -80] # x = vesselRadius+0.5*vesselThickness, why not ???
+calibrationHoleZpos = 80 # z position of the calibration holes, positive and negative
+calibrationHolePos1 = [vesselRadius+0.5*vesselThickness, 0, calibrationHoleZpos]
+calibrationHolePos2 = [vesselRadius+0.5*vesselThickness, 0, -calibrationHoleZpos] # x = vesselRadius+0.5*vesselThickness, why not ???
 
 calibrationShieldingRadius = 25
 calibrationShieldingLength = 30
@@ -22,9 +22,8 @@ calibrationShieldingCutHeight = 24
 calibrationShieldingCutThickness = 3
 calibrationShieldingCutSeparation = 22
 
-calibrationShieldingPosX = 158.5
-calibrationShieldingShift = 7.3
-calibrationShieldingPosZ = 95.5
+calibrationShieldingOpenShiftY = -9.15 # shift in y direction of the open shielding, to avoid the calibration hole
+calibrationShieldingOpenShiftZ = -15.68 # shift in z direction of the open shielding, to avoid the calibration hole
 
 calibrationExternalTapLength = 10
 calibrationExternalTapRadius = 40
@@ -32,7 +31,7 @@ calibrationExternalTapRadius = 40
 calibrationInternalTapLength = 5
 calibrationInternalTapRadius = 25
 
-def generate_vessel_assembly(name="vessel_assembly", registry=None):
+def generate_vessel_assembly(name="vessel_assembly", registry=None, left_calibration_is_open=True, right_calibration_is_open=False):
     """
     Generates the vessel geometry for the TREX-DM detector.
     Returns a Geant4 Registry containing the vessel geometry.
@@ -118,28 +117,28 @@ def generate_vessel_assembly(name="vessel_assembly", registry=None):
         name = "copperVesselSolid_LE",
         obj1 = copperVesselSolid,
         obj2 = calibrationExternalTap,
-        tra2 =[[0, 90*3.1416/180, 0], [vesselRadius + vesselThickness + 0.5*calibrationExternalTapLength - 2, 0, +80]],
+        tra2 =[[0, 90*np.pi/180, 0], [vesselRadius + vesselThickness + 0.5*calibrationExternalTapLength - 2, 0, +calibrationHoleZpos]],
         registry=reg
     )
     copperVesselSolid_LERE = g4.solid.Union(
         name = "copperVesselSolid_LERE",
         obj1 = copperVesselSolid_LE,
         obj2 = calibrationExternalTap,
-        tra2 = [[0, 90*3.1416/180, 0], [vesselRadius + vesselThickness + 0.5*calibrationExternalTapLength - 2, 0, -80]],
+        tra2 = [[0, 90*np.pi/180, 0], [vesselRadius + vesselThickness + 0.5*calibrationExternalTapLength - 2, 0, -calibrationHoleZpos]],
         registry=reg
     )
     copperVesselSolid_LERE_LI = g4.solid.Union(
         name = "copperVesselSolid_LERE_LI",
         obj1 = copperVesselSolid_LERE,
         obj2 = calibrationInternalTap,
-        tra2 = [[0, 90*3.1416/180, 0], [vesselRadius - 0.5*calibrationInternalTapLength, 0, +80]],
+        tra2 = [[0, 90*np.pi/180, 0], [vesselRadius - 0.5*calibrationInternalTapLength, 0, +calibrationHoleZpos]],
         registry=reg
     )
     copperVesselSolid_LERE_LIRI = g4.solid.Union(
         name = "copperVesselSolid_LERE_LIRI",
         obj1 = copperVesselSolid_LERE_LI,
         obj2 = calibrationInternalTap,
-        tra2 = [[0, 90*3.1416/180, 0], [vesselRadius - 0.5*calibrationInternalTapLength, 0, -80]],
+        tra2 = [[0, 90*np.pi/180, 0], [vesselRadius - 0.5*calibrationInternalTapLength, 0, -calibrationHoleZpos]],
         registry=reg
     )
 
@@ -178,8 +177,8 @@ def generate_vessel_assembly(name="vessel_assembly", registry=None):
 
 
     # create the two solids for the calibration shielding (even if they are the same) because I cannot rotate them with two different angles correctly afterwards...
-    rot_close = [0, 0, -66.6*3.1416/180]
-    rot_open = [0, 0, 6.59*3.1416/180]
+    rot_close = [0, 0, -66.6*np.pi/180]
+    rot_open = [0, 0, 6.59*np.pi/180]
     cutbox_relpos_unrotated = [calibrationShieldingCutSeparation+0.5*calibrationShieldingCutThickness,0, -0.5*calibrationShieldingLength] #-0.5*calibrationShieldingLength is to cut only half of the cilinder
     calibrationShieldingCloseSolid = g4.solid.Subtraction(
         name = "calibrationShieldingCloseSolid",
@@ -197,19 +196,30 @@ def generate_vessel_assembly(name="vessel_assembly", registry=None):
     )
 
 
-
+    shiftY = 0
+    shiftZ = 0
+    if left_calibration_is_open:
+        shiftY = calibrationShieldingOpenShiftY
+        shiftZ = calibrationShieldingOpenShiftZ
     vesselSolid_2 = g4.solid.Union(
         name = "vesselSolid_2",
         obj1 = copperVesselSolid_LERE_LIRI,
         obj2 = calibrationShieldingOpenSolid,
-        tra2 = [[0,-90*3.1416/180,0], [vesselRadius-5-0.5*calibrationShieldingCutLength, -9.15, 80-15.68] ],
+        tra2 = [[0,-90*np.pi/180,0], [vesselRadius-calibrationInternalTapLength - 0.5*calibrationShieldingCutLength, shiftY, calibrationHoleZpos + shiftZ] ],
         registry=reg
     )
+    
+    if right_calibration_is_open:
+        shiftY = calibrationShieldingOpenShiftY
+        shiftZ = calibrationShieldingOpenShiftZ
+    else:
+        shiftY = 0
+        shiftZ = 0  
     vesselSolid = g4.solid.Union(
         name = "vesselSolid",
         obj1 = vesselSolid_2,
         obj2 = calibrationShieldingCloseSolid,
-        tra2 = [[0,-90*3.1416/180,0], [vesselRadius-5-0.5*calibrationShieldingCutLength, 0, -80]],
+        tra2 = [[0,-90*np.pi/180,0], [vesselRadius-calibrationInternalTapLength - 0.5*calibrationShieldingCutLength, shiftY, -calibrationHoleZpos + shiftZ] ],
         registry=reg
     )
 
