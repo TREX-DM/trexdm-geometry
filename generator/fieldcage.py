@@ -123,8 +123,8 @@ def generate_fieldcage_assembly(name="fieldcage_assembly", registry=None):
         reg = registry
 
     # Materials
+    """
     # Use this for the pyg4ometry coloured material visualisation
-    
     copper = g4.MaterialPredefined("G4_Cu")
     teflon = g4.MaterialPredefined("G4_TEFLON")
     kapton = g4.MaterialPredefined("G4_KAPTON")
@@ -133,7 +133,7 @@ def generate_fieldcage_assembly(name="fieldcage_assembly", registry=None):
     copper = g4.nist_material_2geant4Material("G4_Cu")
     teflon = g4.nist_material_2geant4Material("G4_TEFLON")
     kapton = g4.nist_material_2geant4Material("G4_KAPTON")
-    """
+
     # Creathe the cathode
     cathodeFoilCu = g4.solid.Box(
         name="cathodeFoilCu",
