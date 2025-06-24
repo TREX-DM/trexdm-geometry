@@ -3,10 +3,10 @@ import pyg4ometry
 from pyg4ometry import geant4 as g4
 import numpy as np
 
-mMBaseSquareLength = 324.0 # 324 mm is the full length, so half is 162 mm
-mMBBaseCornerRadius = 187.0 # 187 mm is the radius of the corners
+mMBaseLength = 324.0 # 324 mm is the full length, so half is 162 mm
+mMBaseRadius = 187.0 # 187 mm is the radius of the corners
 mMBaseThickness = 4.0 # 4 mm is the thickness of the base
-mMBaseRecessSquareLength = 180.0 # mm
+mMBaseRecessLength = 180.0 # mm
 mMBaseRecessThickness = 2.5 # mm
 
 mMBaseBracketLength = 210 # mm 
@@ -21,36 +21,36 @@ mMTeflonSpacerPadThickness = 4.2 *2 # mm. In the CAD it is 4.2 mm, but in the re
 mMTriangularSupportThickness = 15 # mm
 mMTriangularSupportSquareLength = 40 # mm
 
-mMTapSeparatorBaseLength = 90 # mm
-mMTapSeparatorBaseHeight = 37 # mm
-mMTapSeparatorBaseThickness = 10 # mm
+capSupportBaseLength = 90 # mm
+capSupportBaseHeight = 37 # mm
+capSupportBaseThickness = 10 # mm
 
-mMTapSeparatorBaseCutLength = 28 # mm
-mMTapSeparatorBaseCutHeight = 15 # mm
+capSupportBaseCutLength = 28 # mm
+capSupportBaseCutHeight = 15 # mm
 
 
-mMTapSeparatorColumnHeightA = 45# mm
-mMTapSeparatorColumnHeightB = 57.2 # mm
-mMTapSeparatorColumnHeightC = 3 # mm
+capSupportColumnHeightA = 45# mm
+capSupportColumnHeightB = 57.2 # mm
+capSupportColumnHeightC = 3 # mm
 
-mMTapSeparatorColumnLengthA = 34 # mm
-mMTapSeparatorColumnLengthB = 18 # mm
-mMTapSeparatorColumnLengthC = 12 # mm. this is a diameter in reality
+capSupportColumnLengthA = 34 # mm
+capSupportColumnLengthB = 18 # mm
+capSupportColumnLengthC = 12 # mm. this is a diameter in reality
 
-mMTapSeparatorColumnThicknessA = 15 # mm
-mMTapSeparatorColumnThicknessB = 12
-mMTapSeparatorColumnThicknessC = mMTapSeparatorColumnLengthC # mm. this is a diameter in reality
+capSupportColumnThicknessA = 15 # mm
+capSupportColumnThicknessB = 12
+capSupportColumnThicknessC = capSupportColumnLengthC # mm. this is a diameter in reality
 
-mMTapSeparatorColumnProtrusionAtoB = 2.5 # mm
-mMTapSeparatorColumnBtoBase = -1 # mm. In the CAD it is -1 mm, but it is adjustable in real life. Negative means that the column B starts below the base, positive means that it starts above the base.
+capSupportColumnProtrusionAtoB = 2.5 # mm
+capSupportColumnBtoBase = -1 # mm. In the CAD it is -1 mm, but it is adjustable in real life. Negative means that the column B starts below the base, positive means that it starts above the base.
 
-mMTapSeparatorColumnCtoTriangularSupport = 5.45 + 5.05 # mm. 5.05mm should be the columnCradius (6mm) but the hole of the triangular support is smaller (5.05mm radius) in the CAD
+capSupportColumnCtoTriangularSupport = 5.45 + 5.05 # mm. 5.05mm should be the columnCradius (6mm) but the hole of the triangular support is smaller (5.05mm radius) in the CAD
 
 rollerCylinderRadius = 5.0 # mm
 rollerCylinderLength = 164.0 # mm
 rollerCutShift = 1.0 # mm, this is the shift of the cut to avoid the cylinder to be cut in the middle
 
-mMTapSeparatorFinalHeight = mMTapSeparatorBaseThickness + mMTapSeparatorColumnHeightB + mMTapSeparatorColumnBtoBase + mMTapSeparatorColumnHeightC + mMTriangularSupportThickness
+capSupportFinalHeight = capSupportBaseThickness + capSupportColumnHeightB + capSupportColumnBtoBase + capSupportColumnHeightC + mMTriangularSupportThickness
 
 def generate_micromegas_assembly(name="micromegas_assembly", registry=None, is_right_side=True):
     """
@@ -78,7 +78,6 @@ def generate_micromegas_assembly(name="micromegas_assembly", registry=None, is_r
     copper = g4.nist_material_2geant4Material("G4_Cu")
     teflon = g4.nist_material_2geant4Material("G4_TEFLON")
     kapton = g4.nist_material_2geant4Material("G4_KAPTON")
-    
 
     ### Micromegas base
     mMBaseBracket = g4.solid.Box(
@@ -92,8 +91,8 @@ def generate_micromegas_assembly(name="micromegas_assembly", registry=None, is_r
 
     mMBaseSquare0 = g4.solid.Box(
         name="mMBaseSquare0",
-        pX=mMBaseSquareLength,
-        pY=mMBaseSquareLength,
+        pX=mMBaseLength,
+        pY=mMBaseLength,
         pZ=mMBaseThickness,
         lunit="mm",
         registry=reg
@@ -102,7 +101,7 @@ def generate_micromegas_assembly(name="micromegas_assembly", registry=None, is_r
     mMBaseCornersCut = g4.solid.Tubs(
         name="mMBaseCornersCut",
         pRMin=0,
-        pRMax=mMBBaseCornerRadius,
+        pRMax=mMBaseRadius,
         pDz=mMBaseThickness,
         pSPhi=0,
         pDPhi=360,
@@ -123,35 +122,35 @@ def generate_micromegas_assembly(name="micromegas_assembly", registry=None, is_r
         name="mMBaseSquare1",
         obj1=mMBaseSquareCutted,
         obj2=mMBaseBracket,
-        tra2=[[0, 0, 0], [0, mMBaseSquareLength/2 - mMBaseBracketWidth/2 - mMBaseEndToBracketDistance, -(mMBaseThickness/2 + mMBaseBracketThickness/2)]],
+        tra2=[[0, 0, 0], [0, mMBaseLength/2 - mMBaseBracketWidth/2 - mMBaseEndToBracketDistance, -(mMBaseThickness/2 + mMBaseBracketThickness/2)]],
         registry=reg
     )
     mMBaseSquare2 = g4.solid.Union(
         name="mMBaseSquare2",
         obj1=mMBaseSquare1,
         obj2=mMBaseBracket,
-        tra2=[[0, 0, 0], [0, -(mMBaseSquareLength/2 - mMBaseBracketWidth/2 - mMBaseEndToBracketDistance), -(mMBaseThickness/2 + mMBaseBracketThickness/2)]],
+        tra2=[[0, 0, 0], [0, -(mMBaseLength/2 - mMBaseBracketWidth/2 - mMBaseEndToBracketDistance), -(mMBaseThickness/2 + mMBaseBracketThickness/2)]],
         registry=reg
     )
     mMBaseSquare3 = g4.solid.Union(
         name="mMBaseSquare3",
         obj1=mMBaseSquare2,
         obj2=mMBaseBracket,
-        tra2=[[0, 0, 90*3.1416/180], [mMBaseSquareLength/2 - mMBaseBracketWidth/2 - mMBaseEndToBracketDistance, 0, -(mMBaseThickness/2 + mMBaseBracketThickness/2)]],
+        tra2=[[0, 0, 90*3.1416/180], [mMBaseLength/2 - mMBaseBracketWidth/2 - mMBaseEndToBracketDistance, 0, -(mMBaseThickness/2 + mMBaseBracketThickness/2)]],
         registry=reg
     )
     mMBaseSquare = g4.solid.Union(
         name="mMBaseSquare",
         obj1=mMBaseSquare3,
         obj2=mMBaseBracket,
-        tra2=[[0, 0, 90*3.1416/180], [-(mMBaseSquareLength/2 - mMBaseBracketWidth/2 - mMBaseEndToBracketDistance), 0, -(mMBaseThickness/2 + mMBaseBracketThickness/2)]],
+        tra2=[[0, 0, 90*3.1416/180], [-(mMBaseLength/2 - mMBaseBracketWidth/2 - mMBaseEndToBracketDistance), 0, -(mMBaseThickness/2 + mMBaseBracketThickness/2)]],
         registry=reg
     )
 
     mMBaseRecessSquare = g4.solid.Box(
         name="mMBaseRecessSquare",
-        pX=mMBaseRecessSquareLength,
-        pY=mMBaseRecessSquareLength,
+        pX=mMBaseRecessLength,
+        pY=mMBaseRecessLength,
         pZ=mMBaseRecessThickness,
         lunit="mm",
         registry=reg
@@ -176,7 +175,7 @@ def generate_micromegas_assembly(name="micromegas_assembly", registry=None, is_r
         registry=reg
     )
 
-    ### Micromegas to tap separator (and support)
+    ### Micromegas to Cap separator (and support)
     mMTriangularSupportSquare = g4.solid.Box(
         name="mMTriangularSupportSquare",
         pX=mMTriangularSupportSquareLength,
@@ -201,52 +200,52 @@ def generate_micromegas_assembly(name="micromegas_assembly", registry=None, is_r
         registry=reg
     )
 
-    mMTapSeparatorBase0 = g4.solid.Box(
-        name="mMTapSeparatorBase0",
-        pX=mMTapSeparatorBaseLength,
-        pY=mMTapSeparatorBaseHeight,
-        pZ=mMTapSeparatorBaseThickness,
+    capSupportBase0 = g4.solid.Box(
+        name="capSupportBase0",
+        pX=capSupportBaseLength,
+        pY=capSupportBaseHeight,
+        pZ=capSupportBaseThickness,
         lunit="mm",
         registry=reg
     )
-    mMTapSeparatorBaseCut = g4.solid.Box(
-        name="mMTapSeparatorBaseCut",
-        pX=mMTapSeparatorBaseCutLength,
-        pY=mMTapSeparatorBaseCutHeight,
-        pZ=mMTapSeparatorBaseThickness,
+    capSupportBaseCut = g4.solid.Box(
+        name="capSupportBaseCut",
+        pX=capSupportBaseCutLength,
+        pY=capSupportBaseCutHeight,
+        pZ=capSupportBaseThickness,
         lunit="mm",
         registry=reg
     )
 
-    mMTapSeparatorBase = g4.solid.Subtraction(
-        name="mMTapSeparatorBase",
-        obj1=mMTapSeparatorBase0,
-        obj2=mMTapSeparatorBaseCut,
-        tra2=[[0, 0, 0], [0, mMTapSeparatorBaseHeight/2 - mMTapSeparatorBaseCutHeight/2, 0]],
+    capSupportBase = g4.solid.Subtraction(
+        name="capSupportBase",
+        obj1=capSupportBase0,
+        obj2=capSupportBaseCut,
+        tra2=[[0, 0, 0], [0, capSupportBaseHeight/2 - capSupportBaseCutHeight/2, 0]],
         registry=reg
     )
 
-    mMTapSeparatorColumnA = g4.solid.Box(
-        name="mMTapSeparatorColumnA",
-        pX=mMTapSeparatorColumnLengthA,
-        pY=mMTapSeparatorColumnThicknessA,
-        pZ=mMTapSeparatorColumnHeightA,
+    capSupportColumnA = g4.solid.Box(
+        name="capSupportColumnA",
+        pX=capSupportColumnLengthA,
+        pY=capSupportColumnThicknessA,
+        pZ=capSupportColumnHeightA,
         lunit="mm",
         registry=reg
     )
-    mMTapSeparatorColumnB = g4.solid.Box(
-        name="mMTapSeparatorColumnB",
-        pX=mMTapSeparatorColumnLengthB,
-        pY=mMTapSeparatorColumnThicknessB,
-        pZ=mMTapSeparatorColumnHeightB,
+    capSupportColumnB = g4.solid.Box(
+        name="capSupportColumnB",
+        pX=capSupportColumnLengthB,
+        pY=capSupportColumnThicknessB,
+        pZ=capSupportColumnHeightB,
         lunit="mm",
         registry=reg
     )
-    mMTapSeparatorColumnC = g4.solid.Tubs(
-        name="mMTapSeparatorColumnC",
+    capSupportColumnC = g4.solid.Tubs(
+        name="capSupportColumnC",
         pRMin=0,
-        pRMax=mMTapSeparatorColumnThicknessC/2,
-        pDz=mMTapSeparatorColumnHeightC,
+        pRMax=capSupportColumnThicknessC/2,
+        pDz=capSupportColumnHeightC,
         pSPhi=0,
         pDPhi=360,
         aunit="deg",
@@ -254,42 +253,42 @@ def generate_micromegas_assembly(name="micromegas_assembly", registry=None, is_r
         registry=reg
     )
 
-    mMTapSeparatorBaseA = g4.solid.Union(
-        name="mMTapSeparatorBaseA",
-        obj1=mMTapSeparatorBase,
-        obj2=mMTapSeparatorColumnA,
-        tra2=[[0, 0, 0], [0, -mMTapSeparatorBaseHeight/2 + mMTapSeparatorColumnThicknessA/2, mMTapSeparatorBaseThickness/2 +mMTapSeparatorColumnHeightA/2]],
+    capSupportBaseA = g4.solid.Union(
+        name="capSupportBaseA",
+        obj1=capSupportBase,
+        obj2=capSupportColumnA,
+        tra2=[[0, 0, 0], [0, -capSupportBaseHeight/2 + capSupportColumnThicknessA/2, capSupportBaseThickness/2 +capSupportColumnHeightA/2]],
         registry=reg
     )
 
-    mMTapSeparatorBaseACutted = g4.solid.Subtraction(
-        name="mMTapSeparatorBaseACutted",
-        obj1=mMTapSeparatorBaseA,
-        obj2=mMTapSeparatorColumnB,
-        tra2=[[0, 0, 0], [0, -mMTapSeparatorBaseHeight/2 + mMTapSeparatorColumnThicknessB/2 -mMTapSeparatorColumnProtrusionAtoB, -mMTapSeparatorBaseThickness/2 + mMTapSeparatorColumnHeightB/2]],
+    capSupportBaseACutted = g4.solid.Subtraction(
+        name="capSupportBaseACutted",
+        obj1=capSupportBaseA,
+        obj2=capSupportColumnB,
+        tra2=[[0, 0, 0], [0, -capSupportBaseHeight/2 + capSupportColumnThicknessB/2 -capSupportColumnProtrusionAtoB, -capSupportBaseThickness/2 + capSupportColumnHeightB/2]],
         registry=reg
     )
-    mMTapSeparatorColumnBC = g4.solid.Union(
-        name="mMTapSeparatorColumnBC",
-        obj1=mMTapSeparatorColumnB,
-        obj2=mMTapSeparatorColumnC,
-        tra2=[[0, 0, 0], [0, 0, mMTapSeparatorColumnHeightB/2 + mMTapSeparatorColumnHeightC/2]],
+    capSupportColumnBC = g4.solid.Union(
+        name="capSupportColumnBC",
+        obj1=capSupportColumnB,
+        obj2=capSupportColumnC,
+        tra2=[[0, 0, 0], [0, 0, capSupportColumnHeightB/2 + capSupportColumnHeightC/2]],
         registry=reg
     )
 
-    mMTapSeparatorBaseColumn = g4.solid.Union(
-        name="mMTapSeparatorBaseColumn",
-        obj1=mMTapSeparatorBaseACutted,
-        obj2=mMTapSeparatorColumnBC,
-        tra2=[[0, 0, 0], [0, -mMTapSeparatorBaseHeight/2 + mMTapSeparatorColumnThicknessB/2 - mMTapSeparatorColumnProtrusionAtoB, mMTapSeparatorBaseThickness/2 + mMTapSeparatorColumnHeightB/2 + mMTapSeparatorColumnBtoBase]],
+    capSupportBaseColumn = g4.solid.Union(
+        name="capSupportBaseColumn",
+        obj1=capSupportBaseACutted,
+        obj2=capSupportColumnBC,
+        tra2=[[0, 0, 0], [0, -capSupportBaseHeight/2 + capSupportColumnThicknessB/2 - capSupportColumnProtrusionAtoB, capSupportBaseThickness/2 + capSupportColumnHeightB/2 + capSupportColumnBtoBase]],
         registry=reg
     )
 
     mMSupport = g4.solid.Union(
         name="mMSupport",
-        obj1=mMTapSeparatorBaseColumn,
+        obj1=capSupportBaseColumn,
         obj2=mMTriangularSupport,
-        tra2=[[0, 0, -135*3.1416/180], [0, - mMTapSeparatorColumnCtoTriangularSupport - mMTapSeparatorBaseHeight/2 + mMTapSeparatorColumnThicknessB/2-mMTapSeparatorColumnProtrusionAtoB, mMTapSeparatorBaseThickness/2 + mMTapSeparatorColumnHeightB + mMTapSeparatorColumnHeightC + mMTapSeparatorColumnBtoBase + mMTriangularSupportThickness/2 ]],
+        tra2=[[0, 0, -135*3.1416/180], [0, - capSupportColumnCtoTriangularSupport - capSupportBaseHeight/2 + capSupportColumnThicknessB/2-capSupportColumnProtrusionAtoB, capSupportBaseThickness/2 + capSupportColumnHeightB + capSupportColumnHeightC + capSupportColumnBtoBase + mMTriangularSupportThickness/2 ]],
         registry=reg
     )
 
@@ -379,7 +378,7 @@ def generate_micromegas_assembly(name="micromegas_assembly", registry=None, is_r
         registry=reg
     )
 
-    teflonspacerpad_pos_xory = mMBaseSquareLength/2 - mMBaseBracketWidth/2 - mMBaseEndToBracketDistance
+    teflonspacerpad_pos_xory = mMBaseLength/2 - mMBaseBracketWidth/2 - mMBaseEndToBracketDistance
     teflonspacerpad_pos_z = mMBaseThickness/2 + mMBaseBracketThickness + mMTeflonSpacerPadThickness/2
     mMTeflonSpacerPad1_PV = g4.PhysicalVolume(
         rotation=[0, 0, 0],
@@ -452,7 +451,7 @@ def generate_micromegas_assembly(name="micromegas_assembly", registry=None, is_r
     ### Rollers. In the CAD design there are 4 (one on each side), but in the real life there are only 2
     mMBaseTeflonRoller1_PV = g4.PhysicalVolume(
         rotation=(np.array([90*3.1416/180, 0, 0]) + side_rot).tolist(),
-        position=[-mMBaseSquareLength/2, 0, side_z_dir*(mMBaseThickness/2 + rollerCutShift)],
+        position=[-mMBaseLength/2, 0, side_z_dir*(mMBaseThickness/2 + rollerCutShift)],
         name="mMBaseTeflonRoller1_PV",
         logicalVolume=roller_LV,
         motherVolume=micromegas_assembly,
@@ -460,7 +459,7 @@ def generate_micromegas_assembly(name="micromegas_assembly", registry=None, is_r
     )
     mMBaseTeflonRoller2_PV = g4.PhysicalVolume(
         rotation=(np.array([-90*3.1416/180, 0, np.pi]) + side_rot).tolist(),
-        position=[mMBaseSquareLength/2, 0, side_z_dir*(mMBaseThickness/2 + rollerCutShift)],
+        position=[mMBaseLength/2, 0, side_z_dir*(mMBaseThickness/2 + rollerCutShift)],
         name="mMBaseTeflonRoller2_PV",
         logicalVolume=roller_LV,
         motherVolume=micromegas_assembly,
@@ -470,7 +469,7 @@ def generate_micromegas_assembly(name="micromegas_assembly", registry=None, is_r
 
     ### Micromegas support
     mMSupportDistanceToCenter_XorY = 220.79/2 #mm
-    mMSupport_pos_z = mMBaseThickness/2 + mMTapSeparatorBaseThickness/2 + mMTapSeparatorColumnHeightB + mMTapSeparatorColumnHeightC + mMTapSeparatorColumnBtoBase + mMTriangularSupportThickness
+    mMSupport_pos_z = mMBaseThickness/2 + capSupportBaseThickness/2 + capSupportColumnHeightB + capSupportColumnHeightC + capSupportColumnBtoBase + mMTriangularSupportThickness
     mMSupport1_PV = g4.PhysicalVolume(
         rotation=(np.array([0, 0, side_z_dir*45*np.pi/180]) + side_rot).tolist(),  # 45 degrees rotation
         position=[-side_z_dir*mMSupportDistanceToCenter_XorY, side_z_dir*mMSupportDistanceToCenter_XorY, side_z_dir*mMSupport_pos_z],
@@ -487,7 +486,7 @@ def generate_micromegas_assembly(name="micromegas_assembly", registry=None, is_r
         motherVolume=micromegas_assembly,
         registry=reg
     )
-    #print("height of the support: ", mMSupport_pos_z-mMBaseThickness/2+mMTapSeparatorBaseThickness/2, " mm")
+    #print("height of the support: ", mMSupport_pos_z-mMBaseThickness/2+capSupportBaseThickness/2, " mm")
 
     return reg
 

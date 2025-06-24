@@ -7,9 +7,9 @@ gemKaptonFoilLength = 280.0 # mm
 gemKaptonFoilThickness = 0.05 # 50um
 gemKaptonFeedthroughLength = 15.81 # mm
 gemKaptonFeedthroughWidth = 12.0 # mm
+
 gemCopperFoilLength = 245.0 # mm
 gemCopperFoilThickness = 0.005 # 5um
-
 gemCopperFeedthroughLength = 22.41 # mm
 gemCopperFeedthroughWidth = 2 # mm
 gemCopperFeedthroughInnerRadius = 4.0 # mm
