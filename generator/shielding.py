@@ -14,13 +14,186 @@ outerGasSizeX  = copperCageOutSizeX - 2 * copperCageThickness
 outerGasSizeY  = copperCageOutSizeY - copperCageThickness
 outerGasSizeZ  = copperCageOutSizeZ - 2 * copperCageThickness
 
-leadSizeX = 200 + copperCageOutSizeX + 200
-leadSizeY = 200 + copperCageOutSizeY + copperTopThickness + 200
-leadSizeZ = 200 + copperCageOutSizeZ + 200
+leadThickness = 200
+leadSizeX = leadThickness*2 + copperCageOutSizeX
+leadSizeY = leadThickness + copperCageOutSizeY
+leadSizeZ = leadThickness*2 + copperCageOutSizeZ
+
+castleSizeX = leadSizeX
+castleSizeY = leadSizeY + copperTopThickness + leadThickness
+castleSizeZ = leadSizeZ
 
 copperTopSizeX  = leadSizeX
 copperTopSizeY  = copperCageThickness
 copperTopSizeZ  = leadSizeZ
+
+def generate_shielding_assembly_by_parts(name="shielding_assembly", registry=None):
+    # Registry
+    if registry is None:
+        reg = g4.Registry()
+    else:
+        reg = registry  
+
+    # Materials
+    
+    copper = g4.nist_material_2geant4Material("G4_Cu")
+    lead = g4.nist_material_2geant4Material("G4_Pb")
+    air = g4.nist_material_2geant4Material("G4_AIR")
+    """
+    copper = g4.MaterialPredefined("G4_Cu", reg)
+    lead = g4.MaterialPredefined("G4_Pb", reg)
+    air = g4.MaterialPredefined("G4_AIR", reg)
+    """
+
+    leadCage0 = g4.solid.Box(
+        name="leadCage0",
+        pX=leadSizeX,
+        pY=leadSizeY,
+        pZ=leadSizeZ,
+        lunit="mm",
+        registry=reg
+    )
+    
+    copperCage0 = g4.solid.Box(
+        name="copperCage0",
+        pX=copperCageOutSizeX,
+        pY=copperCageOutSizeY,
+        pZ=copperCageOutSizeZ,
+        lunit="mm",
+        registry=reg
+    )
+    
+    outerGasBox = g4.solid.Box(
+        name="outerGasBox",
+        pX=outerGasSizeX,
+        pY=outerGasSizeY,
+        pZ=outerGasSizeZ,
+        lunit="mm",
+        registry=reg
+    )
+
+    leadCage = g4.solid.Subtraction(
+        name="leadCage",
+        obj1=leadCage0,
+        obj2=copperCage0,
+        tra2=[[0, 0, 0], [0, -leadSizeY/2 + leadThickness + copperCageOutSizeY/2, 0]],
+        registry=reg
+    )
+    
+    copperCage = g4.solid.Subtraction(
+        name="copperCage",
+        obj1=copperCage0,
+        obj2=outerGasBox,
+        tra2=[[0, 0, 0], [0, copperCageOutSizeY/2 - outerGasSizeY/2, 0]],
+        registry=reg
+    )
+    
+    copperTop = g4.solid.Box(
+        name="copperTop",
+        pX=copperTopSizeX,
+        pY=copperTopSizeY,
+        pZ=copperTopSizeZ,
+        lunit="mm",
+        registry=reg
+    )
+    
+    leadTop = g4.solid.Box(
+        name="leadTop",
+        pX=leadSizeX,
+        pY=leadThickness,
+        pZ=leadSizeZ,
+        lunit="mm",
+        registry=reg
+    )
+    
+    shielding_assembly = g4.AssemblyVolume(
+        name=name,
+        registry=reg,
+        addRegistry=True
+    )
+    
+    leadCage_LV = g4.LogicalVolume(
+        name="leadCage_LV",
+        solid=leadCage,
+        material=lead,
+        registry=reg
+    )
+    
+    copperCage_LV = g4.LogicalVolume(
+        name="copperCage_LV",
+        solid=copperCage,
+        material=copper,
+        registry=reg
+    )
+    
+    outerGas_LV = g4.LogicalVolume(
+        name="outerGas_LV",
+        solid=outerGasBox,
+        material=air,
+        registry=reg
+    )
+    
+    copperTop_LV = g4.LogicalVolume(
+        name="copperTop_LV",
+        solid=copperTop,
+        material=copper,
+        registry=reg
+    )
+    
+    leadTop_LV = g4.LogicalVolume(
+        name="leadTop_LV",
+        solid=leadTop,
+        material=lead,
+        registry=reg
+    )
+    
+    # physical volumes
+    leadCage_PV = g4.PhysicalVolume(
+        name="leadCage_PV",
+        rotation=[0, 0, 0],
+        position=[0, -castleSizeY/2 + leadSizeY/2, 0],
+        logicalVolume=leadCage_LV,
+        motherVolume=shielding_assembly,
+        registry=reg
+    )
+    
+    copperCage_PV = g4.PhysicalVolume(
+        name="copperCage_PV",
+        rotation=[0, 0, 0],
+        position=[0, -castleSizeY/2 + leadThickness + copperCageOutSizeY/2, 0],
+        logicalVolume=copperCage_LV,
+        motherVolume=shielding_assembly,
+        registry=reg
+    )
+    
+    outerGas_PV = g4.PhysicalVolume(
+        name="outerGas_PV",
+        rotation=[0, 0, 0],
+        position=[0, castleSizeY/2 - leadThickness - copperTopThickness - outerGasSizeY/2, 0],
+        logicalVolume=outerGas_LV,
+        motherVolume=shielding_assembly,
+        registry=reg
+    )
+
+    copperTop_PV = g4.PhysicalVolume(
+        name="copperTop_PV",
+        rotation=[0, 0, 0],
+        position=[0, -castleSizeY/2 + leadThickness + copperCageOutSizeY + copperTopThickness/2, 0],
+        logicalVolume=copperTop_LV,
+        motherVolume=shielding_assembly,
+        registry=reg
+    )
+    
+    leadTop_PV = g4.PhysicalVolume(
+        name="leadTop_PV",
+        rotation=[0, 0, 0],
+        position=[0, castleSizeY/2 - leadThickness/2, 0],
+        logicalVolume=leadTop_LV,
+        motherVolume=shielding_assembly,
+        registry=reg
+    )
+
+    return reg
 
 def generate_shielding_assembly(name="shielding_assembly", registry=None):
     """
@@ -42,16 +215,16 @@ def generate_shielding_assembly(name="shielding_assembly", registry=None):
     air = g4.MaterialPredefined("G4_AIR", reg)
     """
 
-    copperCageOutSolid = g4.solid.Box(
-            "copperCageOutSolid",
+    copperCage = g4.solid.Box(
+            "copperCage",
             copperCageOutSizeX,
             copperCageOutSizeY,
             copperCageOutSizeZ,
             reg,
             "mm"
         )
-    outerGasSolid = g4.solid.Box(
-            "outerGasSolid",
+    outerGas = g4.solid.Box(
+            "outerGas",
             outerGasSizeX,
             outerGasSizeY,
             outerGasSizeZ,
@@ -59,19 +232,19 @@ def generate_shielding_assembly(name="shielding_assembly", registry=None):
             "mm"
         )
 
-    copperTopSolid = g4.solid.Box(
-        "copperTopSolid",
+    copperTop = g4.solid.Box(
+        "copperTop",
         copperTopSizeX,
         copperTopSizeY,
         copperTopSizeZ,
         reg,
         "mm"
     )
-    leadBoxSolid = g4.solid.Box(
-        "leadBoxSolid",
-        leadSizeX,
-        leadSizeY,
-        leadSizeZ,
+    castleBox = g4.solid.Box(
+        "castleBox",
+        castleSizeX,
+        castleSizeY,
+        castleSizeZ,
         reg,
         "mm"
     )
@@ -81,41 +254,41 @@ def generate_shielding_assembly(name="shielding_assembly", registry=None):
         registry=reg,
         addRegistry=True
     )
-    outerGasVolume = g4.LogicalVolume(outerGasSolid, air, "outerGasVolume", reg)
-    copperCageVolume = g4.LogicalVolume(copperCageOutSolid, copper, "copperCageVolume", reg)
-    copperTopVolume = g4.LogicalVolume(copperTopSolid, copper, "copperTopVolume", reg)
-    leadShieldingVolume = g4.LogicalVolume(leadBoxSolid, lead, "leadShieldingVolume", reg) 
-    
-    copperCagePhysical = g4.PhysicalVolume(
+    outerGas_LV = g4.LogicalVolume(outerGas, air, "outerGas_LV", reg)
+    copperCage_LV = g4.LogicalVolume(copperCage, copper, "copperCage_LV", reg)
+    copperTop_LV = g4.LogicalVolume(copperTop, copper, "copperTop_LV", reg)
+    leadShielding_LV = g4.LogicalVolume(castleBox, lead, "leadShielding_LV", reg)
+
+    copperCage_PV = g4.PhysicalVolume(
         rotation=[0,0,0],
         position=[0, copperCageThickness / 2, 0],
-        name="copperCagePV",
-        logicalVolume=copperCageVolume,
-        motherVolume=leadShieldingVolume,
+        name="copperCage_PV",
+        logicalVolume=copperCage_LV,
+        motherVolume=leadShielding_LV,
         registry=reg
     )
-    copperTopPhysical = g4.PhysicalVolume(
+    copperTop_PV = g4.PhysicalVolume(
         rotation=[0,0,0],
         position=[0, copperCageOutSizeY / 2 + copperCageThickness / 2 + copperTopThickness / 2, 0],
-        name="copperTopPV",
-        logicalVolume=copperTopVolume,
-        motherVolume=leadShieldingVolume,
+        name="copperTop_PV",
+        logicalVolume=copperTop_LV,
+        motherVolume=leadShielding_LV,
         registry=reg
     )
-    outerGasPhysical = g4.PhysicalVolume(
+    outerGas_PV = g4.PhysicalVolume(
         rotation=[0,0,0],
         position=[0, copperCageThickness / 2, 0],
-        name="outerGasPV",
-        logicalVolume=outerGasVolume,
-        motherVolume=copperCageVolume,
+        name="outerGas_PV",
+        logicalVolume=outerGas_LV,
+        motherVolume=copperCage_LV,
         registry=reg
     )
 
-    leadShieldingPV = g4.PhysicalVolume(
+    leadShielding_PV = g4.PhysicalVolume(
         rotation=[0,0,0],
         position=[0,0,0],
-        name="shielding",
-        logicalVolume=leadShieldingVolume,
+        name="leadShielding_PV",
+        logicalVolume=leadShielding_LV,
         motherVolume=shielding_assembly,
         registry=reg
     )

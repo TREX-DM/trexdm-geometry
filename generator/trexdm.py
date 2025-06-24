@@ -17,7 +17,7 @@ ws   = g4.solid.Box("ws",5,5,5,reg, "m")
 wl   = g4.LogicalVolume(ws, galactic,"wl",reg)
 
 # Generate the assemblies
-shielding.generate_shielding_assembly(registry=reg)
+shielding.generate_shielding_assembly_by_parts(registry=reg)
 vessel.generate_vessel_assembly(registry=reg)
 micromegas.generate_micromegas_assembly(registry=reg, is_right_side=True)
 gem.generate_gem_assembly(registry=reg, is_right_side=True)
@@ -30,7 +30,7 @@ gem_assembly = reg.findLogicalVolumeByName("gem_assembly")[0]
 fieldcage_assembly = reg.findLogicalVolumeByName("fieldcage_assembly")[0]
 
 # Find the logical volumes needed for mounting the assemblies together
-outerGas_LV = reg.findLogicalVolumeByName("outerGasVolume")[0]
+outerGas_LV = reg.findLogicalVolumeByName("outerGas_LV")[0]
 innerGas_LV = reg.findLogicalVolumeByName("gas_LV")[0]
 
 
