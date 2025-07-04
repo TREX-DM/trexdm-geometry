@@ -1,6 +1,7 @@
 import vtk
 import pyg4ometry
 from pyg4ometry import geant4 as g4
+from pyg4ometry import transformation as tf
 import numpy as np
 
 mMBaseLength = 324.0 # 324 mm is the full length, so half is 162 mm
@@ -51,6 +52,189 @@ rollerCylinderLength = 164.0 # mm
 rollerCutShift = 1.0 # mm, this is the shift of the cut to avoid the cylinder to be cut in the middle
 
 capSupportFinalHeight = capSupportBaseThickness + capSupportColumnHeightB + capSupportColumnBtoBase + capSupportColumnHeightC + mMTriangularSupportThickness
+
+
+mMLength = 250 # 25cm of active Micromegas area
+mMCopperFoilThickness = 0.017 # 17um
+mMKaptonFoilThickness = 0.05 # 50um. This is the amplification gap
+mMKaptonFoil2Thickness = 0.15 # 150um. This is the kapton foil that separates the channels Y from the ground plane (see Hector Mirallas Thesis)
+
+mMBoardLength = mMBaseLength
+mMBoardRadius = mMBaseRadius - 5 # it is a bit smaller than the base radius. 5mm less estimated by eye inspection of the pictures we have :)
+mMBoardThickness = mMCopperFoilThickness*4 + mMKaptonFoilThickness*2 + mMKaptonFoil2Thickness
+mMBoardFoldInnerRadius = mMBaseThickness/2 + mMBaseBracketThickness/2 + mMTeflonSpacerPadThickness/2 # TODO: change this to bigger value to match the position below the teflon spacer pad
+
+limandeBracketSideLength = mMBaseBracketLength
+limandeBracketSideWidth = 40 # mm. It is slightly wider than the bracket
+limandeThickness = 1 # mm
+
+limandeHalfTriangleHeight = 77.95
+
+limandeFoldDistance = 20
+limandeTrapezoidLength = 40.4
+limandeWidth = 60
+
+def generate_micromegas_board(name="mMBoard", suffix="", thickness_in_mm=1, registry=None):
+    # Registry
+    if registry is None:
+        reg = g4.Registry()
+    else:
+        reg = registry
+
+    boardThickness = thickness_in_mm
+
+    mMBoardSquare = g4.solid.Box(
+        name="mMBoardSquare" + suffix,
+        pX=mMBoardLength,
+        pY=mMBoardLength,
+        pZ=boardThickness,
+        lunit="mm",
+        registry=reg
+    )
+    mMBoardCornersCut = g4.solid.Tubs(
+        name="mMBoardCornersCut" + suffix,
+        pRMin=0,
+        pRMax=mMBoardRadius,
+        pDz=boardThickness,
+        pSPhi=0,
+        pDPhi=360,
+        aunit="deg",
+        lunit="mm",
+        registry=reg
+    )
+
+    mMBoard0 = g4.solid.Intersection(
+        name="mMBoard0" + suffix,
+        obj1=mMBoardSquare,
+        obj2=mMBoardCornersCut,
+        tra2=[[0, 0, 0], [0, 0, 0]],
+        registry=reg
+    )
+
+    mMBoardFold = g4.solid.Tubs(
+        name="mMBoardFold" + suffix,
+        pRMin=mMBoardFoldInnerRadius,
+        pRMax=mMBoardFoldInnerRadius + boardThickness,
+        pDz=rollerCylinderLength,
+        pSPhi=0,
+        pDPhi=180,
+        aunit="deg",
+        lunit="mm",
+        registry=reg
+    )
+
+    mMBoardConnectorWidth = mMBaseBracketWidth + mMBaseEndToBracketDistance
+    mMBoardConnectorBox = g4.solid.Box(
+        name="mMBoardConnectorBox" + suffix,
+        pX=mMBaseBracketLength,
+        pY=mMBoardConnectorWidth,
+        pZ=boardThickness,
+        lunit="mm",
+        registry=reg
+    )
+    
+    connector_hipotenuse = np.sqrt(mMBaseEndToBracketDistance**2+((mMBaseBracketLength-rollerCylinderLength)/2)**2)
+    connector_cut_angle = np.arcsin(mMBaseEndToBracketDistance / connector_hipotenuse)
+    connector_cut_rotation_matrix = tf.axisangle2matrix(
+        axis=[0, 0, 1],  # rotation around Z-axis
+        angle=connector_cut_angle
+    )
+    corner_pos = np.array([-mMBaseBracketLength/2, mMBoardConnectorWidth/2 - mMBaseEndToBracketDistance, 0]) 
+    cornerCut_pos = np.array([connector_hipotenuse/2, connector_hipotenuse/2, 0])
+    mMBoardConnectorCut = g4.solid.Box(
+        name="mMBoardConnectorCut" + suffix,
+        pX=connector_hipotenuse,
+        pY=connector_hipotenuse,
+        pZ=boardThickness + 0.01,
+        lunit="mm",
+        registry=reg
+    )
+    mMBoardConnector0 = g4.solid.Subtraction(
+        name="mMBoardConnector0" + suffix,
+        obj1=mMBoardConnectorBox,
+        obj2=mMBoardConnectorCut,
+        tra2=[[0, 0, connector_cut_angle], list(corner_pos + connector_cut_rotation_matrix @ cornerCut_pos)],
+        registry=reg
+    )
+    corner_pos = np.array([mMBaseBracketLength/2, mMBoardConnectorWidth/2 - mMBaseEndToBracketDistance, 0])
+    cornerCut_pos = np.array([-connector_hipotenuse/2, connector_hipotenuse/2, 0])
+    connector_cut_rotation_matrix = tf.axisangle2matrix(
+        axis=[0, 0, 1],  # rotation around Z-axis
+        angle=-connector_cut_angle
+    )
+    mMBoardConnector = g4.solid.Subtraction(
+        name="mMBoardConnector" + suffix,
+        obj1=mMBoardConnector0,
+        obj2=mMBoardConnectorCut,
+        tra2=[[0, 0, -connector_cut_angle], list(corner_pos + connector_cut_rotation_matrix @ cornerCut_pos)],
+        registry=reg
+    )
+
+    mMBoardWithFold1 = g4.solid.Union(
+        name="mMBoardWithFold1" + suffix,
+        obj1=mMBoard0,
+        obj2=mMBoardFold,
+        tra2=[[np.pi/2, -np.pi/2, 0], [-mMBoardLength/2, 0, -(mMBoardFoldInnerRadius+boardThickness/2)]],
+        registry=reg
+    )
+
+    mMBoardWithFold2 = g4.solid.Union(
+        name="mMBoardWithFold2" + suffix,
+        obj1=mMBoardWithFold1,
+        obj2=mMBoardFold,
+        tra2=[[np.pi/2, np.pi/2, 0], [mMBoardLength/2, 0, -(mMBoardFoldInnerRadius+boardThickness/2)]],
+        registry=reg
+    )
+
+    mMBoardWithFold3 = g4.solid.Union(
+        name="mMBoardWithFold3" + suffix,
+        obj1=mMBoardWithFold2,
+        obj2=mMBoardFold,
+        tra2=[[0, np.pi/2, np.pi], [0, -mMBoardLength/2, -(mMBoardFoldInnerRadius+boardThickness/2)]],
+        registry=reg
+    )
+
+    mMBoardWithFold = g4.solid.Union(
+        name="mMBoardWithFold" + suffix,
+        obj1=mMBoardWithFold3,
+        obj2=mMBoardFold,
+        tra2=[[0, np.pi/2, 0], [0, mMBoardLength/2, -(mMBoardFoldInnerRadius+boardThickness/2)]],
+        registry=reg
+    )
+
+    mMBoardWithFoldAndConnector0 = g4.solid.Union(
+        name="mMBoardWithFoldAndConnector0" + suffix,
+        obj1=mMBoardWithFold,
+        obj2=mMBoardConnector,
+        tra2=[[0, 0, 0], [0, mMBoardLength/2 - mMBoardConnectorWidth/2, -(mMBoardFoldInnerRadius*2+boardThickness)]],
+        registry=reg
+    )
+
+    mMBoardWithFoldAndConnector1 = g4.solid.Union(
+        name="mMBoardWithFoldAndConnector1" + suffix,
+        obj1=mMBoardWithFoldAndConnector0,
+        obj2=mMBoardConnector,
+        tra2=[[0, 0, np.pi], [0, -mMBoardLength/2 + mMBoardConnectorWidth/2, -(mMBoardFoldInnerRadius*2+boardThickness)]],
+        registry=reg
+    )
+
+    mMBoardWithFoldAndConnector2 = g4.solid.Union(
+        name="mMBoardWithFoldAndConnector2" + suffix,
+        obj1=mMBoardWithFoldAndConnector1,
+        obj2=mMBoardConnector,
+        tra2=[[0, 0, -np.pi/2], [mMBoardLength/2 - mMBoardConnectorWidth/2, 0, -(mMBoardFoldInnerRadius*2+boardThickness)]],
+        registry=reg
+    )
+
+    mMBoard = g4.solid.Union(
+        name=name,
+        obj1=mMBoardWithFoldAndConnector2,
+        obj2=mMBoardConnector,
+        tra2=[[0, 0, np.pi/2], [-mMBoardLength/2 + mMBoardConnectorWidth/2, 0, -(mMBoardFoldInnerRadius*2+boardThickness)]],
+        registry=reg
+    )
+
+    return reg
 
 def generate_micromegas_assembly(name="micromegas_assembly", registry=None, is_right_side=True):
     """
@@ -322,6 +506,177 @@ def generate_micromegas_assembly(name="micromegas_assembly", registry=None, is_r
         registry=reg
     )
 
+
+    mMCopperFoil = g4.solid.Box(
+        name="mMCopperFoil",
+        pX=mMLength,
+        pY=mMLength,
+        pZ=mMCopperFoilThickness,
+        lunit="mm",
+        registry=reg
+    )
+
+    mMKaptonFoil = g4.solid.Box(
+        name="mMKaptonFoil",
+        pX=mMLength,
+        pY=mMLength,
+        pZ=mMKaptonFoilThickness,
+        lunit="mm",
+        registry=reg
+    )
+
+    mMKaptonFoil2 = g4.solid.Box(
+        name="mMKaptonFoil2",
+        pX=mMLength,
+        pY=mMLength,
+        pZ=mMKaptonFoil2Thickness,
+        lunit="mm",
+        registry=reg
+    )
+
+    # micromegas board will be a sandwich of kapton between copper foils of thickness mMCopperFoilThickness. On the active area we include the other copper foils
+    generate_micromegas_board(name="mMBoardCopper", suffix="Copper", thickness_in_mm=mMBoardThickness, registry=reg)
+    generate_micromegas_board(name="mMBoardKapton", suffix="Kapton", thickness_in_mm=mMBoardThickness - mMCopperFoilThickness*2, registry=reg)
+    mMBoardCopper = reg.findSolidByName("mMBoardCopper")[0]
+    mMBoardKapton = reg.findSolidByName("mMBoardKapton")[0]
+
+    """
+    v = pyg4ometry.visualisation.VtkViewer()
+    v.addBooleanSolidRecursive(mMBoardCopper)
+    v.addAxes(150)
+    v.view()
+    """
+
+    limandeBracketSide = g4.solid.Box(
+        name="limandeBracketSide",
+        pX=limandeBracketSideLength,
+        pY=limandeBracketSideWidth,
+        pZ=limandeThickness,
+        lunit="mm",
+        registry=reg
+    )
+
+    limandeHalfTriangleBox = g4.solid.Box(
+        name="limandeHalfTriangleBox",
+        pX=limandeBracketSideLength/2,
+        pY=limandeHalfTriangleHeight,
+        pZ=limandeThickness,
+        lunit="mm",
+        registry=reg
+    )
+
+    limandeHipotenuse = np.sqrt(limandeHalfTriangleHeight**2 + (limandeBracketSideLength/2)**2)  # sqrt(2) * height
+    limandeHalfTriangleCut = g4.solid.Box(
+        name="limandeHalfTriangleCut",
+        pX=limandeHipotenuse,
+        pY=limandeHalfTriangleHeight,
+        pZ=limandeThickness,
+        lunit="mm",
+        registry=reg
+    )
+
+    rotation_angle = np.arcsin(limandeHalfTriangleHeight/limandeHipotenuse)#np.arctan2(limandeHalfTriangleHeight, limandeBracketSideLength/2)  # angle in radians
+    rotation_matrix = tf.axisangle2matrix(
+        axis=[0, 0, 1],  # rotation around Z-axis
+        angle=-rotation_angle
+    )
+    corner_pos = np.array([-limandeBracketSideLength/4, limandeHalfTriangleHeight/2, 0])
+    cornerCut_pos = np.array([limandeHipotenuse/2, limandeHalfTriangleHeight/2, 0])
+    limandeHalfTriangle = g4.solid.Subtraction(
+        name="limandeHalfTriangle",
+        obj1=limandeHalfTriangleBox,
+        obj2=limandeHalfTriangleCut,
+        tra2=[[0, 0, -rotation_angle], list(corner_pos + rotation_matrix @ cornerCut_pos)],
+        registry=reg
+    )
+
+    limandeBase0 = g4.solid.Union(
+        name="limandeBase0",
+        obj1=limandeBracketSide,
+        obj2=limandeHalfTriangle,
+        tra2=[[0, 0, 0], [limandeBracketSideLength/4, limandeBracketSideWidth/2 + limandeHalfTriangleHeight/2, 0]],
+        registry=reg
+    )
+    limandeBase = g4.solid.Union(
+        name="limandeBase",
+        obj1=limandeBase0,
+        obj2=limandeHalfTriangle,
+        tra2=[[0, np.pi, 0], [-limandeBracketSideLength/4, +limandeBracketSideWidth/2 + limandeHalfTriangleHeight/2, 0]],
+        registry=reg
+    )
+
+    limandeFold = g4.solid.Box(
+        name="limandeFold",
+        pX=limandeHipotenuse,
+        pY=limandeThickness,
+        pZ=limandeFoldDistance,
+        lunit="mm",
+        registry=reg
+    )
+
+    triangle_hipotenuse_pos = np.array([-limandeBracketSideLength/4, limandeBracketSideWidth/2 + limandeHalfTriangleHeight/2, limandeThickness/2 + limandeFoldDistance/2])
+    fold_thickness_pos = np.array([0, -limandeThickness/2, 0])
+    rotation_matrix = tf.axisangle2matrix(
+        axis=[0, 0, 1],  # rotation around Z-axis
+        angle=+rotation_angle
+    )
+    limandeBaseAndFold = g4.solid.Union(
+        name="limandeBaseAndFold",
+        obj1=limandeBase,
+        obj2=limandeFold,
+        tra2=[[0, 0, rotation_angle], list(triangle_hipotenuse_pos + rotation_matrix @ fold_thickness_pos)],
+        registry=reg
+    )
+
+    limandeTrapezoidBox = g4.solid.Box(
+        name="limandeTrapezoidBox",
+        pX=limandeHipotenuse,
+        pY=limandeTrapezoidLength,
+        pZ=limandeThickness,
+        lunit="mm",
+        registry=reg
+    )
+
+    limandeTrapezoidCutHipotenuse = np.sqrt((limandeHipotenuse-limandeWidth)**2 + limandeTrapezoidLength**2)  # sqrt(2) * height
+    limandeTrapezoidCut = g4.solid.Box(
+        name="limandeTrapezoidCut",
+        pX=limandeHipotenuse, # whatever but it needs to be big enough to do the cut
+        pY=limandeTrapezoidCutHipotenuse,
+        pZ=limandeThickness,
+        lunit="mm",
+        registry=reg
+    )
+    rotation_angle_2 = np.arccos(limandeTrapezoidLength/limandeTrapezoidCutHipotenuse)
+    rotation_matrix_2 = tf.axisangle2matrix(
+        axis=[0, 0, 1],  # rotation around Z-axis
+        angle=rotation_angle_2
+    )
+    corner_pos = np.array([-limandeHipotenuse/2, +limandeTrapezoidLength/2, 0])
+    cornerCut_pos = np.array([-limandeHipotenuse/2, -limandeTrapezoidCutHipotenuse/2, 0])
+
+    limandeTrapezoid = g4.solid.Subtraction(
+        name="limandeTrapezoid",
+        obj1=limandeTrapezoidBox,
+        obj2=limandeTrapezoidCut,
+        tra2=[[0, 0, rotation_angle_2], list(corner_pos + rotation_matrix_2 @ cornerCut_pos)],
+        registry=reg
+    )
+
+    triangle_hipotenuse_pos = np.array([-limandeBracketSideLength/4, limandeBracketSideWidth/2 + limandeHalfTriangleHeight/2, limandeThickness + limandeFoldDistance])
+    trapezoid_long_side_pos = -np.array([0, limandeTrapezoidLength/2, 0])
+    rotation_matrix = tf.axisangle2matrix(
+        axis=[0, 0, 1],  # rotation around Z-axis
+        angle=+rotation_angle
+    )
+    limandeBaseFoldTrapezoid = g4.solid.Union(
+        name="limandeBaseFoldTrapezoid",
+        obj1=limandeBaseAndFold,
+        obj2=limandeTrapezoid,
+        tra2=[[0, 0, rotation_angle], list(triangle_hipotenuse_pos + rotation_matrix @ trapezoid_long_side_pos)],
+        registry=reg
+    )
+
+
     ### JOIN THE SOLIDS INTO THE ASSEMBLY
     micromegas_assembly = g4.AssemblyVolume(
         name=name,
@@ -360,6 +715,39 @@ def generate_micromegas_assembly(name="micromegas_assembly", registry=None, is_r
         name="roller_LV",
         registry=reg
     )
+
+    mMBoardCopper_LV = g4.LogicalVolume(
+        solid=mMBoardCopper,
+        material=copper,
+        name="mMBoardCopper_LV",
+        registry=reg
+    )
+    mMBoardKapton_LV = g4.LogicalVolume(
+        solid=mMBoardKapton,
+        material=kapton,
+        name="mMBoardKapton_LV",
+        registry=reg
+    )
+
+    mMCopperFoil_LV = g4.LogicalVolume(
+        solid=mMCopperFoil,
+        material=copper,
+        name="mMCopperFoil_LV",
+        registry=reg
+    )
+    mMKaptonFoil_LV = g4.LogicalVolume(
+        solid=mMKaptonFoil,
+        material=kapton,
+        name="mMKaptonFoil_LV",
+        registry=reg
+    )
+    mMKaptonFoil2_LV = g4.LogicalVolume(
+        solid=mMKaptonFoil2,
+        material=kapton,
+        name="mMKaptonFoil2_LV",
+        registry=reg
+    )
+
 
     # Create the physical volumes and add them to the assembly
     side_rot = np.array([0, 0, 0])
@@ -414,7 +802,7 @@ def generate_micromegas_assembly(name="micromegas_assembly", registry=None, is_r
     )
 
     closingbracket_pos_xory = teflonspacerpad_pos_xory
-    closingbracket_pos_z = teflonspacerpad_pos_z + mMTeflonSpacerPadThickness/2 + mMBaseBracketThickness/2 + 0 # that 0 should be the thickness of the (double) limandes
+    closingbracket_pos_z = teflonspacerpad_pos_z + mMTeflonSpacerPadThickness/2 + mMBaseBracketThickness/2 + mMBoardThickness + limandeThickness
 
     mMBaseClosingBracket1_PV = g4.PhysicalVolume(
         rotation=[0, 0, 0],
@@ -487,6 +875,41 @@ def generate_micromegas_assembly(name="micromegas_assembly", registry=None, is_r
         registry=reg
     )
     #print("height of the support: ", mMSupport_pos_z-mMBaseThickness/2+capSupportBaseThickness/2, " mm")
+
+    mMCopperFoilLayer2_PV = g4.PhysicalVolume(
+        rotation=[0, 0, 0],
+        position=[0, 0, mMBoardThickness/2 - mMKaptonFoilThickness - mMCopperFoilThickness -mMKaptonFoilThickness - mMCopperFoilThickness/2],
+        name="mMCopperFoilLayer2_PV",
+        logicalVolume=mMCopperFoil_LV,
+        motherVolume=mMBoardKapton_LV,
+        registry=reg
+    )
+    mMCopperFoilLayer3_PV = g4.PhysicalVolume(
+        rotation=[0, 0, 0],
+        position=[0, 0, mMBoardThickness/2 - mMKaptonFoilThickness - mMCopperFoilThickness*2 - mMKaptonFoilThickness*2 - mMCopperFoilThickness/2],
+        name="mMCopperFoilLayer3_PV",
+        logicalVolume=mMCopperFoil_LV,
+        motherVolume=mMBoardKapton_LV,
+        registry=reg
+    )
+
+    mMBoardKapton_PV = g4.PhysicalVolume(
+        rotation=[0, 0, 0],
+        position=[0, 0, 0],
+        name="mMBoardKapton_PV",
+        logicalVolume=mMBoardKapton_LV,
+        motherVolume=mMBoardCopper_LV,
+        registry=reg
+    )
+
+    mMBoardCopper_PV = g4.PhysicalVolume(
+        rotation=side_rot.tolist(),
+        position=[0, 0, -side_z_dir*(mMBaseThickness/2 + mMBoardThickness/2)],
+        name="mMBoardCopper_PV",
+        logicalVolume=mMBoardCopper_LV,
+        motherVolume=micromegas_assembly,
+        registry=reg
+    )
 
     return reg
 
