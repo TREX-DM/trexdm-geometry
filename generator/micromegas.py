@@ -62,7 +62,7 @@ mMKaptonFoil2Thickness = 0.15 # 150um. This is the kapton foil that separates th
 mMBoardLength = mMBaseLength
 mMBoardRadius = mMBaseRadius - 5 # it is a bit smaller than the base radius. 5mm less estimated by eye inspection of the pictures we have :)
 mMBoardThickness = mMCopperFoilThickness*4 + mMKaptonFoilThickness*2 + mMKaptonFoil2Thickness
-mMBoardFoldInnerRadius = mMBaseThickness/2 + mMBaseBracketThickness/2 + mMTeflonSpacerPadThickness/2 # TODO: change this to bigger value to match the position below the teflon spacer pad
+mMBoardFoldInnerRadius = mMBaseThickness/2 + mMBaseBracketThickness/2 + mMTeflonSpacerPadThickness/2
 
 limandeBracketSideLength = mMBaseBracketLength
 limandeBracketSideWidth = 40 # mm. It is slightly wider than the bracket
@@ -73,9 +73,22 @@ limandeHalfTriangleHeight = 77.95
 limandeFoldDistance = 20
 limandeTrapezoidLength = 40.4
 limandeWidth = 60
-limandeStraightLength = capSupportFinalHeight + mMBaseThickness/2 - mMBaseBracketThickness - mMTeflonSpacerPadThickness - mMBoardThickness - limandeThickness*2 - limandeFoldDistance # up to the vessel cap
+limandeStraightLength = capSupportFinalHeight - mMBaseBracketThickness - mMTeflonSpacerPadThickness - mMBoardThickness - limandeThickness*2 - limandeFoldDistance # up to the vessel cap
 
-def generate_micromegas_board(name="mMBoard", suffix="", thickness_in_mm=1, registry=None):
+def generate_micromegas_board(name="mMBoard", suffix="", thickness_in_mm=1, thickness_below_in_mm=0, registry=None):
+    """ Generates the micromegas board geometry. It is done in this function because the board has several layers with the same shape but different materials.
+    The function is meant to be generate the solid of each layer which each has different thickness. Also, the inner layer is inside the other, so the inner radius
+    of the fold has to be increased by the thickness_below_in_mm parameter.
+
+    param name: Name of the final solid. This will NOT include the suffix.
+    param suffix: Suffix to append to the solids needed to generate the final solid. If you call this function multiple times with the same registry,
+    you must use a different suffix for each call to avoid solid name conflicts.
+    param thickness_in_mm: Thickness of the layer of the board in mm.
+    param thickness_below_in_mm: Thickness below the board in mm, used for the inner radius of the fold.
+    param registry: Registry to use for the Geant4 objects. If None, a new registry is created.
+    Returns the registry with the board geometry.
+    """
+
     # Registry
     if registry is None:
         reg = g4.Registry()
@@ -83,7 +96,7 @@ def generate_micromegas_board(name="mMBoard", suffix="", thickness_in_mm=1, regi
         reg = registry
 
     boardThickness = thickness_in_mm
-
+    innerRadius = mMBoardFoldInnerRadius + thickness_below_in_mm
     mMBoardSquare = g4.solid.Box(
         name="mMBoardSquare" + suffix,
         pX=mMBoardLength,
@@ -114,8 +127,8 @@ def generate_micromegas_board(name="mMBoard", suffix="", thickness_in_mm=1, regi
 
     mMBoardFold = g4.solid.Tubs(
         name="mMBoardFold" + suffix,
-        pRMin=mMBoardFoldInnerRadius,
-        pRMax=mMBoardFoldInnerRadius + boardThickness,
+        pRMin=innerRadius,
+        pRMax=innerRadius + boardThickness,
         pDz=rollerCylinderLength,
         pSPhi=0,
         pDPhi=180,
@@ -175,7 +188,7 @@ def generate_micromegas_board(name="mMBoard", suffix="", thickness_in_mm=1, regi
         name="mMBoardWithFold1" + suffix,
         obj1=mMBoard0,
         obj2=mMBoardFold,
-        tra2=[[np.pi/2, -np.pi/2, 0], [-mMBoardLength/2, 0, -(mMBoardFoldInnerRadius+boardThickness/2)]],
+        tra2=[[np.pi/2, -np.pi/2, 0], [-mMBoardLength/2, 0, -(innerRadius+boardThickness/2)]],
         registry=reg
     )
 
@@ -183,7 +196,7 @@ def generate_micromegas_board(name="mMBoard", suffix="", thickness_in_mm=1, regi
         name="mMBoardWithFold2" + suffix,
         obj1=mMBoardWithFold1,
         obj2=mMBoardFold,
-        tra2=[[np.pi/2, np.pi/2, 0], [mMBoardLength/2, 0, -(mMBoardFoldInnerRadius+boardThickness/2)]],
+        tra2=[[np.pi/2, np.pi/2, 0], [mMBoardLength/2, 0, -(innerRadius+boardThickness/2)]],
         registry=reg
     )
 
@@ -191,7 +204,7 @@ def generate_micromegas_board(name="mMBoard", suffix="", thickness_in_mm=1, regi
         name="mMBoardWithFold3" + suffix,
         obj1=mMBoardWithFold2,
         obj2=mMBoardFold,
-        tra2=[[0, np.pi/2, np.pi], [0, -mMBoardLength/2, -(mMBoardFoldInnerRadius+boardThickness/2)]],
+        tra2=[[0, np.pi/2, np.pi], [0, -mMBoardLength/2, -(innerRadius+boardThickness/2)]],
         registry=reg
     )
 
@@ -199,7 +212,7 @@ def generate_micromegas_board(name="mMBoard", suffix="", thickness_in_mm=1, regi
         name="mMBoardWithFold" + suffix,
         obj1=mMBoardWithFold3,
         obj2=mMBoardFold,
-        tra2=[[0, np.pi/2, 0], [0, mMBoardLength/2, -(mMBoardFoldInnerRadius+boardThickness/2)]],
+        tra2=[[0, np.pi/2, 0], [0, mMBoardLength/2, -(innerRadius+boardThickness/2)]],
         registry=reg
     )
 
@@ -207,7 +220,7 @@ def generate_micromegas_board(name="mMBoard", suffix="", thickness_in_mm=1, regi
         name="mMBoardWithFoldAndConnector0" + suffix,
         obj1=mMBoardWithFold,
         obj2=mMBoardConnector,
-        tra2=[[0, 0, 0], [0, mMBoardLength/2 - mMBoardConnectorWidth/2, -(mMBoardFoldInnerRadius*2+boardThickness)]],
+        tra2=[[0, 0, 0], [0, mMBoardLength/2 - mMBoardConnectorWidth/2, -(innerRadius*2+boardThickness)]],
         registry=reg
     )
 
@@ -215,7 +228,7 @@ def generate_micromegas_board(name="mMBoard", suffix="", thickness_in_mm=1, regi
         name="mMBoardWithFoldAndConnector1" + suffix,
         obj1=mMBoardWithFoldAndConnector0,
         obj2=mMBoardConnector,
-        tra2=[[0, 0, np.pi], [0, -mMBoardLength/2 + mMBoardConnectorWidth/2, -(mMBoardFoldInnerRadius*2+boardThickness)]],
+        tra2=[[0, 0, np.pi], [0, -mMBoardLength/2 + mMBoardConnectorWidth/2, -(innerRadius*2+boardThickness)]],
         registry=reg
     )
 
@@ -223,7 +236,7 @@ def generate_micromegas_board(name="mMBoard", suffix="", thickness_in_mm=1, regi
         name="mMBoardWithFoldAndConnector2" + suffix,
         obj1=mMBoardWithFoldAndConnector1,
         obj2=mMBoardConnector,
-        tra2=[[0, 0, -np.pi/2], [mMBoardLength/2 - mMBoardConnectorWidth/2, 0, -(mMBoardFoldInnerRadius*2+boardThickness)]],
+        tra2=[[0, 0, -np.pi/2], [mMBoardLength/2 - mMBoardConnectorWidth/2, 0, -(innerRadius*2+boardThickness)]],
         registry=reg
     )
 
@@ -231,7 +244,7 @@ def generate_micromegas_board(name="mMBoard", suffix="", thickness_in_mm=1, regi
         name=name,
         obj1=mMBoardWithFoldAndConnector2,
         obj2=mMBoardConnector,
-        tra2=[[0, 0, np.pi/2], [-mMBoardLength/2 + mMBoardConnectorWidth/2, 0, -(mMBoardFoldInnerRadius*2+boardThickness)]],
+        tra2=[[0, 0, np.pi/2], [-mMBoardLength/2 + mMBoardConnectorWidth/2, 0, -(innerRadius*2+boardThickness)]],
         registry=reg
     )
 
@@ -547,7 +560,7 @@ def generate_micromegas_assembly(name="micromegas_assembly", registry=None, is_r
 
     # micromegas board will be a sandwich of kapton between copper foils of thickness mMCopperFoilThickness. On the active area we include the other copper foils
     generate_micromegas_board(name="mMBoardCopper", suffix="Copper", thickness_in_mm=mMBoardThickness, registry=reg)
-    generate_micromegas_board(name="mMBoardKapton", suffix="Kapton", thickness_in_mm=mMBoardThickness - mMCopperFoilThickness*2, registry=reg)
+    generate_micromegas_board(name="mMBoardKapton", suffix="Kapton", thickness_in_mm=mMBoardThickness - mMCopperFoilThickness*2, thickness_below_in_mm=mMCopperFoilThickness, registry=reg)
     mMBoardCopper = reg.findSolidByName("mMBoardCopper")[0]
     mMBoardKapton = reg.findSolidByName("mMBoardKapton")[0]
 
