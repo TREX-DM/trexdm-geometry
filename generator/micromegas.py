@@ -73,6 +73,7 @@ limandeHalfTriangleHeight = 77.95
 limandeFoldDistance = 20
 limandeTrapezoidLength = 40.4
 limandeWidth = 60
+limandeStraightLength = capSupportFinalHeight + mMBaseThickness/2 - mMBaseBracketThickness - mMTeflonSpacerPadThickness - mMBoardThickness - limandeThickness*2 - limandeFoldDistance # up to the vessel cap
 
 def generate_micromegas_board(name="mMBoard", suffix="", thickness_in_mm=1, registry=None):
     # Registry
@@ -262,6 +263,16 @@ def generate_micromegas_assembly(name="micromegas_assembly", registry=None, is_r
     copper = g4.nist_material_2geant4Material("G4_Cu")
     teflon = g4.nist_material_2geant4Material("G4_TEFLON")
     kapton = g4.nist_material_2geant4Material("G4_KAPTON")
+
+    # Make different side by z->-z transformation.
+    # We use rotation to easily mirror the volumes which are symmetric y->-y.
+    side_rot = np.array([0, 0, 0])
+    if not is_right_side:
+        side_rot = np.array([np.pi, 0, 0])
+    # The rest are done by applying z->-z transformation.
+    side_z_dir = 1
+    if is_right_side:
+        side_z_dir = -1
 
     ### Micromegas base
     mMBaseBracket = g4.solid.Box(
@@ -540,12 +551,6 @@ def generate_micromegas_assembly(name="micromegas_assembly", registry=None, is_r
     mMBoardCopper = reg.findSolidByName("mMBoardCopper")[0]
     mMBoardKapton = reg.findSolidByName("mMBoardKapton")[0]
 
-    """
-    v = pyg4ometry.visualisation.VtkViewer()
-    v.addBooleanSolidRecursive(mMBoardCopper)
-    v.addAxes(150)
-    v.view()
-    """
 
     limandeBracketSide = g4.solid.Box(
         name="limandeBracketSide",
@@ -614,17 +619,26 @@ def generate_micromegas_assembly(name="micromegas_assembly", registry=None, is_r
         registry=reg
     )
 
-    triangle_hipotenuse_pos = np.array([-limandeBracketSideLength/4, limandeBracketSideWidth/2 + limandeHalfTriangleHeight/2, limandeThickness/2 + limandeFoldDistance/2])
+    triangle_hipotenuseA_pos = np.array([-limandeBracketSideLength/4, limandeBracketSideWidth/2 + limandeHalfTriangleHeight/2, side_z_dir*(limandeThickness/2 + limandeFoldDistance/2)])
+    triangle_hipotenuseB_pos = np.array([limandeBracketSideLength/4, limandeBracketSideWidth/2 + limandeHalfTriangleHeight/2, side_z_dir*(limandeThickness/2 + limandeFoldDistance/2)])
     fold_thickness_pos = np.array([0, -limandeThickness/2, 0])
     rotation_matrix = tf.axisangle2matrix(
         axis=[0, 0, 1],  # rotation around Z-axis
         angle=+rotation_angle
     )
-    limandeBaseAndFold = g4.solid.Union(
-        name="limandeBaseAndFold",
+    limandeBaseAndFoldA = g4.solid.Union(
+        name="limandeBaseAndFoldA",
         obj1=limandeBase,
         obj2=limandeFold,
-        tra2=[[0, 0, rotation_angle], list(triangle_hipotenuse_pos + rotation_matrix @ fold_thickness_pos)],
+        tra2=[[0, 0, rotation_angle], list(triangle_hipotenuseA_pos + rotation_matrix @ fold_thickness_pos)],
+        registry=reg
+    )
+    # Mirrored version for the other side
+    limandeBaseAndFoldB = g4.solid.Union(
+        name="limandeBaseAndFoldB",
+        obj1=limandeBase,
+        obj2=limandeFold,
+        tra2=[[0, 0, -rotation_angle], list(triangle_hipotenuseB_pos + rotation_matrix @ fold_thickness_pos)],
         registry=reg
     )
 
@@ -662,17 +676,58 @@ def generate_micromegas_assembly(name="micromegas_assembly", registry=None, is_r
         registry=reg
     )
 
-    triangle_hipotenuse_pos = np.array([-limandeBracketSideLength/4, limandeBracketSideWidth/2 + limandeHalfTriangleHeight/2, limandeThickness + limandeFoldDistance])
+    triangle_hipotenuseA_pos = np.array([-limandeBracketSideLength/4, limandeBracketSideWidth/2 + limandeHalfTriangleHeight/2, side_z_dir*(limandeThickness + limandeFoldDistance)])
+    triangle_hipotenuseB_pos = np.array([+limandeBracketSideLength/4, limandeBracketSideWidth/2 + limandeHalfTriangleHeight/2, side_z_dir*(limandeThickness + limandeFoldDistance)])
     trapezoid_long_side_pos = -np.array([0, limandeTrapezoidLength/2, 0])
-    rotation_matrix = tf.axisangle2matrix(
+    rotation_matrixA = tf.axisangle2matrix(
         axis=[0, 0, 1],  # rotation around Z-axis
         angle=+rotation_angle
     )
-    limandeBaseFoldTrapezoid = g4.solid.Union(
-        name="limandeBaseFoldTrapezoid",
-        obj1=limandeBaseAndFold,
+    limandeBaseFoldTrapezoidA = g4.solid.Union(
+        name="limandeBaseFoldTrapezoidA",
+        obj1=limandeBaseAndFoldA,
         obj2=limandeTrapezoid,
-        tra2=[[0, 0, rotation_angle], list(triangle_hipotenuse_pos + rotation_matrix @ trapezoid_long_side_pos)],
+        tra2=[[0, 0, rotation_angle], list(triangle_hipotenuseA_pos + rotation_matrixA @ trapezoid_long_side_pos)],
+        registry=reg
+    )
+
+    rotation_matrixB = tf.tbxyz2matrix(
+        angles=[0, np.pi, -rotation_angle],  # rotation around Z-axis by pi
+    )
+    limandeBaseFoldTrapezoidB = g4.solid.Union(
+        name="limandeBaseFoldTrapezoidB",
+        obj1=limandeBaseAndFoldB,
+        obj2=limandeTrapezoid,
+        tra2=[[0, np.pi, -rotation_angle], list(triangle_hipotenuseB_pos + rotation_matrixB @ trapezoid_long_side_pos)],
+        registry=reg
+    )
+    
+    limandeStraight = g4.solid.Box(
+        name="limandeStraight",
+        pX=limandeWidth,
+        pY=limandeThickness,
+        pZ=limandeStraightLength,
+        lunit="mm",
+        registry=reg
+    )
+
+    trapezoidA_short_side_pos = np.array([limandeHipotenuse/2-limandeWidth/2, -limandeTrapezoidLength + limandeThickness/2, side_z_dir*(limandeStraightLength/2 + limandeThickness/2)])
+    trapezoidB_short_side_pos = np.array([-(limandeHipotenuse/2-limandeWidth/2), -limandeTrapezoidLength + limandeThickness/2, side_z_dir*(limandeStraightLength/2 + limandeThickness/2)])
+    limandeA = g4.solid.Union(
+        name="limande",
+        obj1=limandeBaseFoldTrapezoidA,
+        obj2=limandeStraight,
+        tra2=[[0, 0, rotation_angle], list(triangle_hipotenuseA_pos + rotation_matrixA @ trapezoidA_short_side_pos)],
+        registry=reg
+    )
+    rotation_matrixB = tf.tbxyz2matrix(
+        angles=[0, 0, -rotation_angle],  # rotation around Z-axis by pi
+    )
+    limandeB = g4.solid.Union(
+        name="limandeB",
+        obj1=limandeBaseFoldTrapezoidB,
+        obj2=limandeStraight,
+        tra2=[[0, 0, -rotation_angle], list(triangle_hipotenuseB_pos + rotation_matrixB @ trapezoidB_short_side_pos)],
         registry=reg
     )
 
@@ -747,15 +802,22 @@ def generate_micromegas_assembly(name="micromegas_assembly", registry=None, is_r
         name="mMKaptonFoil2_LV",
         registry=reg
     )
+    
+    limandeA_LV = g4.LogicalVolume(
+        solid=limandeA,
+        material=copper,
+        name="limandeA_LV",
+        registry=reg
+    )
+    limandeB_LV = g4.LogicalVolume(
+        solid=limandeB,
+        material=copper,
+        name="limandeB_LV",
+        registry=reg
+    )
 
 
     # Create the physical volumes and add them to the assembly
-    side_rot = np.array([0, 0, 0])
-    if not is_right_side:
-        side_rot = np.array([np.pi, 0, 0])
-    side_z_dir = 1
-    if is_right_side:
-        side_z_dir = -1
     
     mMBase_PV = g4.PhysicalVolume(
         rotation=side_rot.tolist(),
@@ -907,6 +969,41 @@ def generate_micromegas_assembly(name="micromegas_assembly", registry=None, is_r
         position=[0, 0, -side_z_dir*(mMBaseThickness/2 + mMBoardThickness/2)],
         name="mMBoardCopper_PV",
         logicalVolume=mMBoardCopper_LV,
+        motherVolume=micromegas_assembly,
+        registry=reg
+    )
+    
+    limande_z_pos = side_z_dir*(mMBaseThickness/2 + mMBaseBracketThickness + mMTeflonSpacerPadThickness + mMBoardThickness + limandeThickness/2)
+    limande_x_or_y = mMBaseLength/2 - mMBaseEndToBracketDistance - limandeBracketSideWidth/2
+    limande1_PV = g4.PhysicalVolume(
+        rotation=[0, 0, 0],
+        position=[0, -limande_x_or_y, limande_z_pos],
+        name="limande1_PV",
+        logicalVolume=limandeA_LV,
+        motherVolume=micromegas_assembly,
+        registry=reg
+    )
+    limande2_PV = g4.PhysicalVolume(
+        rotation=[0, 0, np.pi],
+        position=[0, +limande_x_or_y, limande_z_pos],
+        name="limande2_PV",
+        logicalVolume=limandeA_LV,
+        motherVolume=micromegas_assembly,
+        registry=reg
+    )
+    limande3_PV = g4.PhysicalVolume(
+        rotation=[0, 0, -np.pi/2],
+        position=[+limande_x_or_y, 0, limande_z_pos],
+        name="limande3_PV",
+        logicalVolume=limandeB_LV,
+        motherVolume=micromegas_assembly,
+        registry=reg
+    )
+    limande4_PV = g4.PhysicalVolume(
+        rotation=[0, 0, +np.pi/2],
+        position=[-limande_x_or_y, 0, limande_z_pos],
+        name="limande4_PV",
+        logicalVolume=limandeB_LV,
         motherVolume=micromegas_assembly,
         registry=reg
     )
