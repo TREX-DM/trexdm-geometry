@@ -66,7 +66,8 @@ mMBoardFoldInnerRadius = mMBaseThickness/2 + mMBaseBracketThickness/2 + mMTeflon
 
 limandeBracketSideLength = mMBaseBracketLength
 limandeBracketSideWidth = 40 # mm. It is slightly wider than the bracket
-limandeThickness = 1 # mm
+limandeCopperThickness = 0.017 # 17um, same as the micromegas copper layers
+limandeThickness = limandeCopperThickness*4 + 0.350*2 + 0.050 # mm. 350um and 50um is Kapton and 17um is copper (see Hector Mirallas Thesis section 8.2)
 
 limandeHalfTriangleHeight = 77.95
 
@@ -77,7 +78,7 @@ limandeStraightLength = capSupportFinalHeight - mMBaseBracketThickness - mMTeflo
 
 def generate_micromegas_board(name="mMBoard", suffix="", thickness_in_mm=1, thickness_below_in_mm=0, registry=None):
     """ Generates the micromegas board geometry. It is done in this function because the board has several layers with the same shape but different materials.
-    The function is meant to be generate the solid of each layer which each has different thickness. Also, the inner layer is inside the other, so the inner radius
+    The function is meant to generate the solid of each layer which each has different thickness. Also, the inner layer is inside the other, so the inner radius
     of the fold has to be increased by the thickness_below_in_mm parameter.
 
     param name: Name of the final solid. This will NOT include the suffix.
@@ -245,6 +246,210 @@ def generate_micromegas_board(name="mMBoard", suffix="", thickness_in_mm=1, thic
         obj1=mMBoardWithFoldAndConnector2,
         obj2=mMBoardConnector,
         tra2=[[0, 0, np.pi/2], [-mMBoardLength/2 + mMBoardConnectorWidth/2, 0, -(innerRadius*2+boardThickness)]],
+        registry=reg
+    )
+
+    return reg
+
+def generate_limandes(name="limande", suffix="", thickness_in_mm=1, thickness_below_in_mm=0, is_right_side=True, registry=None):
+    """
+    Generates the limandes (A and B) solids.
+    param name: Name of the volume.
+    param suffix: Suffix to append to the solid names.
+    param thickness_in_mm: Thickness of the solid parts in mm.
+    param thickness_below_in_mm:
+    param registry: Registry to use for the Geant4 objects. If None, a new registry is created.
+    """
+    # Registry
+    if registry is None:
+        reg = g4.Registry()
+    else:
+        reg = registry
+
+    side_z_dir = 1
+    if is_right_side:
+        side_z_dir = -1
+
+    thickness = thickness_in_mm
+    foldDistance = limandeFoldDistance + thickness_below_in_mm*2
+    straightLength = limandeStraightLength + thickness_below_in_mm
+
+    limandeBracketSide = g4.solid.Box(
+        name="limandeBracketSide" + suffix,
+        pX=limandeBracketSideLength,
+        pY=limandeBracketSideWidth,
+        pZ=thickness,
+        lunit="mm",
+        registry=reg
+    )
+
+    limandeHalfTriangleBox = g4.solid.Box(
+        name="limandeHalfTriangleBox" + suffix,
+        pX=limandeBracketSideLength/2,
+        pY=limandeHalfTriangleHeight,
+        pZ=thickness,
+        lunit="mm",
+        registry=reg
+    )
+
+    limandeHipotenuse = np.sqrt(limandeHalfTriangleHeight**2 + (limandeBracketSideLength/2)**2)  # sqrt(2) * height
+    limandeHalfTriangleCut = g4.solid.Box(
+        name="limandeHalfTriangleCut" + suffix,
+        pX=limandeHipotenuse,
+        pY=limandeHalfTriangleHeight,
+        pZ=thickness + 0.1, # to ensure cut
+        lunit="mm",
+        registry=reg
+    )
+
+    rotation_angle = np.arcsin(limandeHalfTriangleHeight/limandeHipotenuse) #np.arctan2(limandeHalfTriangleHeight, limandeBracketSideLength/2)  # angle in radians
+    rotation_matrix = tf.axisangle2matrix(
+        axis=[0, 0, 1],  # rotation around Z-axis
+        angle=-rotation_angle
+    )
+    corner_pos = np.array([-limandeBracketSideLength/4, limandeHalfTriangleHeight/2, 0])
+    cornerCut_pos = np.array([limandeHipotenuse/2, limandeHalfTriangleHeight/2, 0])
+    limandeHalfTriangle = g4.solid.Subtraction(
+        name="limandeHalfTriangle" + suffix,
+        obj1=limandeHalfTriangleBox,
+        obj2=limandeHalfTriangleCut,
+        tra2=[[0, 0, -rotation_angle], list(corner_pos + rotation_matrix @ cornerCut_pos)],
+        registry=reg
+    )
+
+    limandeBase0 = g4.solid.Union(
+        name="limandeBase0" + suffix,
+        obj1=limandeBracketSide,
+        obj2=limandeHalfTriangle,
+        tra2=[[0, 0, 0], [limandeBracketSideLength/4, limandeBracketSideWidth/2 + limandeHalfTriangleHeight/2, 0]],
+        registry=reg
+    )
+    limandeBase = g4.solid.Union(
+        name="limandeBase" + suffix,
+        obj1=limandeBase0,
+        obj2=limandeHalfTriangle,
+        tra2=[[0, np.pi, 0], [-limandeBracketSideLength/4, +limandeBracketSideWidth/2 + limandeHalfTriangleHeight/2, 0]],
+        registry=reg
+    )
+
+    limandeFold = g4.solid.Box(
+        name="limandeFold" + suffix,
+        pX=limandeHipotenuse,
+        pY=thickness,
+        pZ=foldDistance,
+        lunit="mm",
+        registry=reg
+    )
+
+    triangle_hipotenuseA_pos = np.array([-limandeBracketSideLength/4, limandeBracketSideWidth/2 + limandeHalfTriangleHeight/2, side_z_dir*(thickness/2 + foldDistance/2)])
+    triangle_hipotenuseB_pos = np.array([limandeBracketSideLength/4, limandeBracketSideWidth/2 + limandeHalfTriangleHeight/2, side_z_dir*(thickness/2 + foldDistance/2)])
+    fold_thickness_pos = np.array([0, -thickness/2-thickness_below_in_mm, 0])
+    rotation_matrix = tf.axisangle2matrix(
+        axis=[0, 0, 1],  # rotation around Z-axis
+        angle=+rotation_angle
+    )
+    limandeBaseAndFoldA = g4.solid.Union(
+        name="limandeBaseAndFoldA" + suffix,
+        obj1=limandeBase,
+        obj2=limandeFold,
+        tra2=[[0, 0, rotation_angle], list(triangle_hipotenuseA_pos + rotation_matrix @ fold_thickness_pos)],
+        registry=reg
+    )
+    # Mirrored version for the other side
+    limandeBaseAndFoldB = g4.solid.Union(
+        name="limandeBaseAndFoldB" + suffix,
+        obj1=limandeBase,
+        obj2=limandeFold,
+        tra2=[[0, 0, -rotation_angle], list(triangle_hipotenuseB_pos + rotation_matrix @ fold_thickness_pos)],
+        registry=reg
+    )
+
+    limandeTrapezoidBox = g4.solid.Box(
+        name="limandeTrapezoidBox" + suffix,
+        pX=limandeHipotenuse,
+        pY=limandeTrapezoidLength,
+        pZ=thickness,
+        lunit="mm",
+        registry=reg
+    )
+
+    limandeTrapezoidCutHipotenuse = np.sqrt((limandeHipotenuse-limandeWidth)**2 + (limandeTrapezoidLength)**2)  # sqrt(2) * height
+    limandeTrapezoidCut = g4.solid.Box(
+        name="limandeTrapezoidCut" + suffix,
+        pX=limandeHipotenuse, # whatever but it needs to be big enough to do the cut
+        pY=limandeTrapezoidCutHipotenuse,
+        pZ=thickness + 0.1,  # to ensure cut
+        lunit="mm",
+        registry=reg
+    )
+    rotation_angle_2 = np.arccos(limandeTrapezoidLength/limandeTrapezoidCutHipotenuse)
+    rotation_matrix_2 = tf.axisangle2matrix(
+        axis=[0, 0, 1],  # rotation around Z-axis
+        angle=rotation_angle_2
+    )
+    corner_pos = np.array([-limandeHipotenuse/2, +limandeTrapezoidLength/2-thickness-thickness_below_in_mm*2, 0])
+    cornerCut_pos = np.array([-limandeHipotenuse/2, -limandeTrapezoidCutHipotenuse/2, 0])
+
+    limandeTrapezoid = g4.solid.Subtraction(
+        name="limandeTrapezoid" + suffix,
+        obj1=limandeTrapezoidBox,
+        obj2=limandeTrapezoidCut,
+        tra2=[[0, 0, rotation_angle_2], list(corner_pos + rotation_matrix_2 @ cornerCut_pos)],
+        registry=reg
+    )
+
+    triangle_hipotenuseA_pos = np.array([-limandeBracketSideLength/4, limandeBracketSideWidth/2 + limandeHalfTriangleHeight/2, side_z_dir*(thickness + foldDistance)])
+    triangle_hipotenuseB_pos = np.array([+limandeBracketSideLength/4, limandeBracketSideWidth/2 + limandeHalfTriangleHeight/2, side_z_dir*(thickness + foldDistance)])
+    trapezoid_long_side_pos = -np.array([0, limandeTrapezoidLength/2, 0])
+    rotation_matrixA = tf.axisangle2matrix(
+        axis=[0, 0, 1],  # rotation around Z-axis
+        angle=+rotation_angle
+    )
+    limandeBaseFoldTrapezoidA = g4.solid.Union(
+        name="limandeBaseFoldTrapezoidA" + suffix,
+        obj1=limandeBaseAndFoldA,
+        obj2=limandeTrapezoid,
+        tra2=[[0, 0, rotation_angle], list(triangle_hipotenuseA_pos + rotation_matrixA @ trapezoid_long_side_pos)],
+        registry=reg
+    )
+
+    rotation_matrixB = tf.tbxyz2matrix(
+        angles=[0, np.pi, -rotation_angle],  # rotation around Z-axis by pi
+    )
+    limandeBaseFoldTrapezoidB = g4.solid.Union(
+        name="limandeBaseFoldTrapezoidB" + suffix,
+        obj1=limandeBaseAndFoldB,
+        obj2=limandeTrapezoid,
+        tra2=[[0, np.pi, -rotation_angle], list(triangle_hipotenuseB_pos + rotation_matrixB @ trapezoid_long_side_pos)],
+        registry=reg
+    )
+
+    limandeStraight = g4.solid.Box(
+        name="limandeStraight" + suffix,
+        pX=limandeWidth,
+        pY=thickness,
+        pZ=straightLength,
+        lunit="mm",
+        registry=reg
+    )
+
+    trapezoidA_short_side_pos = np.array([limandeHipotenuse/2-limandeWidth/2, -limandeTrapezoidLength + thickness/2 + thickness_below_in_mm, side_z_dir*(straightLength/2 + thickness/2)])
+    trapezoidB_short_side_pos = np.array([-(limandeHipotenuse/2-limandeWidth/2), -limandeTrapezoidLength + thickness/2 + thickness_below_in_mm, side_z_dir*(straightLength/2 + thickness/2)])
+    limandeA = g4.solid.Union(
+        name=name + "A",
+        obj1=limandeBaseFoldTrapezoidA,
+        obj2=limandeStraight,
+        tra2=[[0, 0, rotation_angle], list(triangle_hipotenuseA_pos + rotation_matrixA @ trapezoidA_short_side_pos)],
+        registry=reg
+    )
+    rotation_matrixB = tf.tbxyz2matrix(
+        angles=[0, 0, -rotation_angle],  # rotation around Z-axis by pi
+    )
+    limandeB = g4.solid.Union(
+        name=name + "B",
+        obj1=limandeBaseFoldTrapezoidB,
+        obj2=limandeStraight,
+        tra2=[[0, 0, -rotation_angle], list(triangle_hipotenuseB_pos + rotation_matrixB @ trapezoidB_short_side_pos)],
         registry=reg
     )
 
@@ -561,189 +766,15 @@ def generate_micromegas_assembly(name="micromegas_assembly", registry=None, is_r
     # micromegas board will be a sandwich of kapton between copper foils of thickness mMCopperFoilThickness. On the active area we include the other copper foils
     generate_micromegas_board(name="mMBoardCopper", suffix="Copper", thickness_in_mm=mMBoardThickness, registry=reg)
     generate_micromegas_board(name="mMBoardKapton", suffix="Kapton", thickness_in_mm=mMBoardThickness - mMCopperFoilThickness*2, thickness_below_in_mm=mMCopperFoilThickness, registry=reg)
-    mMBoardCopper = reg.findSolidByName("mMBoardCopper")[0]
-    mMBoardKapton = reg.findSolidByName("mMBoardKapton")[0]
+    mMBoardCopper = utils.get_solid_by_name("mMBoardCopper", reg)
+    mMBoardKapton = utils.get_solid_by_name("mMBoardKapton", reg)
 
-
-    limandeBracketSide = g4.solid.Box(
-        name="limandeBracketSide",
-        pX=limandeBracketSideLength,
-        pY=limandeBracketSideWidth,
-        pZ=limandeThickness,
-        lunit="mm",
-        registry=reg
-    )
-
-    limandeHalfTriangleBox = g4.solid.Box(
-        name="limandeHalfTriangleBox",
-        pX=limandeBracketSideLength/2,
-        pY=limandeHalfTriangleHeight,
-        pZ=limandeThickness,
-        lunit="mm",
-        registry=reg
-    )
-
-    limandeHipotenuse = np.sqrt(limandeHalfTriangleHeight**2 + (limandeBracketSideLength/2)**2)  # sqrt(2) * height
-    limandeHalfTriangleCut = g4.solid.Box(
-        name="limandeHalfTriangleCut",
-        pX=limandeHipotenuse,
-        pY=limandeHalfTriangleHeight,
-        pZ=limandeThickness,
-        lunit="mm",
-        registry=reg
-    )
-
-    rotation_angle = np.arcsin(limandeHalfTriangleHeight/limandeHipotenuse)#np.arctan2(limandeHalfTriangleHeight, limandeBracketSideLength/2)  # angle in radians
-    rotation_matrix = tf.axisangle2matrix(
-        axis=[0, 0, 1],  # rotation around Z-axis
-        angle=-rotation_angle
-    )
-    corner_pos = np.array([-limandeBracketSideLength/4, limandeHalfTriangleHeight/2, 0])
-    cornerCut_pos = np.array([limandeHipotenuse/2, limandeHalfTriangleHeight/2, 0])
-    limandeHalfTriangle = g4.solid.Subtraction(
-        name="limandeHalfTriangle",
-        obj1=limandeHalfTriangleBox,
-        obj2=limandeHalfTriangleCut,
-        tra2=[[0, 0, -rotation_angle], list(corner_pos + rotation_matrix @ cornerCut_pos)],
-        registry=reg
-    )
-
-    limandeBase0 = g4.solid.Union(
-        name="limandeBase0",
-        obj1=limandeBracketSide,
-        obj2=limandeHalfTriangle,
-        tra2=[[0, 0, 0], [limandeBracketSideLength/4, limandeBracketSideWidth/2 + limandeHalfTriangleHeight/2, 0]],
-        registry=reg
-    )
-    limandeBase = g4.solid.Union(
-        name="limandeBase",
-        obj1=limandeBase0,
-        obj2=limandeHalfTriangle,
-        tra2=[[0, np.pi, 0], [-limandeBracketSideLength/4, +limandeBracketSideWidth/2 + limandeHalfTriangleHeight/2, 0]],
-        registry=reg
-    )
-
-    limandeFold = g4.solid.Box(
-        name="limandeFold",
-        pX=limandeHipotenuse,
-        pY=limandeThickness,
-        pZ=limandeFoldDistance,
-        lunit="mm",
-        registry=reg
-    )
-
-    triangle_hipotenuseA_pos = np.array([-limandeBracketSideLength/4, limandeBracketSideWidth/2 + limandeHalfTriangleHeight/2, side_z_dir*(limandeThickness/2 + limandeFoldDistance/2)])
-    triangle_hipotenuseB_pos = np.array([limandeBracketSideLength/4, limandeBracketSideWidth/2 + limandeHalfTriangleHeight/2, side_z_dir*(limandeThickness/2 + limandeFoldDistance/2)])
-    fold_thickness_pos = np.array([0, -limandeThickness/2, 0])
-    rotation_matrix = tf.axisangle2matrix(
-        axis=[0, 0, 1],  # rotation around Z-axis
-        angle=+rotation_angle
-    )
-    limandeBaseAndFoldA = g4.solid.Union(
-        name="limandeBaseAndFoldA",
-        obj1=limandeBase,
-        obj2=limandeFold,
-        tra2=[[0, 0, rotation_angle], list(triangle_hipotenuseA_pos + rotation_matrix @ fold_thickness_pos)],
-        registry=reg
-    )
-    # Mirrored version for the other side
-    limandeBaseAndFoldB = g4.solid.Union(
-        name="limandeBaseAndFoldB",
-        obj1=limandeBase,
-        obj2=limandeFold,
-        tra2=[[0, 0, -rotation_angle], list(triangle_hipotenuseB_pos + rotation_matrix @ fold_thickness_pos)],
-        registry=reg
-    )
-
-    limandeTrapezoidBox = g4.solid.Box(
-        name="limandeTrapezoidBox",
-        pX=limandeHipotenuse,
-        pY=limandeTrapezoidLength,
-        pZ=limandeThickness,
-        lunit="mm",
-        registry=reg
-    )
-
-    limandeTrapezoidCutHipotenuse = np.sqrt((limandeHipotenuse-limandeWidth)**2 + limandeTrapezoidLength**2)  # sqrt(2) * height
-    limandeTrapezoidCut = g4.solid.Box(
-        name="limandeTrapezoidCut",
-        pX=limandeHipotenuse, # whatever but it needs to be big enough to do the cut
-        pY=limandeTrapezoidCutHipotenuse,
-        pZ=limandeThickness,
-        lunit="mm",
-        registry=reg
-    )
-    rotation_angle_2 = np.arccos(limandeTrapezoidLength/limandeTrapezoidCutHipotenuse)
-    rotation_matrix_2 = tf.axisangle2matrix(
-        axis=[0, 0, 1],  # rotation around Z-axis
-        angle=rotation_angle_2
-    )
-    corner_pos = np.array([-limandeHipotenuse/2, +limandeTrapezoidLength/2, 0])
-    cornerCut_pos = np.array([-limandeHipotenuse/2, -limandeTrapezoidCutHipotenuse/2, 0])
-
-    limandeTrapezoid = g4.solid.Subtraction(
-        name="limandeTrapezoid",
-        obj1=limandeTrapezoidBox,
-        obj2=limandeTrapezoidCut,
-        tra2=[[0, 0, rotation_angle_2], list(corner_pos + rotation_matrix_2 @ cornerCut_pos)],
-        registry=reg
-    )
-
-    triangle_hipotenuseA_pos = np.array([-limandeBracketSideLength/4, limandeBracketSideWidth/2 + limandeHalfTriangleHeight/2, side_z_dir*(limandeThickness + limandeFoldDistance)])
-    triangle_hipotenuseB_pos = np.array([+limandeBracketSideLength/4, limandeBracketSideWidth/2 + limandeHalfTriangleHeight/2, side_z_dir*(limandeThickness + limandeFoldDistance)])
-    trapezoid_long_side_pos = -np.array([0, limandeTrapezoidLength/2, 0])
-    rotation_matrixA = tf.axisangle2matrix(
-        axis=[0, 0, 1],  # rotation around Z-axis
-        angle=+rotation_angle
-    )
-    limandeBaseFoldTrapezoidA = g4.solid.Union(
-        name="limandeBaseFoldTrapezoidA",
-        obj1=limandeBaseAndFoldA,
-        obj2=limandeTrapezoid,
-        tra2=[[0, 0, rotation_angle], list(triangle_hipotenuseA_pos + rotation_matrixA @ trapezoid_long_side_pos)],
-        registry=reg
-    )
-
-    rotation_matrixB = tf.tbxyz2matrix(
-        angles=[0, np.pi, -rotation_angle],  # rotation around Z-axis by pi
-    )
-    limandeBaseFoldTrapezoidB = g4.solid.Union(
-        name="limandeBaseFoldTrapezoidB",
-        obj1=limandeBaseAndFoldB,
-        obj2=limandeTrapezoid,
-        tra2=[[0, np.pi, -rotation_angle], list(triangle_hipotenuseB_pos + rotation_matrixB @ trapezoid_long_side_pos)],
-        registry=reg
-    )
-    
-    limandeStraight = g4.solid.Box(
-        name="limandeStraight",
-        pX=limandeWidth,
-        pY=limandeThickness,
-        pZ=limandeStraightLength,
-        lunit="mm",
-        registry=reg
-    )
-
-    trapezoidA_short_side_pos = np.array([limandeHipotenuse/2-limandeWidth/2, -limandeTrapezoidLength + limandeThickness/2, side_z_dir*(limandeStraightLength/2 + limandeThickness/2)])
-    trapezoidB_short_side_pos = np.array([-(limandeHipotenuse/2-limandeWidth/2), -limandeTrapezoidLength + limandeThickness/2, side_z_dir*(limandeStraightLength/2 + limandeThickness/2)])
-    limandeA = g4.solid.Union(
-        name="limande",
-        obj1=limandeBaseFoldTrapezoidA,
-        obj2=limandeStraight,
-        tra2=[[0, 0, rotation_angle], list(triangle_hipotenuseA_pos + rotation_matrixA @ trapezoidA_short_side_pos)],
-        registry=reg
-    )
-    rotation_matrixB = tf.tbxyz2matrix(
-        angles=[0, 0, -rotation_angle],  # rotation around Z-axis by pi
-    )
-    limandeB = g4.solid.Union(
-        name="limandeB",
-        obj1=limandeBaseFoldTrapezoidB,
-        obj2=limandeStraight,
-        tra2=[[0, 0, -rotation_angle], list(triangle_hipotenuseB_pos + rotation_matrixB @ trapezoidB_short_side_pos)],
-        registry=reg
-    )
-
+    generate_limandes(name="limande", suffix="Copper", thickness_in_mm=limandeThickness, thickness_below_in_mm=0, is_right_side=is_right_side, registry=reg)
+    generate_limandes(name="limandeInner", suffix="Kapton", thickness_in_mm=limandeThickness - limandeCopperThickness*2, thickness_below_in_mm=limandeCopperThickness, is_right_side=is_right_side, registry=reg)
+    limandeA = reg.findSolidByName("limandeA")[0]
+    limandeB = reg.findSolidByName("limandeB")[0]
+    limandeInnerA = reg.findSolidByName("limandeInnerA")[0]
+    limandeInnerB = reg.findSolidByName("limandeInnerB")[0]
 
     ### JOIN THE SOLIDS INTO THE ASSEMBLY
     micromegas_assembly = g4.AssemblyVolume(
@@ -826,6 +857,19 @@ def generate_micromegas_assembly(name="micromegas_assembly", registry=None, is_r
         solid=limandeB,
         material=copper,
         name="limandeB_LV",
+        registry=reg
+    )
+    
+    limandeInnerA_LV = g4.LogicalVolume(
+        solid=limandeInnerA,
+        material=kapton,
+        name="limandeInnerA_LV",
+        registry=reg
+    )
+    limandeInnerB_LV = g4.LogicalVolume(
+        solid=limandeInnerB,
+        material=kapton,
+        name="limandeInnerB_LV",
         registry=reg
     )
 
@@ -983,6 +1027,23 @@ def generate_micromegas_assembly(name="micromegas_assembly", registry=None, is_r
         name="mMBoardCopper_PV",
         logicalVolume=mMBoardCopper_LV,
         motherVolume=micromegas_assembly,
+        registry=reg
+    )
+
+    limandeInnerA_PV = g4.PhysicalVolume(
+        rotation=[0, 0, 0],
+        position=[0, 0, 0],
+        name="limandeInnerA_PV",
+        logicalVolume=limandeInnerA_LV,
+        motherVolume=limandeA_LV,
+        registry=reg
+    )
+    limandeInnerB_PV = g4.PhysicalVolume(
+        rotation=[0, 0, 0],
+        position=[0, 0, 0],
+        name="limandeInnerB_PV",
+        logicalVolume=limandeInnerB_LV,
+        motherVolume=limandeB_LV,
         registry=reg
     )
     
