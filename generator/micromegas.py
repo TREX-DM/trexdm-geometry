@@ -3,6 +3,7 @@ import pyg4ometry
 from pyg4ometry import geant4 as g4
 from pyg4ometry import transformation as tf
 import numpy as np
+import utils
 
 mMBaseLength = 324.0 # 324 mm is the full length, so half is 162 mm
 mMBaseRadius = 187.0 # 187 mm is the radius of the corners
@@ -771,10 +772,11 @@ def generate_micromegas_assembly(name="micromegas_assembly", registry=None, is_r
 
     generate_limandes(name="limande", suffix="Copper", thickness_in_mm=limandeThickness, thickness_below_in_mm=0, is_right_side=is_right_side, registry=reg)
     generate_limandes(name="limandeInner", suffix="Kapton", thickness_in_mm=limandeThickness - limandeCopperThickness*2, thickness_below_in_mm=limandeCopperThickness, is_right_side=is_right_side, registry=reg)
-    limandeA = reg.findSolidByName("limandeA")[0]
-    limandeB = reg.findSolidByName("limandeB")[0]
-    limandeInnerA = reg.findSolidByName("limandeInnerA")[0]
-    limandeInnerB = reg.findSolidByName("limandeInnerB")[0]
+    limandeA = utils.get_solid_by_name("limandeA", reg)
+    limandeB = utils.get_solid_by_name("limandeB", reg)
+    limandeInnerA = utils.get_solid_by_name("limandeInnerA", reg)
+    limandeInnerB = utils.get_solid_by_name("limandeInnerB", reg)
+
 
     ### JOIN THE SOLIDS INTO THE ASSEMBLY
     micromegas_assembly = g4.AssemblyVolume(
@@ -1092,7 +1094,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
     
     reg = generate_micromegas_assembly(is_right_side=False)
-    micromegas_assembly = reg.findLogicalVolumeByName("micromegas_assembly")[0]
+    micromegas_assembly = utils.get_logical_volume_by_name("micromegas_assembly", reg)
 
     if args.gdml:
         galactic = g4.nist_material_2geant4Material("G4_Galactic")

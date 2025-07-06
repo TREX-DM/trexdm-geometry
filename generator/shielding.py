@@ -1,7 +1,7 @@
 import vtk
 import pyg4ometry
 from pyg4ometry import geant4 as g4
-
+import utils
 
 copperTopThickness = 50
 
@@ -304,7 +304,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     reg = generate_shielding_assembly("shielding_assembly")
-    shielding_assembly = reg.findLogicalVolumeByName("shielding_assembly")[0]
+    shielding_assembly = utils.get_logical_volume_by_name("shielding_assembly", reg)
 
     if args.gdml:
         galactic = g4.nist_material_2geant4Material("G4_Galactic")

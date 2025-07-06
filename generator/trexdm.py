@@ -8,6 +8,7 @@ import shielding
 import gem
 import micromegas
 import fieldcage
+import utils
 
 reg = g4.Registry()
 
@@ -23,15 +24,15 @@ micromegas.generate_micromegas_assembly(registry=reg, is_right_side=True)
 gem.generate_gem_assembly(registry=reg, is_right_side=True)
 fieldcage.generate_fieldcage_assembly(registry=reg)
 
-shielding_assembly = reg.findLogicalVolumeByName("shielding_assembly")[0]
-vessel_assembly = reg.findLogicalVolumeByName("vessel_assembly")[0]
-micromegas_assembly = reg.findLogicalVolumeByName("micromegas_assembly")[0]
-gem_assembly = reg.findLogicalVolumeByName("gem_assembly")[0]
-fieldcage_assembly = reg.findLogicalVolumeByName("fieldcage_assembly")[0]
+shielding_assembly = utils.get_logical_volume_by_name("shielding_assembly", reg)
+vessel_assembly = utils.get_logical_volume_by_name("vessel_assembly", reg)
+micromegas_assembly = utils.get_logical_volume_by_name("micromegas_assembly", reg)
+gem_assembly = utils.get_logical_volume_by_name("gem_assembly", reg)
+fieldcage_assembly = utils.get_logical_volume_by_name("fieldcage_assembly", reg)
 
 # Find the logical volumes needed for mounting the assemblies together
-outerGas_LV = reg.findLogicalVolumeByName("outerGas_LV")[0]
-innerGas_LV = reg.findLogicalVolumeByName("gas_LV")[0]
+outerGas_LV = utils.get_logical_volume_by_name("outerGas_LV", reg)
+innerGas_LV = utils.get_logical_volume_by_name("gas_LV", reg)
 
 
 # Create the physical volumes

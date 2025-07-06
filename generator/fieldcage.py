@@ -3,6 +3,7 @@ import pyg4ometry
 from pyg4ometry import geant4 as g4
 from pyg4ometry import transformation as tf
 import numpy as np
+import utils
 
 cathodeLength = 206 # mm
 cathodeCuThickness = 0.002 # 2um
@@ -1018,7 +1019,7 @@ if __name__ == "__main__":
     args = parser.parse_args()
     
     reg = generate_fieldcage_assembly()
-    fieldcage_assembly = reg.findLogicalVolumeByName("fieldcage_assembly")[0]
+    fieldcage_assembly = utils.get_logical_volume_by_name("fieldcage_assembly", reg)
 
     if args.gdml:
         galactic = g4.nist_material_2geant4Material("G4_Galactic")
