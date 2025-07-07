@@ -1,6 +1,9 @@
 from pyg4ometry import geant4 as g4
+import pyg4ometry.transformation as tf
+from pyg4ometry.exceptions import IdenticalNameError
+import numpy as np
 
-def substract_daughters_from_mother(mother, registry=None):
+def substract_daughters_from_mother(mother, solid_mother=None, rotation_mother=[0, 0, 0], position_mother=[0, 0, 0], base_name="", registry=None):
     """
     Subtracts the daughter volumes from the mother volume.
     This is a utility function to create a subtraction solid.
@@ -12,36 +15,58 @@ def substract_daughters_from_mother(mother, registry=None):
 
     daughters = []
     mother_solid = None
-    mother_material = None
+    #mother_material = None
     if isinstance(mother, g4.PhysicalVolume):
         daughters = mother.logicalVolume.daughterVolumes
         mother_solid = mother.logicalVolume.solid
-        mother_material = mother.logicalVolume.material
-    elif isinstance(mother, g4.LogicalVolume) or isinstance(mother, g4.AssemblyVolume):
+        #mother_material = mother.logicalVolume.material
+    elif isinstance(mother, g4.LogicalVolume):
         daughters = mother.daughterVolumes
         mother_solid = mother.solid
-        mother_material = mother.material
+        #mother_material = mother.material
+    elif isinstance(mother, g4.AssemblyVolume):
+        daughters = mother.daughterVolumes
+        if solid_mother is None:
+            raise TypeError("solid_mother must be provided for AssemblyVolume")
+        mother_solid = solid_mother
+        #mother_material = mother.material
     else:
         raise TypeError("mother must be a PhysicalVolume, LogicalVolume or AssemblyVolume")
 
-    solid_name = mother_solid.name + "_minus"
-    for daughter in daughters:
+    if not base_name:
+        solid_name_base = mother_solid.name
+    else:
+        solid_name_base = base_name
+
+    for i, daughter in enumerate(daughters):
         daughter_logical = daughter.logicalVolume
+        solid_name = f"{solid_name_base}-{i}"
+        if isinstance(daughter_logical, g4.AssemblyVolume):
+            substract_daughters_from_mother(
+                                            daughter_logical,
+                                            solid_mother=mother_solid,
+                                            rotation_mother=rotation_mother,
+                                            position_mother=position_mother,
+                                            base_name=solid_name,
+                                            registry=reg
+                                        )
+            continue
         daughter_solid = daughter_logical.solid
-        daughter_rotation = daughter.rotation
-        daughter_position = daughter.position
-        solid_name = f"{solid_name}_{daughter_solid.name}"
+        daughter_rotation = np.array(daughter.rotation.eval())
+        daughter_position = np.array(daughter.position.eval())
+        final_rot = tf.matrix2tbxyz( tf.tbxyz2matrix(daughter_rotation) @ tf.tbxyz2matrix(rotation_mother) )
+        final_pos = daughter_position + np.array(position_mother)
         mother_solid = g4.solid.Subtraction(
             name=solid_name,
             obj1=mother_solid,
             obj2=daughter_solid,
-            tra2=[daughter_rotation, daughter_position],
+            tra2=[final_rot, final_pos.tolist()],
             registry=reg
         )
     
-    g4.LogicalVolume(mother_solid, mother_material, mother.name + "_subtracted", reg)
+    #subtracted_solid = g4.LogicalVolume(mother_solid, mother_material, solid_name_base + "_subtracted", reg)
     
-    return reg
+    return mother_solid
 
 def get_solid_by_name(name, registry):
     """
@@ -110,3 +135,83 @@ def get_material_by_name(name, registry):
         raise KeyError(f"Material with name '{name}' not found in registry, similar names found: {', '.join(mat.name for mat in materials)}")
     
     return materials[0]
+
+def get_childless_volume(volume, base_name="", position=[0, 0, 0], rotation=[0, 0, 0], world_volume=None, is_world_volume=True, registry=None):
+    reg = registry if registry is not None else g4.Registry()
+    mother_logical = volume
+    mother_pos = np.array(position) if isinstance(position, (list, tuple)) else position
+    mother_rot_matrix = tf.tbxyz2matrix(rotation)
+    if volume.daughterVolumes and not is_world_volume and not isinstance(volume, g4.AssemblyVolume):
+        #print(f"Removing children from solid of volume: {volume}")
+        subtracted_solid = substract_daughters_from_mother(volume, reg)
+        try:
+            subtracted_logical = g4.LogicalVolume(
+                name=base_name +volume.name + "_childless_LV",
+                solid=subtracted_solid,
+                material=volume.material,
+                registry=reg
+            )
+        except IdenticalNameError:
+            subtracted_logical = get_logical_volume_by_name(volume.name + "_childless_LV", reg)
+        print(base_name + volume.name + "_childless_PV")
+        g4.PhysicalVolume(
+            name=base_name + volume.name + "_childless_PV",
+            logicalVolume=subtracted_logical,
+            motherVolume=world_volume,
+            position=mother_pos,
+            rotation=tf.matrix2tbxyz(mother_rot_matrix), # rotation better to avoid converting to matrix and back to tbxyz
+            registry=reg
+        )
+    elif is_world_volume:
+        try:
+            print(f"Adding world volume: {volume.name}")
+            g4.LogicalVolume(
+                name=base_name + volume.name,
+                solid=volume.solid,
+                material=volume.material,
+                registry=reg
+            )
+        except IdenticalNameError:
+            print(f"World volume {volume.name} already exists, skipping creation.")
+
+    for physical in volume.daughterVolumes:
+        pos = np.array(physical.position.eval())
+        rot_matrix= tf.tbxyz2matrix(physical.rotation.eval())
+        logical = physical.logicalVolume
+        if not logical.daughterVolumes:
+            print(f"{base_name + physical.name}")
+            reg.transferLogicalVolume(logical)
+            g4.PhysicalVolume(
+                name=base_name + physical.name,
+                logicalVolume=logical,
+                motherVolume=world_volume,
+                position=mother_pos + pos,
+                rotation=tf.matrix2tbxyz(mother_rot_matrix @ rot_matrix),
+                registry=reg
+            )
+        else:
+            get_childless_volume(logical, base_name=base_name + physical.name + "/", position=mother_pos + pos, rotation=tf.matrix2tbxyz(mother_rot_matrix @ rot_matrix), world_volume=world_volume, is_world_volume=False, registry=reg)
+
+
+def transfer_childless_world(origin_registry):
+    """
+    Transfers the childless world volume from origin_registry to target_registry.
+    This function is used to create a new registry without daughter volumes.
+    """
+    if not isinstance(origin_registry, g4.Registry):
+        raise TypeError("Both origin_registry and target_registry must be instances of g4.Registry")
+    world_volume = origin_registry.getWorldVolume()
+    if world_volume is None:
+        raise ValueError("No world volume found in origin_registry")
+
+    target_registry = g4.Registry()
+
+    for name, solid in origin_registry.solidDict.items():
+        target_registry.transferSolid(solid)
+    for name, material in origin_registry.materialDict.items():
+        target_registry.transferMaterial(material)
+    world_volume_target = g4.LogicalVolume(world_volume.solid, world_volume.material,"wl",target_registry)
+    get_childless_volume(world_volume, world_volume=world_volume_target, is_world_volume=True, registry=target_registry)
+
+    target_registry.setWorld(world_volume_target.name)
+    return target_registry
