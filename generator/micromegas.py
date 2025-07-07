@@ -345,15 +345,19 @@ def generate_limandes(name="limande", suffix="", thickness_in_mm=1, thickness_be
     triangle_hipotenuseA_pos = np.array([-limandeBracketSideLength/4, limandeBracketSideWidth/2 + limandeHalfTriangleHeight/2, side_z_dir*(thickness/2 + foldDistance/2)])
     triangle_hipotenuseB_pos = np.array([limandeBracketSideLength/4, limandeBracketSideWidth/2 + limandeHalfTriangleHeight/2, side_z_dir*(thickness/2 + foldDistance/2)])
     fold_thickness_pos = np.array([0, -thickness/2-thickness_below_in_mm, 0])
-    rotation_matrix = tf.axisangle2matrix(
+    rotation_matrix_A = tf.axisangle2matrix(
         axis=[0, 0, 1],  # rotation around Z-axis
         angle=+rotation_angle
+    )
+    rotation_matrix_B = tf.axisangle2matrix(
+        axis=[0, 0, 1],  # rotation around Z-axis by pi
+        angle=-rotation_angle
     )
     limandeBaseAndFoldA = g4.solid.Union(
         name="limandeBaseAndFoldA" + suffix,
         obj1=limandeBase,
         obj2=limandeFold,
-        tra2=[[0, 0, rotation_angle], list(triangle_hipotenuseA_pos + rotation_matrix @ fold_thickness_pos)],
+        tra2=[[0, 0, rotation_angle], list(triangle_hipotenuseA_pos + rotation_matrix_A @ fold_thickness_pos)],
         registry=reg
     )
     # Mirrored version for the other side
@@ -361,7 +365,7 @@ def generate_limandes(name="limande", suffix="", thickness_in_mm=1, thickness_be
         name="limandeBaseAndFoldB" + suffix,
         obj1=limandeBase,
         obj2=limandeFold,
-        tra2=[[0, 0, -rotation_angle], list(triangle_hipotenuseB_pos + rotation_matrix @ fold_thickness_pos)],
+        tra2=[[0, 0, -rotation_angle], list(triangle_hipotenuseB_pos + rotation_matrix_B @ fold_thickness_pos)],
         registry=reg
     )
 
