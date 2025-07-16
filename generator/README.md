@@ -6,7 +6,7 @@ The vessel assembly is composed of the following physical volumes:
 * gas
 
 ## GEM
-The GEM is composed of the following physical volumes:
+The GEM assembly is composed of the following physical volumes:
 * gemKaptonFoil
 * gemTop
 * gemBottom
@@ -14,7 +14,9 @@ The GEM is composed of the following physical volumes:
 * gemmMSeparator1 (to 2)
 * gemmMSeparatorFixer1 (to 2)
 
-![gem](../docs/images/gem_visualization.png)
+<img src="../docs/images/gem_visualization.png" width="49%">
+
+*GEM assembly for the right side.*
 
 ## Micromegas
 The Micromegas assembly is meant to contain the Micromegas readout supporting structure, the Micromegas readout itself and the limandes. It is composed of the following physical volumes:
@@ -23,5 +25,14 @@ The Micromegas assembly is meant to contain the Micromegas readout supporting st
 * mMBaseClosingBracket1 (to 4)
 * mMBaseTeflonRoller1 (to 2)
 * mMSupport1 (to 2)
+* mMBoardCopper
+    * mMBoardKapton
+        * mMCopperFoilLayer2
+        * mMCopperFoilLayer3
+* limande1 (to 4)
+    * limandeInnerA (or B)
 
-![mM](../docs/images/micromegas_visualization.png)
+<img src="../docs/images/micromegas_visualization.png" width="49%">
+<img src="../docs/images/micromegasFull_visualization.png" width="49%">
+
+*Left: right side micromegas assembly without the mMBoardCopper and limande1 (to 4) physical volumes. Right: the full right side micromegas assembly.*
