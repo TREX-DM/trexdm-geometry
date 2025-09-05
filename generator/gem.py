@@ -27,7 +27,8 @@ gemFrameFeedthroughIndentationDepth = 0.5 # mm
 
 gemmMSeparatorLength = 242.5 # mm
 gemmMSeparatorWidth = 16.0 # mm
-gemmMSeparatorThickness = 5.5 # mm. There is a protusion to tense the GEM foil that is 2mm more. This is not taken into account...
+# gemmMSeparatorThickness establish the distance between the GEM and the micromegas (forgetting about the mM thickness)
+gemmMSeparatorThickness = 6.5 # mm. Measured (in sept2025 intervention) distance between GEM frame and micromegas board = 10.5mm, minus 4mm frame thickness = 6.5mm
 gemmMSeparatorExtensionLength = 16.0 # mm
 gemmMSeparatorExtensionWidth = 10.0 # mm
 gemmMSeparatorExtensionDistance = 128.0 # mm, this is the distance from the closer edges of the extensions
