@@ -28,6 +28,7 @@ calibrationShieldingOpenShiftZ = -15.68 # shift in z direction of the open shiel
 
 calibrationExternalTapLength = 10
 calibrationExternalTapRadius = 40
+calibrationExternalTapPosToVesselDistance = -2
 
 calibrationInternalTapLength = 5
 calibrationInternalTapRadius = 25
@@ -118,14 +119,14 @@ def generate_vessel_assembly(name="vessel_assembly", registry=None, left_calibra
         name = "copperVesselSolid_LE",
         obj1 = copperVesselSolid,
         obj2 = calibrationExternalTap,
-        tra2 =[[0, 90*np.pi/180, 0], [vesselRadius + vesselThickness + 0.5*calibrationExternalTapLength - 2, 0, +calibrationHoleZpos]],
+        tra2 =[[0, 90*np.pi/180, 0], [vesselRadius + vesselThickness + 0.5*calibrationExternalTapLength + calibrationExternalTapPosToVesselDistance, 0, +calibrationHoleZpos]],
         registry=reg
     )
     copperVesselSolid_LERE = g4.solid.Union(
         name = "copperVesselSolid_LERE",
         obj1 = copperVesselSolid_LE,
         obj2 = calibrationExternalTap,
-        tra2 = [[0, 90*np.pi/180, 0], [vesselRadius + vesselThickness + 0.5*calibrationExternalTapLength - 2, 0, -calibrationHoleZpos]],
+        tra2 = [[0, 90*np.pi/180, 0], [vesselRadius + vesselThickness + 0.5*calibrationExternalTapLength + calibrationExternalTapPosToVesselDistance, 0, -calibrationHoleZpos]],
         registry=reg
     )
     copperVesselSolid_LERE_LI = g4.solid.Union(
