@@ -1,7 +1,2 @@
-
-This repository serves to store and maintain TREX-DM detector setup geometries.
-
-Repository contents:
-
-- Basic: A ultra-simplified but complete description of the TREX-DM inner detector setup.
-- backgroundModel: complete geometry used for background Model
+# TREX-DM geometry
+This repository is meant to contain all the geometry related files for use in the TREX-DM experiment simulations. As we use [restG4](https://github.com/rest-for-physics/restG4) (an interface to [Geant4](https://geant4.web.cern.ch/) software) for montecarlo simulations of radiation transport, the geometry of the experiment must be written at the endpoint in [gdml](https://indico.cern.ch/event/408139/contributions/979922/attachments/815913/1118019/GDML_CHEP06.pdf) format. 
