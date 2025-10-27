@@ -44,7 +44,7 @@ capSupportColumnThicknessB = 12
 capSupportColumnThicknessC = capSupportColumnLengthC # mm. this is a diameter in reality
 
 capSupportColumnProtrusionAtoB = 2.5 # mm
-capSupportColumnBtoBase = -1 # mm. In the CAD it is -1 mm, but it is adjustable in real life. Negative means that the column B starts below the base, positive means that it starts above the base.
+capSupportColumnBtoBase = -2 # mm. In the CAD it is -1 mm, but it is adjustable in real life. Negative means that the column B starts below the base, positive means that it starts above the base.
 
 capSupportColumnCtoTriangularSupport = 5.45 + 5.05 # mm. 5.05mm should be the columnCradius (6mm) but the hole of the triangular support is smaller (5.05mm radius) in the CAD
 
