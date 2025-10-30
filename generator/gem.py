@@ -207,7 +207,7 @@ def generate_gem_assembly(name="gem_assembly", registry=None, is_right_side=True
         name="gemFrameInnerSquare",
         pX=gemFrameLength - 2*gemFrameWidth,
         pY=gemFrameLength - 2*gemFrameWidth,
-        pZ=gemFrameThickness,
+        pZ=gemFrameThickness + 0.1, # 0.1 to avoid precision issues
         lunit="mm",
         registry=reg
     )
