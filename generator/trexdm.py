@@ -34,16 +34,37 @@ fieldcage_assembly = utils.get_logical_volume_by_name("fieldcage_assembly", reg)
 outerGas_LV = utils.get_logical_volume_by_name("outerGas_LV", reg)
 innerGas_LV = utils.get_logical_volume_by_name("gas_LV", reg)
 
+gem_position_z = vessel.vesselLength/2 - micromegas.capSupportFinalHeight - micromegas.mMBaseThickness  - micromegas.mMBoardThickness - gem.gemmMSeparatorThickness - gem.gemKaptonFoilThickness/2
+
+driftGasGap = (gem_position_z - gem.gemKaptonFoilThickness/2 - gem.gemCopperFoilThickness) - (fieldcage.cathodeKaptonThickness/2 +fieldcage.cathodeCuThickness)
+driftGasSolid = g4.solid.Box(
+    name="driftGasSolid",
+    pX=250,
+    pY=250,
+    pZ=driftGasGap,
+    registry=reg,
+    lunit="mm"
+)
+transferGasSolid = g4.solid.Box(
+    name="transferGasSolid",
+    pX=250,
+    pY=250,
+    pZ=gem.gemmMSeparatorThickness - gem.gemKaptonFoilThickness - gem.gemCopperFoilThickness,
+    registry=reg,
+    lunit="mm"
+)
 
 # Create the physical volumes
+
 gemRight_PV = g4.PhysicalVolume(
     name="gemRight_PV",
     logicalVolume=gem_assembly,
     motherVolume=innerGas_LV,
     rotation=[0, 0, 0],
-    position=[0, 0, -(vessel.vesselLength/2 - micromegas.capSupportFinalHeight - micromegas.mMBaseThickness - gem.gemmMSeparatorThickness - gem.gemKaptonFoilThickness - micromegas.mMBoardThickness)],
+    position=[0, 0, -(vessel.vesselLength/2 - micromegas.capSupportFinalHeight - micromegas.mMBaseThickness - micromegas.mMBoardThickness - gem.gemmMSeparatorThickness - gem.gemKaptonFoilThickness/2)],
     registry=reg
 )
+
 micromegasRight_PV = g4.PhysicalVolume(
     name="micromegasRight_PV",
     logicalVolume=micromegas_assembly,
@@ -52,12 +73,13 @@ micromegasRight_PV = g4.PhysicalVolume(
     position=[0, 0, -(vessel.vesselLength/2 - micromegas.capSupportFinalHeight - 0.5*micromegas.mMBaseThickness)],
     registry=reg
 )
+
 gemLeft_PV = g4.PhysicalVolume(
     name="gemLeft_PV",
     logicalVolume=gem_assembly,
     motherVolume=innerGas_LV,
     rotation=[np.pi, 0, 0],
-    position=[0, 0, vessel.vesselLength/2 - micromegas.capSupportFinalHeight - micromegas.mMBaseThickness - gem.gemmMSeparatorThickness - gem.gemKaptonFoilThickness - micromegas.mMBoardThickness],
+    position=[0, 0, vessel.vesselLength/2 - micromegas.capSupportFinalHeight - micromegas.mMBaseThickness - micromegas.mMBoardThickness - gem.gemmMSeparatorThickness - gem.gemKaptonFoilThickness/2 ],
     registry=reg
 )
 

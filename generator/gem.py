@@ -382,9 +382,9 @@ def generate_gem_assembly(name="gem_assembly", registry=None, is_right_side=True
         registry=reg
     )
 
-    separator1_pos = np.array([ 0, gemmMSeparatorDistance/2 + gemmMSeparatorWidth/2, -side_z_dir*(gemmMSeparatorThickness/2+gemKaptonFoilThickness)])
+    separator1_pos = np.array([ 0, gemmMSeparatorDistance/2 + gemmMSeparatorWidth/2, -side_z_dir*(gemmMSeparatorThickness/2+gemKaptonFoilThickness/2)])
     fixer_wrt_separator1_pos = np.array([ 0, gemmMSeparatorFixerToSeparatorDistance + gemmMSeparatorWidth/2 + gemmMSeparatorFixerWidth/2, side_z_dir*(gemmMSeparatorThickness/2 + gemmMSeparatorFixerThickness/2)])
-    separator2_pos = np.array([ 0, -(gemmMSeparatorDistance/2 + gemmMSeparatorWidth/2), -side_z_dir*(gemmMSeparatorThickness/2+gemKaptonFoilThickness)])
+    separator2_pos = np.array([ 0, -(gemmMSeparatorDistance/2 + gemmMSeparatorWidth/2), -side_z_dir*(gemmMSeparatorThickness/2+gemKaptonFoilThickness/2)])
     fixer_wrt_separator2_pos = np.array([ 0, -(gemmMSeparatorFixerToSeparatorDistance + gemmMSeparatorWidth/2 + gemmMSeparatorFixerWidth/2), side_z_dir*(gemmMSeparatorThickness/2 + gemmMSeparatorFixerThickness/2)])
     
     gemmMSeparator1_PV = g4.PhysicalVolume(
