@@ -15,7 +15,7 @@ reg = g4.Registry()
 galactic = g4.MaterialPredefined("G4_Galactic")
 # world solid and logical
 ws   = g4.solid.Box("ws",5,5,5,reg, "m")
-wl   = g4.LogicalVolume(ws, galactic,"wl",reg)
+world  = g4.LogicalVolume(ws, galactic,"world",reg)
 
 # Generate the assemblies
 shielding.generate_shielding_assembly_by_parts(registry=reg)
@@ -104,7 +104,7 @@ vesselassembly_PV = g4.PhysicalVolume(
 shielding_PV = g4.PhysicalVolume(
     name="shielding_PV",
     logicalVolume=shielding_assembly,
-    motherVolume=wl,
+    motherVolume=world,
     rotation=[0, 0, 0],
     position=[0, 0, 0],
     registry=reg

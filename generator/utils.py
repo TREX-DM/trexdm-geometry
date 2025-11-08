@@ -233,7 +233,7 @@ def transfer_childless_world(origin_registry):
     for name, material in origin_registry.materialDict.items():
         #print(f"Transferring material: {name}")
         target_registry.transferMaterial(material)
-    world_volume_target = g4.LogicalVolume(world_volume.solid, world_volume.material,"wl",target_registry)
+    world_volume_target = g4.LogicalVolume(world_volume.solid, world_volume.material, "world", target_registry)
     get_childless_volume(world_volume, world_volume=world_volume_target, is_world_volume=True, registry=target_registry)
     
     for name, solid in origin_registry.solidDict.items():
