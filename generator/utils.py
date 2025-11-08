@@ -66,7 +66,7 @@ def substract_daughters_from_mother(mother, solid_mother=None, rotation_mother=[
                 name=solid_name,
                 obj1=mother_solid,
                 obj2=daughter_solid,
-                tra2=[final_rot, final_pos],
+                tra2=[final_rot, final_pos.tolist()],
                 registry=reg
             )
         except IdenticalNameError:
