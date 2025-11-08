@@ -24,7 +24,7 @@ calibrationShieldingCutThickness = 3
 calibrationShieldingCutSeparation = 22
 
 calibrationShieldingOpenShiftY = -9.15 # shift in y direction of the open shielding, to avoid the calibration hole
-calibrationShieldingOpenShiftZ = -15.68 # shift in z direction of the open shielding, to avoid the calibration hole
+calibrationShieldingOpenShiftZ = 15.68 # shift in z direction of the open shielding, to avoid the calibration hole
 
 calibrationExternalTapLength = 10
 calibrationExternalTapRadius = 40
@@ -202,7 +202,7 @@ def generate_vessel_assembly(name="vessel_assembly", registry=None, left_calibra
     shiftZ = 0
     if left_calibration_is_open:
         shiftY = calibrationShieldingOpenShiftY
-        shiftZ = calibrationShieldingOpenShiftZ
+        shiftZ = -calibrationShieldingOpenShiftZ
     vesselSolid_2 = g4.solid.Union(
         name = "vesselSolid_2",
         obj1 = copperVesselSolid_LERE_LIRI,
