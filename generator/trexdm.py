@@ -36,26 +36,60 @@ innerGas_LV = utils.get_logical_volume_by_name("gas_LV", reg)
 
 gem_position_z = vessel.vesselLength/2 - micromegas.capSupportFinalHeight - micromegas.mMBaseThickness  - micromegas.mMBoardThickness - gem.gemmMSeparatorThickness - gem.gemKaptonFoilThickness/2
 
-driftGasGap = (gem_position_z - gem.gemKaptonFoilThickness/2 - gem.gemCopperFoilThickness) - (fieldcage.cathodeKaptonThickness/2 +fieldcage.cathodeCuThickness)
+driftGasGap = (gem_position_z - gem.gemKaptonFoilThickness/2 - gem.gemCopperFoilThickness) - (fieldcage.cathodeKaptonThickness/2 + fieldcage.cathodeCuThickness)
+transferGasGap = gem.gemmMSeparatorThickness - gem.gemCopperFoilThickness
 driftGasSolid = g4.solid.Box(
     name="driftGasSolid",
-    pX=250,
-    pY=250,
+    pX=206, # 206 mm because cathode frame is inside active gas volume so I need to avoid that overlap
+    pY=206,
     pZ=driftGasGap,
     registry=reg,
     lunit="mm"
 )
 transferGasSolid = g4.solid.Box(
     name="transferGasSolid",
-    pX=250,
-    pY=250,
-    pZ=gem.gemmMSeparatorThickness - gem.gemKaptonFoilThickness - gem.gemCopperFoilThickness,
+    pX=206,
+    pY=206,
+    pZ=transferGasGap,
     registry=reg,
     lunit="mm"
 )
 
-# Create the physical volumes
+sensitiveGasOneSide = g4.solid.Union(
+    name="sensitiveGasOneSide",
+    obj1=driftGasSolid,
+    obj2=transferGasSolid,
+    tra2=[[0, 0, 0], [0, 0, driftGasGap/2 + gem.gemCopperFoilThickness*2 + gem.gemKaptonFoilThickness + transferGasGap/2]],
+    registry=reg
+)
 
+sensitiveGasBothSides = g4.solid.Union(
+    name="sensitiveGasBothSides",
+    obj1=sensitiveGasOneSide,
+    obj2=sensitiveGasOneSide,
+    tra2=[[0, np.pi, 0], [0, 0, -(driftGasGap/2 + fieldcage.cathodeKaptonThickness/2 + fieldcage.cathodeCuThickness)]],
+    registry=reg
+)
+
+gas_material = innerGas_LV.material
+sensitiveGasOneSide_LV = g4.LogicalVolume(
+    name="sensitiveGasOneSide_LV",
+    solid=sensitiveGasOneSide,
+    material=gas_material,
+    registry=reg
+)
+
+sensitiveGasLeft_PV = g4.PhysicalVolume(
+    name="sensitiveGasLeft_PV",
+    logicalVolume=sensitiveGasOneSide_LV,
+    motherVolume=innerGas_LV,
+    rotation=[0, 0, 0],
+    position=[0, 0, driftGasGap/2 + fieldcage.cathodeKaptonThickness/2 + fieldcage.cathodeCuThickness],
+    registry=reg
+)
+
+# Create the physical volumes
+"""
 gemRight_PV = g4.PhysicalVolume(
     name="gemRight_PV",
     logicalVolume=gem_assembly,
@@ -64,7 +98,7 @@ gemRight_PV = g4.PhysicalVolume(
     position=[0, 0, -(vessel.vesselLength/2 - micromegas.capSupportFinalHeight - micromegas.mMBaseThickness - micromegas.mMBoardThickness - gem.gemmMSeparatorThickness - gem.gemKaptonFoilThickness/2)],
     registry=reg
 )
-
+"""
 micromegasRight_PV = g4.PhysicalVolume(
     name="micromegasRight_PV",
     logicalVolume=micromegas_assembly,
@@ -119,12 +153,52 @@ fieldcage_PV = g4.PhysicalVolume(
     registry=reg
 )
 
-reg.setWorld(wl.name)
+
+reg.setWorld(world.name)
+
+
+import argparse
+parser = argparse.ArgumentParser()
+parser.add_argument("--childless", action="store_true", default=False)
+parser.add_argument("-f", "--file", type=str, default="trexdm.gdml")
+
+args = parser.parse_args()
+
 w = pyg4ometry.gdml.Writer()
 w.addDetector(reg)
-w.write('trexdm.gdml')
+w.write(args.file)
 
-v = pyg4ometry.visualisation.VtkViewerColouredMaterial()
-v.addLogicalVolumeRecursive(wl)
-v.addAxes(1000)
-v.view()
+if args.childless:
+    print("ORIGINAL WL DAUGHTERS LIST:")
+    for daughter in world.daughterVolumes:
+        print(f"{daughter.name}")
+    print("END OF ORIGINAL WL DAUGHTERS LIST")
+
+    """
+    reg_noDaughters = g4.Registry()
+
+    # Create a new registry without daughters
+    for name, solid in reg.solidDict.items():
+        reg_noDaughters.transferSolid(solid)
+    for name, material in reg.materialDict.items():
+        reg_noDaughters.transferMaterial(material)
+    world_noDaughters = g4.LogicalVolume(ws, galactic,"world",reg_noDaughters)
+    utils.get_childless_volume(world, world_volume=world_noDaughters, registry=reg_noDaughters)
+
+    reg_noDaughters.setWorld(world_noDaughters.name)
+    """
+
+    reg_noDaughters = utils.transfer_childless_world(reg)
+    world_noDaughters = reg_noDaughters.getWorldVolume()
+    w = pyg4ometry.gdml.Writer()
+    w.addDetector(reg_noDaughters)
+    name = args.file.split(".gdml")[0] + "_noDaughters.gdml"
+    w.write(name)
+
+    """
+    gas_wo_daughters = utils.get_solid_by_name("gasSolid-0-17", reg_noDaughters)
+    v = pyg4ometry.visualisation.VtkViewerColouredMaterial()
+    v.addSolid(gas_wo_daughters)
+    v.addAxes(1000)
+    v.view()
+    """
