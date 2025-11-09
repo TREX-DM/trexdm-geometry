@@ -33,7 +33,7 @@ calibrationExternalTapPosToVesselDistance = -2
 calibrationInternalTapLength = 5
 calibrationInternalTapRadius = 25
 
-def generate_vessel_assembly(name="vessel_assembly", registry=None, left_calibration_is_open=True, right_calibration_is_open=False):
+def generate_vessel_assembly(name="vessel_assembly", registry=None, left_calibration_is_open=True, right_calibration_is_open=False, gas="Argon1%Isobutane1.1bar"):
     """
     Generates the vessel geometry for the TREX-DM detector.
     Returns a Geant4 Registry containing the vessel geometry.
@@ -49,7 +49,98 @@ def generate_vessel_assembly(name="vessel_assembly", registry=None, left_calibra
     """
     copper = g4.nist_material_2geant4Material("G4_Cu")
     air = g4.nist_material_2geant4Material("G4_AIR")
-    
+
+    argon_element = g4.nist_element_2geant4Element("G4_Ar")
+    argon = g4.MaterialCompound("ArgonGas",
+                                density=1.63897,
+                                state="gas",
+                                #temperature=293.15,
+                                #temperature_unit="K",
+                                #pressure=1,
+                                #pressure_unit="bar",
+                                number_of_components=1,
+                                registry=reg)
+    argon.add_element_massfraction(argon_element, 1)
+    neon_element = g4.nist_element_2geant4Element("G4_Ne")
+    neon = g4.MaterialCompound("NeonGas",
+                                density=0.8282,
+                                state="gas",
+                                #temperature=293.15,
+                                #temperature_unit="K",
+                                #pressure=1,
+                                #pressure_unit="bar",
+                                number_of_components=1,
+                                registry=reg)
+    neon.add_element_massfraction(neon_element, 1)
+
+    hydrogen = g4.nist_material_2geant4Material("G4_H")
+    carbon = g4.nist_material_2geant4Material("G4_C")
+    isobutanegas = g4.MaterialCompound("IsobutaneGas",
+                                       density=2.38467,
+                                       #temperature=293.15,
+                                       #temperature_unit="K",
+                                      #pressure=1,
+                                       #pressure_unit="bar",
+                                       number_of_components=2,
+                                       state="gas",
+                                       registry=reg)
+    isobutanegas.add_material(hydrogen, 0.1734180721461297)
+    isobutanegas.add_material(carbon, 0.8265819278538703)
+    if gas == "Argon1%Isobutane1bar":
+        gas_material = g4.MaterialCompound("Argon1%Isobutane1bar",
+                                           density=1.61882,
+                                           state="gas",
+                                           #temperature=298.15,
+                                           #temperature_unit="K",
+                                           #pressure=1,
+                                           #pressure_unit="bar",
+                                           number_of_components=2,
+                                           registry=reg
+                                           )
+        gas_material.add_material(argon, 0.9855)
+        gas_material.add_material(isobutanegas, 0.0145)
+    elif gas == "Argon1%Isobutane1.1bar":
+        gas_material = g4.MaterialCompound("Argon1%Isobutane1.1bar",
+                                           density=1.78070,
+                                           state="gas",
+                                           #temperature=298.15,
+                                           #temperature_unit="K",
+                                           #pressure=1.1,
+                                           #pressure_unit="bar",
+                                           number_of_components=2,
+                                           registry=reg
+                                           )
+        gas_material.add_material(argon, 0.9855)
+        gas_material.add_material(isobutanegas, 0.0145)
+    elif gas == "Argon2%Isobutane1.1bar":
+        gas_material = g4.MaterialCompound("Argon2%Isobutane1.1bar",
+                                           density=1.78877,
+                                           state="gas",
+                                           #temperature=298.15,
+                                           #temperature_unit="K",
+                                           #pressure=1.1,
+                                           #pressure_unit="bar",
+                                           number_of_components=2,
+                                           registry=reg
+                                           )
+        gas_material.add_material(argon, 0.9711)
+        gas_material.add_material(isobutanegas, 0.0289)
+    elif gas == "Neon2%Isobutane1.1bar":
+        gas_material = g4.MaterialCompound("Neon2%Isobutane1.1bar",
+                                           density=0.91108,
+                                           state="gas",
+                                           #temperature=298.15,
+                                           #temperature_unit="K",
+                                           #pressure=1.1,
+                                           #pressure_unit="bar",
+                                           number_of_components=2,
+                                           registry=reg
+                                           )
+        gas_material.add_material(neon, 0.9445)
+        gas_material.add_material(isobutanegas, 0.0555)
+    else:
+        raise ValueError(f"Gas mixture '{gas}' is not defined.")
+
     copperVesselTubeSolid = g4.solid.Tubs(
         name = "copperVesselTubeSolid",
         pRMin=vesselRadius,
@@ -264,7 +355,7 @@ def generate_vessel_assembly(name="vessel_assembly", registry=None, left_calibra
     gas_LV = g4.LogicalVolume(
         name="gas_LV",
         solid=gasSolid,
-        material=air,
+        material=gas_material,
         registry=reg
     )
         
