@@ -19,8 +19,8 @@ world  = g4.LogicalVolume(ws, galactic,"world",reg)
 
 # Generate the assemblies
 shielding.generate_shielding_assembly_by_parts(registry=reg)
-vessel.generate_vessel_assembly(registry=reg)
-micromegas.generate_micromegas_assembly(registry=reg, is_right_side=True)
+vessel.generate_vessel_assembly(registry=reg, left_calibration_is_open=True, right_calibration_is_open=True, gas="Argon1%Isobutane1.1bar")
+micromegas.generate_micromegas_assembly(registry=reg, is_right_side=True, simple_geometry=True)
 gem.generate_gem_assembly(registry=reg, is_right_side=True)
 fieldcage.generate_fieldcage_assembly(registry=reg)
 
