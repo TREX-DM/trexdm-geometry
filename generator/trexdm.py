@@ -12,7 +12,7 @@ import utils
 
 reg = g4.Registry()
 
-galactic = g4.MaterialPredefined("G4_Galactic")
+galactic = g4.nist_material_2geant4Material("G4_Galactic")
 # world solid and logical
 ws   = g4.solid.Box("ws",5,5,5,reg, "m")
 world  = g4.LogicalVolume(ws, galactic,"world",reg)
