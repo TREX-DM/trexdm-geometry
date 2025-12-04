@@ -952,23 +952,6 @@ def generate_fieldcage_assembly(name="fieldcage_assembly", registry=None, cathod
             registry=reg
         )
 
-    resistorAssemblyLeft_PV = g4.PhysicalVolume(
-        name="resistorAssemblyLeft_PV",
-        rotation=[0, 0, 0],
-        position=[(cornersSlotHeight/2-resistorShieldingLength/2), cornersInnerLength/2+resistorShieldingWidth/2, (sideSeparatorThickness/2 + cathodeSideFrameThickness + resistorShieldingThickness/2)],
-        logicalVolume=resistorAssembly,
-        motherVolume=fieldcage_assembly,
-        registry=reg
-    )
-
-    resistorAssemblyRight_PV = g4.PhysicalVolume(
-        name="resistorAssemblyRight_PV",
-        rotation=[0, np.pi, 0],
-        position=[-(cornersSlotHeight/2-resistorShieldingLength/2), cornersInnerLength/2+resistorShieldingWidth/2, -(sideSeparatorThickness/2 + cathodeSideFrameThickness + resistorShieldingThickness/2)],
-        logicalVolume=resistorAssembly,
-        motherVolume=fieldcage_assembly,
-        registry=reg
-    )
 
     supportCorners_PV = g4.PhysicalVolume(
         name="supportCorners_PV",
@@ -1066,6 +1049,23 @@ def generate_fieldcage_assembly(name="fieldcage_assembly", registry=None, cathod
     )
     """
 
+    resistorAssemblyLeft_PV = g4.PhysicalVolume(
+        name="resistorAssemblyLeft_PV",
+        rotation=[0, 0, 0],
+        position=[(cornersSlotHeight/2-resistorShieldingLength/2), cornersInnerLength/2+resistorShieldingWidth/2, (sideSeparatorThickness/2 + cathodeSideFrameThickness + resistorShieldingThickness/2)],
+        logicalVolume=resistorAssembly,
+        motherVolume=fieldcage_assembly,
+        registry=reg
+    )
+
+    resistorAssemblyRight_PV = g4.PhysicalVolume(
+        name="resistorAssemblyRight_PV",
+        rotation=[0, np.pi, 0],
+        position=[-(cornersSlotHeight/2-resistorShieldingLength/2), cornersInnerLength/2+resistorShieldingWidth/2, -(sideSeparatorThickness/2 + cathodeSideFrameThickness + resistorShieldingThickness/2)],
+        logicalVolume=resistorAssembly,
+        motherVolume=fieldcage_assembly,
+        registry=reg
+    )
     return reg
 
 
