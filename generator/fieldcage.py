@@ -9,6 +9,11 @@ cathodeLength = 206 # mm
 cathodeCuThickness = 0.002 # 2um
 cathodeKaptonThickness = 0.0125 # 12.5um
 
+cathodeWireRadius = 0.25 # mm
+cathodeWireLength = 206 # mm
+cathodeWireNumber = 10 # wires per direction
+cathodeDistanceBetweenWires = 20  # mm
+
 cathodeFrameLength = 236 # mm
 cathodeFrameInnerLength = 206 # mm
 cathodeFrameThickness = 10 # 2um
@@ -113,7 +118,7 @@ handleSlotWidth = 20
 vacuumCylinderLength = 45 # this is to much, as it extrudes the gas volume
 vacuumCylinderRadius = 20 # mm
 
-def generate_fieldcage_assembly(name="fieldcage_assembly", registry=None):
+def generate_fieldcage_assembly(name="fieldcage_assembly", registry=None, cathode_type="wired"):
     """
     Generate the field cage assembly for the TREX-DM geometry.
     """
@@ -135,39 +140,56 @@ def generate_fieldcage_assembly(name="fieldcage_assembly", registry=None):
     teflon = g4.nist_material_2geant4Material("G4_TEFLON")
     kapton = g4.nist_material_2geant4Material("G4_KAPTON")
 
-    # Creathe the cathode
-    cathodeFoilCu = g4.solid.Box(
-        name="cathodeFoilCu",
-        pX=cathodeLength,
-        pY=cathodeLength,
-        pZ=cathodeCuThickness,
-        lunit="mm",
-        registry=reg
-    )
-    cathodeFoilKapton = g4.solid.Box(
-        name="cathodeFoilKapton",
-        pX=cathodeLength,
-        pY=cathodeLength,
-        pZ=cathodeKaptonThickness,
-        lunit="mm",
-        registry=reg
-    )
-    """
-    cathodeFoil0 = g4.solid.Union(
-        name="cathodeFoil",
-        obj1=cathodeFoilKapton,
-        obj2=cathodeFoilCu,
-        tra2=[[0, 0, 0], [0, 0, cathodeKaptonThickness/2]],
-        registry=reg
-    )
-    cathodeFoil = g4.solid.Union(
-        name="cathodeFoil",
-        obj1=cathodeFoil0,
-        obj2=cathodeFoilCu,
-        tra2=[[0, 0, 0], [0, 0, -cathodeCuThickness/2]],
-        registry=reg
-    )
-    """
+    if cathode_type == "plain":
+        # Create the the cathode
+        cathodeFoilCu = g4.solid.Box(
+            name="cathodeFoilCu",
+            pX=cathodeLength,
+            pY=cathodeLength,
+            pZ=cathodeCuThickness,
+            lunit="mm",
+            registry=reg
+        )
+        cathodeFoilKapton = g4.solid.Box(
+            name="cathodeFoilKapton",
+            pX=cathodeLength,
+            pY=cathodeLength,
+            pZ=cathodeKaptonThickness,
+            lunit="mm",
+            registry=reg
+        )
+        """
+        cathodeFoil0 = g4.solid.Union(
+            name="cathodeFoil",
+            obj1=cathodeFoilKapton,
+            obj2=cathodeFoilCu,
+            tra2=[[0, 0, 0], [0, 0, cathodeKaptonThickness/2]],
+            registry=reg
+        )
+        cathodeFoil = g4.solid.Union(
+            name="cathodeFoil",
+            obj1=cathodeFoil0,
+            obj2=cathodeFoilCu,
+            tra2=[[0, 0, 0], [0, 0, -cathodeCuThickness/2]],
+            registry=reg
+        )
+        """
+    elif cathode_type == "wired":
+        cathodeSingleWire = g4.solid.Tubs(
+            name="cathodeSingleWire",
+            pRMin=0,
+            pRMax=cathodeWireRadius,
+            pDz=cathodeWireLength,
+            pSPhi=0,
+            pDPhi=360,
+            aunit="deg",
+            lunit="mm",
+            registry=reg
+        )
+
+    else:
+        raise ValueError("Invalid cathode type. Choose either 'plain' or 'wired'.")
+
     cathodeFrame0 = g4.solid.Box(
         name="cathodeFrame0",
         pX=cathodeFrameLength,
@@ -616,18 +638,29 @@ def generate_fieldcage_assembly(name="fieldcage_assembly", registry=None):
     # Create the field cage assembly
     fieldcage_assembly = g4.AssemblyVolume(name=name, registry=reg)
     
-    cathodeFoilCu_LV = g4.LogicalVolume(
-        name="cathodeFoilCu_LV",
-        solid=cathodeFoilCu,
-        material=copper,
-        registry=reg
-    )
-    cathodeFoilKapton_LV = g4.LogicalVolume(
-        name="cathodeFoilKapton_LV",
-        solid=cathodeFoilKapton,
-        material=kapton,
-        registry=reg
-    )
+    if cathode_type == "plain":
+        cathodeFoilCu_LV = g4.LogicalVolume(
+            name="cathodeFoilCu_LV",
+            solid=cathodeFoilCu,
+            material=copper,
+            registry=reg
+        )
+        cathodeFoilKapton_LV = g4.LogicalVolume(
+            name="cathodeFoilKapton_LV",
+            solid=cathodeFoilKapton,
+            material=kapton,
+            registry=reg
+        )
+    elif cathode_type == "wired":
+        cathodeSingleWire_LV = g4.LogicalVolume(
+            name="cathodeSingleWire_LV",
+            solid=cathodeSingleWire,
+            material=copper,
+            registry=reg
+        )
+    else:
+        raise ValueError("Invalid cathode type. Choose either 'plain' or 'wired'.")
+
     cathodeFrame_LV = g4.LogicalVolume(
         name="cathodeFrame_LV",
         solid=cathodeFrame,
@@ -756,31 +789,57 @@ def generate_fieldcage_assembly(name="fieldcage_assembly", registry=None):
         registry=reg
     )
 
-    cathodeFoilKapton_PV = g4.PhysicalVolume(
-        name="cathodeFoilKapton_PV",
-        rotation=[0, 0, 0],
-        position=[0, 0, 0],
-        logicalVolume=cathodeFoilKapton_LV,
-        motherVolume=fieldcage_assembly,
-        registry=reg
-    )
-        
-    cathodeFoilCuLeft_PV = g4.PhysicalVolume(
-        name="cathodeFoilCuLeft_PV",
-        rotation=[0, 0, 0],
-        position=[0, 0, cathodeKaptonThickness/2],
-        logicalVolume=cathodeFoilCu_LV,
-        motherVolume=fieldcage_assembly,
-        registry=reg
-    )
-    cathodeFoilCuRight_PV = g4.PhysicalVolume(
-        name="cathodeFoilCuRight_PV",
-        rotation=[0, 0, 0],
-        position=[0, 0, -cathodeKaptonThickness/2],
-        logicalVolume=cathodeFoilCu_LV,
-        motherVolume=fieldcage_assembly,
-        registry=reg
-    )
+    if cathode_type == "plain":
+        cathodeFoilKapton_PV = g4.PhysicalVolume(
+            name="cathodeFoilKapton_PV",
+            rotation=[0, 0, 0],
+            position=[0, 0, 0],
+            logicalVolume=cathodeFoilKapton_LV,
+            motherVolume=fieldcage_assembly,
+            registry=reg
+        )
+            
+        cathodeFoilCuLeft_PV = g4.PhysicalVolume(
+            name="cathodeFoilCuLeft_PV",
+            rotation=[0, 0, 0],
+            position=[0, 0, cathodeKaptonThickness/2],
+            logicalVolume=cathodeFoilCu_LV,
+            motherVolume=fieldcage_assembly,
+            registry=reg
+        )
+        cathodeFoilCuRight_PV = g4.PhysicalVolume(
+            name="cathodeFoilCuRight_PV",
+            rotation=[0, 0, 0],
+            position=[0, 0, -cathodeKaptonThickness/2],
+            logicalVolume=cathodeFoilCu_LV,
+            motherVolume=fieldcage_assembly,
+            registry=reg
+        )
+    elif cathode_type == "wired":
+        first_wire_distance_to_frame = (cathodeLength - (cathodeWireNumber-1)*cathodeDistanceBetweenWires) / 2
+        z_shift = cathodeWireRadius # to avoid overlap between x wires and y wires
+        for i in range(cathodeWireNumber):
+            wire_position_XorY = cathodeLength/2 - first_wire_distance_to_frame - i * cathodeDistanceBetweenWires
+
+            g4.PhysicalVolume(
+                name=f"cathodeWireX{i+1}_PV",
+                rotation=[90*np.pi/180, 0, 0],
+                position = [wire_position_XorY, 0, -z_shift],
+                logicalVolume=cathodeSingleWire_LV,
+                motherVolume=fieldcage_assembly,
+                registry=reg
+            )
+            g4.PhysicalVolume(
+                name=f"cathodeWireY{i+1}_PV",
+                rotation=[0, 90*np.pi/180, 0],
+                position = [0, wire_position_XorY, z_shift],
+                logicalVolume=cathodeSingleWire_LV,
+                motherVolume=fieldcage_assembly,
+                registry=reg
+            )
+    else:
+        raise ValueError("Invalid cathode type. Choose either 'plain' or 'wired'.")
+
     cathodeFrame_PV = g4.PhysicalVolume(
         name="cathodeFrame_PV",
         rotation=[0, 0, 0],
@@ -1018,7 +1077,7 @@ if __name__ == "__main__":
     parser.add_argument("--gdml", action="store_true")
     args = parser.parse_args()
     
-    reg = generate_fieldcage_assembly()
+    reg = generate_fieldcage_assembly(cathode_type="wired")
     fieldcage_assembly = utils.get_logical_volume_by_name("fieldcage_assembly", reg)
 
     if args.gdml:

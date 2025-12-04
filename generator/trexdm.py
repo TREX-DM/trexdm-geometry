@@ -10,6 +10,14 @@ import micromegas
 import fieldcage
 import utils
 
+
+LEFT_CALIBRATION_OPEN = True
+RIGHT_CALIBRATION_OPEN = True
+GAS = "Neon2%Isobutane1.1bar"
+CATHODE_TYPE = "wired"  # "wired" or "plain"
+
+
+
 reg = g4.Registry()
 
 galactic = g4.nist_material_2geant4Material("G4_Galactic")
@@ -19,10 +27,10 @@ world  = g4.LogicalVolume(ws, galactic,"world",reg)
 
 # Generate the assemblies
 shielding.generate_shielding_assembly_by_parts(registry=reg)
-vessel.generate_vessel_assembly(registry=reg, left_calibration_is_open=True, right_calibration_is_open=True, gas="Argon1%Isobutane1.1bar")
+vessel.generate_vessel_assembly(registry=reg, left_calibration_is_open=LEFT_CALIBRATION_OPEN, right_calibration_is_open=RIGHT_CALIBRATION_OPEN, gas=GAS)
 micromegas.generate_micromegas_assembly(registry=reg, is_right_side=True, simple_geometry=True)
 gem.generate_gem_assembly(registry=reg, is_right_side=True)
-fieldcage.generate_fieldcage_assembly(registry=reg)
+fieldcage.generate_fieldcage_assembly(registry=reg, cathode_type=CATHODE_TYPE)
 
 shielding_assembly = utils.get_logical_volume_by_name("shielding_assembly", reg)
 vessel_assembly = utils.get_logical_volume_by_name("vessel_assembly", reg)
@@ -36,7 +44,12 @@ innerGas_LV = utils.get_logical_volume_by_name("gas_LV", reg)
 
 gem_position_z = vessel.vesselLength/2 - micromegas.capSupportFinalHeight - micromegas.mMBaseThickness  - micromegas.mMBoardThickness - gem.gemmMSeparatorThickness - gem.gemKaptonFoilThickness/2
 
-driftGasGap = (gem_position_z - gem.gemKaptonFoilThickness/2 - gem.gemCopperFoilThickness) - (fieldcage.cathodeKaptonThickness/2 + fieldcage.cathodeCuThickness)
+if CATHODE_TYPE == "plain":
+    cathodeLeftSideThickness = fieldcage.cathodeKaptonThickness + fieldcage.cathodeCuThickness*2
+else:  # wired cathode
+    cathodeLeftSideThickness = fieldcage.cathodeWireRadius*2 #fieldcage.cathodeKaptonThickness + fieldcage.cathodeCuThickness*2 + fieldcage.cathodeWireRadius*2
+
+driftGasGap = (gem_position_z - gem.gemKaptonFoilThickness/2 - gem.gemCopperFoilThickness) - cathodeLeftSideThickness #(fieldcage.cathodeKaptonThickness/2 + fieldcage.cathodeCuThickness)
 transferGasGap = gem.gemmMSeparatorThickness - gem.gemCopperFoilThickness
 driftGasSolid = g4.solid.Box(
     name="driftGasSolid",
@@ -67,7 +80,7 @@ sensitiveGasBothSides = g4.solid.Union(
     name="sensitiveGasBothSides",
     obj1=sensitiveGasOneSide,
     obj2=sensitiveGasOneSide,
-    tra2=[[0, np.pi, 0], [0, 0, -(driftGasGap/2 + fieldcage.cathodeKaptonThickness/2 + fieldcage.cathodeCuThickness)]],
+    tra2=[[0, np.pi, 0], [0, 0, -(driftGasGap/2 + cathodeLeftSideThickness)]],
     registry=reg
 )
 
@@ -84,7 +97,7 @@ sensitiveGasLeft_PV = g4.PhysicalVolume(
     logicalVolume=sensitiveGasOneSide_LV,
     motherVolume=innerGas_LV,
     rotation=[0, 0, 0],
-    position=[0, 0, driftGasGap/2 + fieldcage.cathodeKaptonThickness/2 + fieldcage.cathodeCuThickness],
+    position=[0, 0, driftGasGap/2 + cathodeLeftSideThickness],
     registry=reg
 )
 
