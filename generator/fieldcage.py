@@ -724,7 +724,7 @@ def generate_fieldcage_assembly(name="fieldcage_assembly", registry=None, cathod
     )
     resistorAssembly = g4.AssemblyVolume(name="resistorAssembly", registry=reg)
     resistorShielding_PV = g4.PhysicalVolume(
-        name="resistorShielding_PV",
+        name="resistorShielding",
         rotation=[0, 0, 0],
         position=[0, 0, 0],
         logicalVolume=resistorShielding_LV,
@@ -732,7 +732,7 @@ def generate_fieldcage_assembly(name="fieldcage_assembly", registry=None, cathod
         registry=reg
     )
     resistor_PV = g4.PhysicalVolume(
-        name="resistor_PV",
+        name="resistor",
         rotation=[0, 0, 0],
         position=[-resistorShieldingLength/2 + resistorDistanceToShieldingSlotEdge + resistorLength/2, resistorShieldingSlotWidthShift - resistorShieldingSlotWidth/2 + resistorWidth/2, 0],
         logicalVolume=resistor_LV,
@@ -791,7 +791,7 @@ def generate_fieldcage_assembly(name="fieldcage_assembly", registry=None, cathod
 
     if cathode_type == "plain":
         cathodeFoilKapton_PV = g4.PhysicalVolume(
-            name="cathodeFoilKapton_PV",
+            name="cathodeFoilKapton",
             rotation=[0, 0, 0],
             position=[0, 0, 0],
             logicalVolume=cathodeFoilKapton_LV,
@@ -800,7 +800,7 @@ def generate_fieldcage_assembly(name="fieldcage_assembly", registry=None, cathod
         )
             
         cathodeFoilCuLeft_PV = g4.PhysicalVolume(
-            name="cathodeFoilCuLeft_PV",
+            name="cathodeFoilCuLeft",
             rotation=[0, 0, 0],
             position=[0, 0, cathodeKaptonThickness/2],
             logicalVolume=cathodeFoilCu_LV,
@@ -808,7 +808,7 @@ def generate_fieldcage_assembly(name="fieldcage_assembly", registry=None, cathod
             registry=reg
         )
         cathodeFoilCuRight_PV = g4.PhysicalVolume(
-            name="cathodeFoilCuRight_PV",
+            name="cathodeFoilCuRight",
             rotation=[0, 0, 0],
             position=[0, 0, -cathodeKaptonThickness/2],
             logicalVolume=cathodeFoilCu_LV,
@@ -822,7 +822,7 @@ def generate_fieldcage_assembly(name="fieldcage_assembly", registry=None, cathod
             wire_position_XorY = cathodeLength/2 - first_wire_distance_to_frame - i * cathodeDistanceBetweenWires
 
             g4.PhysicalVolume(
-                name=f"cathodeWireX{i+1}_PV",
+                name=f"cathodeWireX{i+1}",
                 rotation=[90*np.pi/180, 0, 0],
                 position = [wire_position_XorY, 0, -z_shift],
                 logicalVolume=cathodeSingleWire_LV,
@@ -830,7 +830,7 @@ def generate_fieldcage_assembly(name="fieldcage_assembly", registry=None, cathod
                 registry=reg
             )
             g4.PhysicalVolume(
-                name=f"cathodeWireY{i+1}_PV",
+                name=f"cathodeWireY{i+1}",
                 rotation=[0, 90*np.pi/180, 0],
                 position = [0, wire_position_XorY, z_shift],
                 logicalVolume=cathodeSingleWire_LV,
@@ -841,7 +841,7 @@ def generate_fieldcage_assembly(name="fieldcage_assembly", registry=None, cathod
         raise ValueError("Invalid cathode type. Choose either 'plain' or 'wired'.")
 
     cathodeFrame_PV = g4.PhysicalVolume(
-        name="cathodeFrame_PV",
+        name="cathodeFrame",
         rotation=[0, 0, 0],
         position=[0, 0, 0],
         logicalVolume=cathodeFrame_LV,
@@ -850,7 +850,7 @@ def generate_fieldcage_assembly(name="fieldcage_assembly", registry=None, cathod
     )
     
     cathodeSideFrameLeft_PV = g4.PhysicalVolume(
-        name="cathodeSideFrameLeft_PV",
+        name="cathodeSideFrameLeft",
         rotation=[0, 0, 0],
         position=[0, 0, +(sideSeparatorThickness/2 + cathodeSideFrameThickness/2)],
         logicalVolume=cathodeSideFrame_LV,
@@ -858,7 +858,7 @@ def generate_fieldcage_assembly(name="fieldcage_assembly", registry=None, cathod
         registry=reg
     )
     cathodeSideFrameRight_PV = g4.PhysicalVolume(
-        name="cathodeSideFrameRight_PV",
+        name="cathodeSideFrameRight",
         rotation=[0, 0, 0],
         position=[0, 0, -(sideSeparatorThickness/2 + cathodeSideFrameThickness/2)],
         logicalVolume=cathodeSideFrame_LV,
@@ -866,7 +866,7 @@ def generate_fieldcage_assembly(name="fieldcage_assembly", registry=None, cathod
         registry=reg
     )
     sideSeparator_PV = g4.PhysicalVolume(
-        name="sideSeparator_PV",
+        name="sideSeparator",
         rotation=[0, 0, 0],
         position=[0, 0, 0],
         logicalVolume=sideSeparator_LV,
@@ -875,7 +875,7 @@ def generate_fieldcage_assembly(name="fieldcage_assembly", registry=None, cathod
     )
     
     cathodeFeedthrough_PV = g4.PhysicalVolume(
-        name="cathodeFeedthrough_PV",
+        name="cathodeFeedthrough",
         rotation=[0, 0, 0],
         position=[-(cathodeSideFrameLength/2 - cathodeFeedThroughWidth/2), 0, 0],
         logicalVolume=cathodeFeedthrough_LV,
@@ -884,7 +884,7 @@ def generate_fieldcage_assembly(name="fieldcage_assembly", registry=None, cathod
     )
     
     cornersLeft_PV = g4.PhysicalVolume(
-        name="cornersLeft_PV",
+        name="cornersLeft",
         rotation=[0, 0, 0],
         position=[0, 0, +(sideSeparatorThickness/2 + cathodeSideFrameThickness + cornersThickness/2)],
         logicalVolume=corners_LV,
@@ -892,7 +892,7 @@ def generate_fieldcage_assembly(name="fieldcage_assembly", registry=None, cathod
         registry=reg
     )
     cornersRight_PV = g4.PhysicalVolume(
-        name="cornersRight_PV",
+        name="cornersRight",
         rotation=[0, 0, 0],
         position=[0, 0, -(sideSeparatorThickness/2 + cathodeSideFrameThickness + cornersThickness/2)],
         logicalVolume=corners_LV,
@@ -900,7 +900,7 @@ def generate_fieldcage_assembly(name="fieldcage_assembly", registry=None, cathod
         registry=reg
     )
     closerFrameLeft_PV = g4.PhysicalVolume(
-        name="closerFrameLeft_PV",
+        name="closerFrameLeft",
         rotation=[0, 0, 0],
         position=[0, 0, +(sideSeparatorThickness/2 + cathodeSideFrameThickness + cornersThickness + closerFrameThickness/2)],
         logicalVolume=closerFrame_LV,
@@ -908,7 +908,7 @@ def generate_fieldcage_assembly(name="fieldcage_assembly", registry=None, cathod
         registry=reg
     )
     closerFrameRight_PV = g4.PhysicalVolume(
-        name="closerFrameRight_PV",
+        name="closerFrameRight",
         rotation=[0, 0, 0],
         position=[0, 0, -(sideSeparatorThickness/2 + cathodeSideFrameThickness + cornersThickness + closerFrameThickness/2)],
         logicalVolume=closerFrame_LV,
@@ -917,7 +917,7 @@ def generate_fieldcage_assembly(name="fieldcage_assembly", registry=None, cathod
     )
     
     ringsBoardLeft_PV = g4.PhysicalVolume(
-        name="ringsBoardLeft_PV",
+        name="ringsBoardLeft",
         rotation=[0, 0, 0],
         position=[0, 0, +(sideSeparatorThickness/2 + cathodeSideFrameThickness + ringsBoardThickness/2)],
         logicalVolume=ringsBoard_LV,
@@ -925,7 +925,7 @@ def generate_fieldcage_assembly(name="fieldcage_assembly", registry=None, cathod
         registry=reg
     )
     ringsBoardRight_PV = g4.PhysicalVolume(
-        name="ringsBoardRight_PV",
+        name="ringsBoardRight",
         rotation=[0, 0, 0],
         position=[0, 0, -(sideSeparatorThickness/2 + cathodeSideFrameThickness + ringsBoardThickness/2)],
         logicalVolume=ringsBoard_LV,
@@ -936,7 +936,7 @@ def generate_fieldcage_assembly(name="fieldcage_assembly", registry=None, cathod
     for i in range(ringNumber):
         distance = (ringSeparation + ringThickness) * i # to the beginning of the board
         g4.PhysicalVolume(
-            name=f"ringLeft{i+1}_PV",
+            name=f"ringLeft{i+1}",
             rotation=[0, 0, 0],
             position=[0, 0, +(sideSeparatorThickness/2 + cathodeSideFrameThickness + ringThickness/2 + distance)],
             logicalVolume=ring_LV,
@@ -944,7 +944,7 @@ def generate_fieldcage_assembly(name="fieldcage_assembly", registry=None, cathod
             registry=reg
         )
         g4.PhysicalVolume(
-            name=f"ringRight{i+1}_PV",
+            name=f"ringRight{i+1}",
             rotation=[0, 0, 0],
             position=[0, 0, -(sideSeparatorThickness/2 + cathodeSideFrameThickness + ringThickness/2 + distance)],
             logicalVolume=ring_LV,
@@ -954,7 +954,7 @@ def generate_fieldcage_assembly(name="fieldcage_assembly", registry=None, cathod
 
 
     supportCorners_PV = g4.PhysicalVolume(
-        name="supportCorners_PV",
+        name="supportCorners",
         rotation=[0, 0, 0],
         position=[0, 0, 0],
         logicalVolume=supportCorners_LV,
@@ -963,7 +963,7 @@ def generate_fieldcage_assembly(name="fieldcage_assembly", registry=None, cathod
     )
 
     supportColumn1_PV = g4.PhysicalVolume(
-        name="supportColumn1_PV",
+        name="supportColumn1",
         rotation=[0, 0, 0],
         position=[-(sideSeparatorLength/2 + supportColumnWidth/2), supportColumnHeightShift, 0],
         logicalVolume=supportColumn_LV,
@@ -971,7 +971,7 @@ def generate_fieldcage_assembly(name="fieldcage_assembly", registry=None, cathod
         registry=reg
     )
     supportColumn2_PV = g4.PhysicalVolume(
-        name="supportColumn2_PV",
+        name="supportColumn2",
         rotation=[0, 0, 0],
         position=[sideSeparatorLength/2 + supportColumnWidth/2, supportColumnHeightShift, 0],
         logicalVolume=supportColumn_LV,
@@ -979,7 +979,7 @@ def generate_fieldcage_assembly(name="fieldcage_assembly", registry=None, cathod
         registry=reg
     )
     supportBottomBeam_PV = g4.PhysicalVolume(
-        name="supportBeam_PV",
+        name="supportBeam",
         rotation=[0, 0, 0],
         position=[0, -(cathodeSideFrameLength/2 + supportBeamWidth/2), 0],
         logicalVolume=supportBeam_LV,
@@ -987,7 +987,7 @@ def generate_fieldcage_assembly(name="fieldcage_assembly", registry=None, cathod
         registry=reg
     )
     supportTopBeam_PV = g4.PhysicalVolume(
-        name="supportTopBeam_PV",
+        name="supportTopBeam",
         rotation=[0, 0, 0],
         position=[0, sideSeparatorLength/2+supportBeamWidth/2, 0],
         logicalVolume=supportBeam_LV,
@@ -996,7 +996,7 @@ def generate_fieldcage_assembly(name="fieldcage_assembly", registry=None, cathod
     )
 
     supportTopSideBeamLeft_PV = g4.PhysicalVolume(
-        name="supportTopSideBeamLeft_PV",
+        name="supportTopSideBeamLeft",
         rotation=[0, 0, 0],
         position=[-cornersSlotHeight/2+supportTopSideBeamLength/2, cornersLength/2+supportTopSideBeamWidth/2, sideSeparatorThickness/2 + cathodeSideFrameThickness + supportTopSideBeamThickness/2],
         logicalVolume=supportTopSideBeam_LV,
@@ -1004,7 +1004,7 @@ def generate_fieldcage_assembly(name="fieldcage_assembly", registry=None, cathod
         registry=reg
     )
     supportTopSideBeamRight_PV = g4.PhysicalVolume(
-        name="supportTopSideBeamRight_PV",
+        name="supportTopSideBeamRight",
         rotation=[0, np.pi, 0],
         position=[-(-cornersSlotHeight/2+supportTopSideBeamLength/2), cornersLength/2+supportTopSideBeamWidth/2, -(sideSeparatorThickness/2 + cathodeSideFrameThickness + supportTopSideBeamThickness/2)],
         logicalVolume=supportTopSideBeam_LV,
@@ -1013,7 +1013,7 @@ def generate_fieldcage_assembly(name="fieldcage_assembly", registry=None, cathod
     )
 
     supportToVessel1_PV = g4.PhysicalVolume(
-        name="supportToVessel1_PV",
+        name="supportToVessel1",
         rotation=[0, 0, 0],
         position=[-(supportToVesselDistanceBetweenThem/2+supportToVesselLength/2), -(supportCornersLength/2+supportToVesselHeight/2), 0],
         logicalVolume=supportToVessel_LV,
@@ -1021,7 +1021,7 @@ def generate_fieldcage_assembly(name="fieldcage_assembly", registry=None, cathod
         registry=reg
     )
     supportToVessel2_PV = g4.PhysicalVolume(
-        name="supportToVessel2_PV",
+        name="supportToVessel2",
         rotation=[0, np.pi, 0],
         position=[supportToVesselDistanceBetweenThem/2+supportToVesselLength/2, -(supportCornersLength/2+supportToVesselHeight/2), 0],
         logicalVolume=supportToVessel_LV,
@@ -1030,7 +1030,7 @@ def generate_fieldcage_assembly(name="fieldcage_assembly", registry=None, cathod
     )
 
     handle_PV = g4.PhysicalVolume(
-        name="handle_PV",
+        name="handle",
         rotation=[0, 0, 0],
         position=[-(cornersInnerLength/2 + supportColumnWidth + handleWidth/2), 0, 0],
         logicalVolume=handle_LV,
@@ -1040,7 +1040,7 @@ def generate_fieldcage_assembly(name="fieldcage_assembly", registry=None, cathod
 
     """ # The vacuum cylinder will not be used in the field cage assembly for now
     vacuumCylinder_PV = g4.PhysicalVolume(
-        name="vacuumCylinder_PV",
+        name="vacuumCylinder",
         rotation=[np.pi/2, 0, 0],
         position=[0, cornersLength/2 + supportTopSideBeamWidth + vacuumCylinderLength/2, 0],
         logicalVolume=vacuumCylinder_LV,
@@ -1050,7 +1050,7 @@ def generate_fieldcage_assembly(name="fieldcage_assembly", registry=None, cathod
     """
 
     resistorAssemblyLeft_PV = g4.PhysicalVolume(
-        name="resistorAssemblyLeft_PV",
+        name="resistorAssemblyLeft",
         rotation=[0, 0, 0],
         position=[(cornersSlotHeight/2-resistorShieldingLength/2), cornersInnerLength/2+resistorShieldingWidth/2, (sideSeparatorThickness/2 + cathodeSideFrameThickness + resistorShieldingThickness/2)],
         logicalVolume=resistorAssembly,
@@ -1059,7 +1059,7 @@ def generate_fieldcage_assembly(name="fieldcage_assembly", registry=None, cathod
     )
 
     resistorAssemblyRight_PV = g4.PhysicalVolume(
-        name="resistorAssemblyRight_PV",
+        name="resistorAssemblyRight",
         rotation=[0, np.pi, 0],
         position=[-(cornersSlotHeight/2-resistorShieldingLength/2), cornersInnerLength/2+resistorShieldingWidth/2, -(sideSeparatorThickness/2 + cathodeSideFrameThickness + resistorShieldingThickness/2)],
         logicalVolume=resistorAssembly,

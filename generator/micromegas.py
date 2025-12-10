@@ -889,7 +889,7 @@ def generate_micromegas_assembly(name="micromegas_assembly", registry=None, is_r
     mMBase_PV = g4.PhysicalVolume(
         rotation=side_rot.tolist(),
         position=[0, 0, 0],
-        name="mMBase_PV",
+        name="mMBase",
         logicalVolume=mMBase_LV,
         motherVolume=micromegas_assembly,
         registry=reg
@@ -900,7 +900,7 @@ def generate_micromegas_assembly(name="micromegas_assembly", registry=None, is_r
     mMTeflonSpacerPad1_PV = g4.PhysicalVolume(
         rotation=[0, 0, 0],
         position=[0, teflonspacerpad_pos_xory, side_z_dir*teflonspacerpad_pos_z],
-        name="mMTeflonSpacerPad1_PV",
+        name="mMTeflonSpacerPad1",
         logicalVolume=mMTeflonSpacerPad_LV,
         motherVolume=micromegas_assembly,
         registry=reg
@@ -908,7 +908,7 @@ def generate_micromegas_assembly(name="micromegas_assembly", registry=None, is_r
     mMTeflonSpacerPad2_PV = g4.PhysicalVolume(
         rotation=[0, 0, 0],
         position=[0, -teflonspacerpad_pos_xory, side_z_dir*teflonspacerpad_pos_z],
-        name="mMTeflonSpacerPad2_PV",
+        name="mMTeflonSpacerPad2",
         logicalVolume=mMTeflonSpacerPad_LV,
         motherVolume=micromegas_assembly,
         registry=reg
@@ -916,7 +916,7 @@ def generate_micromegas_assembly(name="micromegas_assembly", registry=None, is_r
     mMTeflonSpacerPad3_PV = g4.PhysicalVolume(
         rotation=[0, 0, 90*np.pi/180],
         position=[teflonspacerpad_pos_xory, 0, side_z_dir*teflonspacerpad_pos_z],
-        name="mMTeflonSpacerPad3_PV",
+        name="mMTeflonSpacerPad3",
         logicalVolume=mMTeflonSpacerPad_LV,
         motherVolume=micromegas_assembly,
         registry=reg
@@ -924,7 +924,7 @@ def generate_micromegas_assembly(name="micromegas_assembly", registry=None, is_r
     mMTeflonSpacerPad4_PV = g4.PhysicalVolume(
         rotation=[0, 0, 90*np.pi/180],
         position=[-teflonspacerpad_pos_xory, 0, side_z_dir*teflonspacerpad_pos_z],
-        name="mMTeflonSpacerPad4_PV",
+        name="mMTeflonSpacerPad4",
         logicalVolume=mMTeflonSpacerPad_LV,
         motherVolume=micromegas_assembly,
         registry=reg
@@ -936,7 +936,7 @@ def generate_micromegas_assembly(name="micromegas_assembly", registry=None, is_r
     mMBaseClosingBracket1_PV = g4.PhysicalVolume(
         rotation=[0, 0, 0],
         position=[0, closingbracket_pos_xory, side_z_dir*closingbracket_pos_z],
-        name="mMBaseClosingBracket1_PV",
+        name="mMBaseClosingBracket1",
         logicalVolume=mMBaseClosingBracket_LV,
         motherVolume=micromegas_assembly,
         registry=reg
@@ -944,7 +944,7 @@ def generate_micromegas_assembly(name="micromegas_assembly", registry=None, is_r
     mMBaseClosingBracket2_PV = g4.PhysicalVolume(
         rotation=[0, 0, 0],
         position=[0, -closingbracket_pos_xory, side_z_dir*closingbracket_pos_z],
-        name="mMBaseClosingBracket2_PV",
+        name="mMBaseClosingBracket2",
         logicalVolume=mMBaseClosingBracket_LV,
         motherVolume=micromegas_assembly,
         registry=reg
@@ -952,7 +952,7 @@ def generate_micromegas_assembly(name="micromegas_assembly", registry=None, is_r
     mMBaseClosingBracket_3_PV = g4.PhysicalVolume(
         rotation=[0, 0, 90*np.pi/180],
         position=[closingbracket_pos_xory, 0, side_z_dir*closingbracket_pos_z],
-        name="mMBaseClosingBracket3_PV",
+        name="mMBaseClosingBracket3",
         logicalVolume=mMBaseClosingBracket_LV,
         motherVolume=micromegas_assembly,
         registry=reg
@@ -960,7 +960,7 @@ def generate_micromegas_assembly(name="micromegas_assembly", registry=None, is_r
     mMBaseClosingBracket_4_PV = g4.PhysicalVolume(
         rotation=[0, 0, 90*np.pi/180],
         position=[-closingbracket_pos_xory, 0, side_z_dir*closingbracket_pos_z],
-        name="mMBaseClosingBracket4_PV",
+        name="mMBaseClosingBracket4",
         logicalVolume=mMBaseClosingBracket_LV,
         motherVolume=micromegas_assembly,
         registry=reg
@@ -969,7 +969,7 @@ def generate_micromegas_assembly(name="micromegas_assembly", registry=None, is_r
     mMBaseTeflonRoller1_PV = g4.PhysicalVolume(
         rotation=(np.array([90*3.1416/180, 0, 0]) + side_rot).tolist(),
         position=[-mMBaseLength/2, 0, side_z_dir*(mMBaseThickness/2 + rollerCutShift)],
-        name="mMBaseTeflonRoller1_PV",
+        name="mMBaseTeflonRoller1",
         logicalVolume=roller_LV,
         motherVolume=micromegas_assembly,
         registry=reg
@@ -977,7 +977,7 @@ def generate_micromegas_assembly(name="micromegas_assembly", registry=None, is_r
     mMBaseTeflonRoller2_PV = g4.PhysicalVolume(
         rotation=(np.array([-90*3.1416/180, 0, np.pi]) + side_rot).tolist(),
         position=[mMBaseLength/2, 0, side_z_dir*(mMBaseThickness/2 + rollerCutShift)],
-        name="mMBaseTeflonRoller2_PV",
+        name="mMBaseTeflonRoller2",
         logicalVolume=roller_LV,
         motherVolume=micromegas_assembly,
         registry=reg
@@ -990,7 +990,7 @@ def generate_micromegas_assembly(name="micromegas_assembly", registry=None, is_r
         mMSupport1_PV = g4.PhysicalVolume(
             rotation=(np.array([0, 0, side_z_dir*45*np.pi/180]) + side_rot).tolist(),  # 45 degrees rotation
             position=[-side_z_dir*mMSupportDistanceToCenter_XorY, side_z_dir*mMSupportDistanceToCenter_XorY, side_z_dir*mMSupport_pos_z],
-            name="mMSupport1_PV",
+            name="mMSupport1",
             logicalVolume=mMSupport_LV,
             motherVolume=micromegas_assembly,
             registry=reg
@@ -998,7 +998,7 @@ def generate_micromegas_assembly(name="micromegas_assembly", registry=None, is_r
         mMSupport2_PV = g4.PhysicalVolume(
             rotation=(np.array([0, 0, -side_z_dir*135*np.pi/180]) + side_rot).tolist(),  # 45 degrees rotation
             position=[side_z_dir*mMSupportDistanceToCenter_XorY, -side_z_dir*mMSupportDistanceToCenter_XorY, side_z_dir*mMSupport_pos_z],
-            name="mMSupport2_PV",
+            name="mMSupport2",
             logicalVolume=mMSupport_LV,
             motherVolume=micromegas_assembly,
             registry=reg
@@ -1008,7 +1008,7 @@ def generate_micromegas_assembly(name="micromegas_assembly", registry=None, is_r
     mMCopperFoilLayer2_PV = g4.PhysicalVolume(
         rotation=[0, 0, 0],
         position=[0, 0, mMBoardThickness/2 - mMKaptonFoilThickness - mMCopperFoilThickness -mMKaptonFoilThickness - mMCopperFoilThickness/2],
-        name="mMCopperFoilLayer2_PV",
+        name="mMCopperFoilLayer2",
         logicalVolume=mMCopperFoil_LV,
         motherVolume=mMBoardKapton_LV,
         registry=reg
@@ -1016,7 +1016,7 @@ def generate_micromegas_assembly(name="micromegas_assembly", registry=None, is_r
     mMCopperFoilLayer3_PV = g4.PhysicalVolume(
         rotation=[0, 0, 0],
         position=[0, 0, mMBoardThickness/2 - mMKaptonFoilThickness - mMCopperFoilThickness*2 - mMKaptonFoilThickness*2 - mMCopperFoilThickness/2],
-        name="mMCopperFoilLayer3_PV",
+        name="mMCopperFoilLayer3",
         logicalVolume=mMCopperFoil_LV,
         motherVolume=mMBoardKapton_LV,
         registry=reg
@@ -1025,7 +1025,7 @@ def generate_micromegas_assembly(name="micromegas_assembly", registry=None, is_r
     mMBoardKapton_PV = g4.PhysicalVolume(
         rotation=[0, 0, 0],
         position=[0, 0, 0],
-        name="mMBoardKapton_PV",
+        name="mMBoardKapton",
         logicalVolume=mMBoardKapton_LV,
         motherVolume=mMBoardCopper_LV,
         registry=reg
@@ -1034,7 +1034,7 @@ def generate_micromegas_assembly(name="micromegas_assembly", registry=None, is_r
     mMBoardCopper_PV = g4.PhysicalVolume(
         rotation=side_rot.tolist(),
         position=[0, 0, -side_z_dir*(mMBaseThickness/2 + mMBoardThickness/2)],
-        name="mMBoardCopper_PV",
+        name="mMBoardCopper",
         logicalVolume=mMBoardCopper_LV,
         motherVolume=micromegas_assembly,
         registry=reg
@@ -1044,7 +1044,7 @@ def generate_micromegas_assembly(name="micromegas_assembly", registry=None, is_r
         limandeInnerA_PV = g4.PhysicalVolume(
             rotation=[0, 0, 0],
             position=[0, 0, 0],
-            name="limandeInnerA_PV",
+            name="limandeInnerA",
             logicalVolume=limandeInnerA_LV,
             motherVolume=limandeA_LV,
             registry=reg
@@ -1052,7 +1052,7 @@ def generate_micromegas_assembly(name="micromegas_assembly", registry=None, is_r
         limandeInnerB_PV = g4.PhysicalVolume(
             rotation=[0, 0, 0],
             position=[0, 0, 0],
-            name="limandeInnerB_PV",
+            name="limandeInnerB",
             logicalVolume=limandeInnerB_LV,
             motherVolume=limandeB_LV,
             registry=reg
@@ -1063,7 +1063,7 @@ def generate_micromegas_assembly(name="micromegas_assembly", registry=None, is_r
         limande1_PV = g4.PhysicalVolume(
             rotation=[0, 0, 0],
             position=[0, -limande_x_or_y, limande_z_pos],
-            name="limande1_PV",
+            name="limande1",
             logicalVolume=limandeA_LV,
             motherVolume=micromegas_assembly,
             registry=reg
@@ -1071,7 +1071,7 @@ def generate_micromegas_assembly(name="micromegas_assembly", registry=None, is_r
         limande2_PV = g4.PhysicalVolume(
             rotation=[0, 0, np.pi],
             position=[0, +limande_x_or_y, limande_z_pos],
-            name="limande2_PV",
+            name="limande2",
             logicalVolume=limandeA_LV,
             motherVolume=micromegas_assembly,
             registry=reg
@@ -1079,7 +1079,7 @@ def generate_micromegas_assembly(name="micromegas_assembly", registry=None, is_r
         limande3_PV = g4.PhysicalVolume(
             rotation=[0, 0, -np.pi/2],
             position=[+limande_x_or_y, 0, limande_z_pos],
-            name="limande3_PV",
+            name="limande3",
             logicalVolume=limandeB_LV,
             motherVolume=micromegas_assembly,
             registry=reg
@@ -1087,7 +1087,7 @@ def generate_micromegas_assembly(name="micromegas_assembly", registry=None, is_r
         limande4_PV = g4.PhysicalVolume(
             rotation=[0, 0, +np.pi/2],
             position=[-limande_x_or_y, 0, limande_z_pos],
-            name="limande4_PV",
+            name="limande4",
             logicalVolume=limandeB_LV,
             motherVolume=micromegas_assembly,
             registry=reg

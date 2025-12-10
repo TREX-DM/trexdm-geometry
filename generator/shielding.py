@@ -149,7 +149,7 @@ def generate_shielding_assembly_by_parts(name="shielding_assembly", registry=Non
     
     # physical volumes
     leadCage_PV = g4.PhysicalVolume(
-        name="leadCage_PV",
+        name="leadCage",
         rotation=[0, 0, 0],
         position=[0, -castleSizeY/2 + leadSizeY/2, 0],
         logicalVolume=leadCage_LV,
@@ -158,7 +158,7 @@ def generate_shielding_assembly_by_parts(name="shielding_assembly", registry=Non
     )
     
     copperCage_PV = g4.PhysicalVolume(
-        name="copperCage_PV",
+        name="copperCage",
         rotation=[0, 0, 0],
         position=[0, -castleSizeY/2 + leadThickness + copperCageOutSizeY/2, 0],
         logicalVolume=copperCage_LV,
@@ -167,7 +167,7 @@ def generate_shielding_assembly_by_parts(name="shielding_assembly", registry=Non
     )
     
     outerGas_PV = g4.PhysicalVolume(
-        name="outerGas_PV",
+        name="outerGas",
         rotation=[0, 0, 0],
         position=[0, castleSizeY/2 - leadThickness - copperTopThickness - outerGasSizeY/2, 0],
         logicalVolume=outerGas_LV,
@@ -176,7 +176,7 @@ def generate_shielding_assembly_by_parts(name="shielding_assembly", registry=Non
     )
 
     copperTop_PV = g4.PhysicalVolume(
-        name="copperTop_PV",
+        name="copperTop",
         rotation=[0, 0, 0],
         position=[0, -castleSizeY/2 + leadThickness + copperCageOutSizeY + copperTopThickness/2, 0],
         logicalVolume=copperTop_LV,
@@ -185,7 +185,7 @@ def generate_shielding_assembly_by_parts(name="shielding_assembly", registry=Non
     )
     
     leadTop_PV = g4.PhysicalVolume(
-        name="leadTop_PV",
+        name="leadTop",
         rotation=[0, 0, 0],
         position=[0, castleSizeY/2 - leadThickness/2, 0],
         logicalVolume=leadTop_LV,
@@ -262,7 +262,7 @@ def generate_shielding_assembly(name="shielding_assembly", registry=None):
     copperCage_PV = g4.PhysicalVolume(
         rotation=[0,0,0],
         position=[0, copperCageThickness / 2, 0],
-        name="copperCage_PV",
+        name="copperCage",
         logicalVolume=copperCage_LV,
         motherVolume=leadShielding_LV,
         registry=reg
@@ -270,7 +270,7 @@ def generate_shielding_assembly(name="shielding_assembly", registry=None):
     copperTop_PV = g4.PhysicalVolume(
         rotation=[0,0,0],
         position=[0, copperCageOutSizeY / 2 + copperCageThickness / 2 + copperTopThickness / 2, 0],
-        name="copperTop_PV",
+        name="copperTop",
         logicalVolume=copperTop_LV,
         motherVolume=leadShielding_LV,
         registry=reg
@@ -278,7 +278,7 @@ def generate_shielding_assembly(name="shielding_assembly", registry=None):
     outerGas_PV = g4.PhysicalVolume(
         rotation=[0,0,0],
         position=[0, copperCageThickness / 2, 0],
-        name="outerGas_PV",
+        name="outerGas",
         logicalVolume=outerGas_LV,
         motherVolume=copperCage_LV,
         registry=reg
@@ -287,7 +287,7 @@ def generate_shielding_assembly(name="shielding_assembly", registry=None):
     leadShielding_PV = g4.PhysicalVolume(
         rotation=[0,0,0],
         position=[0,0,0],
-        name="leadShielding_PV",
+        name="leadShielding",
         logicalVolume=leadShielding_LV,
         motherVolume=shielding_assembly,
         registry=reg

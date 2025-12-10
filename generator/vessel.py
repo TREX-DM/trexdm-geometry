@@ -360,7 +360,7 @@ def generate_vessel_assembly(name="vessel_assembly", registry=None, left_calibra
     )
         
     vessel_PV = g4.PhysicalVolume(
-        name="vessel_PV",
+        name="vessel",
         logicalVolume=vessel_LV,
         motherVolume=vessel_assembly,
         position=[0, 0, 0],
@@ -368,7 +368,7 @@ def generate_vessel_assembly(name="vessel_assembly", registry=None, left_calibra
         registry=reg
     )
     gas_PV = g4.PhysicalVolume(
-        name="gas_PV",
+        name="gas",
         logicalVolume=gas_LV,
         motherVolume=vessel_assembly,
         position=[0, 0, 0],

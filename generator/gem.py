@@ -350,7 +350,7 @@ def generate_gem_assembly(name="gem_assembly", registry=None, is_right_side=True
     side_z_dir = 1 if is_right_side else -1
 
     gemKaptonFoil_PV = g4.PhysicalVolume(
-        name="gemKaptonFoil_PV",
+        name="gemKaptonFoil",
         rotation=[0, 0, 0],
         position=[0, 0, 0],
         logicalVolume=gemKaptonFoil_LV,
@@ -358,7 +358,7 @@ def generate_gem_assembly(name="gem_assembly", registry=None, is_right_side=True
         registry=reg
     )
     gemTop_PV = g4.PhysicalVolume(
-        name="gemTop_PV",
+        name="gemTop",
         rotation=[0, 0, 0],
         position=[0, 0, side_z_dir*(gemCopperFoilThickness/2 + gemKaptonFoilThickness/2)],
         logicalVolume=gemTop_LV,
@@ -366,7 +366,7 @@ def generate_gem_assembly(name="gem_assembly", registry=None, is_right_side=True
         registry=reg
     )
     gemBottom_PV = g4.PhysicalVolume(
-        name="gemBottom_PV",
+        name="gemBottom",
         rotation=[0, 0, 0],
         position=[0, 0, -side_z_dir*(gemCopperFoilThickness/2 + gemKaptonFoilThickness/2)],
         logicalVolume=gemBottom_LV,
@@ -374,7 +374,7 @@ def generate_gem_assembly(name="gem_assembly", registry=None, is_right_side=True
         registry=reg
     )
     gemFrame_PV = g4.PhysicalVolume(
-        name="gemFrame_PV",
+        name="gemFrame",
         rotation=[0, 0, 0],
         position=[0, 0, side_z_dir*(gemKaptonFoilThickness + gemFrameThickness/2)],
         logicalVolume=gemFrame_LV,
@@ -388,7 +388,7 @@ def generate_gem_assembly(name="gem_assembly", registry=None, is_right_side=True
     fixer_wrt_separator2_pos = np.array([ 0, -(gemmMSeparatorFixerToSeparatorDistance + gemmMSeparatorWidth/2 + gemmMSeparatorFixerWidth/2), side_z_dir*(gemmMSeparatorThickness/2 + gemmMSeparatorFixerThickness/2)])
     
     gemmMSeparator1_PV = g4.PhysicalVolume(
-        name="gemmMSeparator1_PV",
+        name="gemmMSeparator1",
         rotation=[0, 0, 0],
         position=separator1_pos,
         logicalVolume=gemmMSeparator_LV,
@@ -397,7 +397,7 @@ def generate_gem_assembly(name="gem_assembly", registry=None, is_right_side=True
     )
 
     gemmMSeparatorFixer1_PV = g4.PhysicalVolume(
-        name="gemmMSeparatorFixer1_PV",
+        name="gemmMSeparatorFixer1",
         rotation=[0, 0, 0],
         position=separator1_pos + fixer_wrt_separator1_pos,
         logicalVolume=gemmMSeparatorFixer_LV,
@@ -407,7 +407,7 @@ def generate_gem_assembly(name="gem_assembly", registry=None, is_right_side=True
 
     # Add the second separator and fixer
     gemmMSeparator2_PV = g4.PhysicalVolume(
-        name="gemmMSeparator2_PV",
+        name="gemmMSeparator2",
         rotation=[0, 0, np.pi],
         position=separator2_pos,
         logicalVolume=gemmMSeparator_LV,
@@ -415,7 +415,7 @@ def generate_gem_assembly(name="gem_assembly", registry=None, is_right_side=True
         registry=reg
     )
     gemmMSeparatorFixer2_PV = g4.PhysicalVolume(
-        name="gemmMSeparatorFixer2_PV",
+        name="gemmMSeparatorFixer2",
         rotation=[0, 0, 0],
         position=separator2_pos + fixer_wrt_separator2_pos,
         logicalVolume=gemmMSeparatorFixer_LV,

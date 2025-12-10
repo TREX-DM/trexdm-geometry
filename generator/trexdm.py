@@ -93,7 +93,7 @@ sensitiveGasOneSide_LV = g4.LogicalVolume(
 )
 
 sensitiveGasLeft_PV = g4.PhysicalVolume(
-    name="sensitiveGasLeft_PV",
+    name="sensitiveGasLeft",
     logicalVolume=sensitiveGasOneSide_LV,
     motherVolume=innerGas_LV,
     rotation=[0, 0, 0],
@@ -104,7 +104,7 @@ sensitiveGasLeft_PV = g4.PhysicalVolume(
 # Create the physical volumes
 """
 gemRight_PV = g4.PhysicalVolume(
-    name="gemRight_PV",
+    name="gemRight",
     logicalVolume=gem_assembly,
     motherVolume=innerGas_LV,
     rotation=[0, 0, 0],
@@ -113,7 +113,7 @@ gemRight_PV = g4.PhysicalVolume(
 )
 """
 micromegasRight_PV = g4.PhysicalVolume(
-    name="micromegasRight_PV",
+    name="micromegasRight",
     logicalVolume=micromegas_assembly,
     motherVolume=innerGas_LV,
     rotation=[0, 0, 0],
@@ -122,7 +122,7 @@ micromegasRight_PV = g4.PhysicalVolume(
 )
 
 gemLeft_PV = g4.PhysicalVolume(
-    name="gemLeft_PV",
+    name="gemLeft",
     logicalVolume=gem_assembly,
     motherVolume=innerGas_LV,
     rotation=[np.pi, 0, 0],
@@ -131,7 +131,7 @@ gemLeft_PV = g4.PhysicalVolume(
 )
 
 micromegasLeft_PV = g4.PhysicalVolume(
-    name="micromegasLeft_PV",
+    name="micromegasLeft",
     logicalVolume=micromegas_assembly,
     motherVolume=innerGas_LV,
     rotation=[np.pi, 0, 0],
@@ -140,7 +140,7 @@ micromegasLeft_PV = g4.PhysicalVolume(
 )
 
 vesselassembly_PV = g4.PhysicalVolume(
-    name="vesselassembly_PV",
+    name="vesselassembly",
     logicalVolume=vessel_assembly,
     motherVolume=outerGas_LV,
     rotation=[0, 0, 0],
@@ -149,7 +149,7 @@ vesselassembly_PV = g4.PhysicalVolume(
 )
 
 shielding_PV = g4.PhysicalVolume(
-    name="shielding_PV",
+    name="shielding",
     logicalVolume=shielding_assembly,
     motherVolume=world,
     rotation=[0, 0, 0],
@@ -158,7 +158,7 @@ shielding_PV = g4.PhysicalVolume(
 )
 
 fieldcage_PV = g4.PhysicalVolume(
-    name="fieldcage_PV",
+    name="fieldcage",
     logicalVolume=fieldcage_assembly,
     motherVolume=innerGas_LV,
     rotation=[0, 0, 0],
