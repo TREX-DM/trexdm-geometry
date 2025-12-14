@@ -128,6 +128,22 @@ def get_physical_volume_by_name(name, registry):
     
     return physical_volumes[0]
 
+def get_position_of_physical_volume(name, registry):
+    """
+    Returns the position of the physical volume with the given name from the registry.
+    If the physical volume is not found, it raises a KeyError.
+    """
+    physical_volume = get_physical_volume_by_name(name, registry)
+    return physical_volume.position.eval()
+
+def get_rotation_of_physical_volume(name, registry):
+    """
+    Returns the rotation of the physical volume with the given name from the registry.
+    If the physical volume is not found, it raises a KeyError.
+    """
+    physical_volume = get_physical_volume_by_name(name, registry)
+    return physical_volume.rotation.eval()
+
 def get_material_by_name(name, registry):
     """
     Returns the material with the given name from the registry.
