@@ -186,6 +186,29 @@ def generate_fieldcage_assembly(name="fieldcage_assembly", registry=None, cathod
             lunit="mm",
             registry=reg
         )
+        
+        first_wire_distance_to_frame = (cathodeWireLength - (cathodeWireNumber-1)*cathodeDistanceBetweenWires) / 2
+        z_shift = cathodeWireRadius*2 # to avoid overlap between x wires and y wires
+        for i in range(cathodeWireNumber-1): # first cathodeWire has two wires already
+            wire_position = (i+1) * cathodeDistanceBetweenWires
+
+            cathodeWire = g4.solid.Union(
+                name=f"cathodeWireX{i+1}",
+                obj1=cathodeWire if i!=0 else cathodeSingleWire,
+                obj2=cathodeSingleWire,
+                tra2=[[0, 0, 0], [wire_position, 0, 0]], #
+                registry=reg
+            )
+        for i in range(cathodeWireNumber):
+            wire_position = cathodeWireLength/2 - first_wire_distance_to_frame - i * cathodeDistanceBetweenWires
+
+            cathodeWire = g4.solid.Union(
+                name=f"cathodeWireX{cathodeWireNumber}Y{i+1}" if i!= cathodeWireNumber-1 else "cathodeWiredFull",
+                obj1=cathodeWire,
+                obj2=cathodeSingleWire,
+                tra2=[[0, 90*np.pi/180, 0], [cathodeWireLength/2-first_wire_distance_to_frame, z_shift, wire_position]],
+                registry=reg
+            )
 
     else:
         raise ValueError("Invalid cathode type. Choose either 'plain' or 'wired'.")
@@ -652,9 +675,17 @@ def generate_fieldcage_assembly(name="fieldcage_assembly", registry=None, cathod
             registry=reg
         )
     elif cathode_type == "wired":
+        """ # old implementation with individual wires
         cathodeSingleWire_LV = g4.LogicalVolume(
             name="cathodeSingleWire_LV",
             solid=cathodeSingleWire,
+            material=copper,
+            registry=reg
+        )
+        """
+        cathodeWired_LV = g4.LogicalVolume(
+            name="cathodeWired_LV",
+            solid=cathodeWire, # the last one is the full wired cathode
             material=copper,
             registry=reg
         )
@@ -816,6 +847,8 @@ def generate_fieldcage_assembly(name="fieldcage_assembly", registry=None, cathod
             registry=reg
         )
     elif cathode_type == "wired":
+
+        """ # old implementation with individual PV for each wire
         first_wire_distance_to_frame = (cathodeLength - (cathodeWireNumber-1)*cathodeDistanceBetweenWires) / 2
         z_shift = cathodeWireRadius # to avoid overlap between x wires and y wires
         for i in range(cathodeWireNumber):
@@ -837,6 +870,15 @@ def generate_fieldcage_assembly(name="fieldcage_assembly", registry=None, cathod
                 motherVolume=fieldcage_assembly,
                 registry=reg
             )
+        """
+        cathodeWired_PV = g4.PhysicalVolume(
+            name="cathodeWired",
+            rotation=[90*np.pi/180, 0, 0],
+            position=[-cathodeWireLength/2+first_wire_distance_to_frame, 0, cathodeWireRadius],
+            logicalVolume=cathodeWired_LV,
+            motherVolume=fieldcage_assembly,
+            registry=reg
+        )
     else:
         raise ValueError("Invalid cathode type. Choose either 'plain' or 'wired'.")
 
