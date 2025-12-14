@@ -13,8 +13,6 @@ import utils
 
 LEFT_CALIBRATION_OPEN = True
 RIGHT_CALIBRATION_OPEN = True
-LEFT_GEM = True
-RIGHT_GEM = False
 GAS = "Neon2%Isobutane1.1bar"
 CATHODE_TYPE = "wired"  # "wired" or "plain"
 SIMPLIFY_MM_GEOMETRY = False
@@ -32,8 +30,7 @@ world  = g4.LogicalVolume(ws, galactic,"world",reg)
 shielding.generate_shielding_assembly_by_parts(registry=reg)
 vessel.generate_vessel_assembly(registry=reg, left_calibration_is_open=LEFT_CALIBRATION_OPEN, right_calibration_is_open=RIGHT_CALIBRATION_OPEN, gas=GAS)
 micromegas.generate_micromegas_assembly(registry=reg, is_right_side=True, simple_geometry=SIMPLIFY_MM_GEOMETRY)
-if LEFT_GEM or RIGHT_GEM:
-    gem.generate_gem_assembly(registry=reg, is_right_side=True)
+gem.generate_gem_assembly(registry=reg, is_right_side=True)
 fieldcage.generate_fieldcage_assembly(registry=reg, cathode_type=CATHODE_TYPE)
 
 shielding_assembly = utils.get_logical_volume_by_name("shielding_assembly", reg)
@@ -116,6 +113,7 @@ transferGasSolid = g4.solid.Box(
     lunit="mm"
 )
 
+"""
 sensitiveGasLeft = g4.solid.Union(
     name="sensitiveGasLeft",
     obj1=driftLeftGas,
@@ -123,6 +121,7 @@ sensitiveGasLeft = g4.solid.Union(
     tra2=[[0, 0, 0], [0, 0, driftLeftGasGap/2 + gem.gemCopperFoilThickness*2 + gem.gemKaptonFoilThickness + transferGasGap/2]],
     registry=reg
 )
+"""
 
 driftRightGasGap = mM_position_z - micromegas.mMBaseThickness/2 - micromegas.mMBoardThickness 
 driftRightGas0 = g4.solid.Box(
@@ -172,31 +171,25 @@ driftRightGas = g4.solid.Subtraction(
     registry=reg
 )
 
-sensitiveGasRight = driftRightGas # no transfer gap on right side (no gem)
 
+"""
 sensitiveGasBothSides = g4.solid.Union(
     name="sensitiveGasBothSides",
     obj1=sensitiveGasLeft,
-    obj2=sensitiveGasRight,
+    obj2=driftRightGas,
     tra2=[[0, np.pi, 0], [0, 0, -(driftLeftGasGap/2 + cathodeSideThickness)]],
     registry=reg
 )
+"""
 
 gas_material = innerGas_LV.material
+"""
 sensitiveGasLeft_LV = g4.LogicalVolume(
     name="sensitiveGasLeft_LV",
     solid=sensitiveGasLeft,
     material=gas_material,
     registry=reg
 )
-
-sensitiveGasRight_LV = g4.LogicalVolume(
-    name="sensitiveGasRight_LV",
-    solid=sensitiveGasRight,
-    material=gas_material,
-    registry=reg
-)
-
 sensitiveGasLeft_PV = g4.PhysicalVolume(
     name="sensitiveGasLeft",
     logicalVolume=sensitiveGasLeft_LV,
@@ -205,10 +198,50 @@ sensitiveGasLeft_PV = g4.PhysicalVolume(
     position=[0, 0, driftLeftGasGap/2 + cathodeSideThickness],
     registry=reg
 )
+"""
 
-sensitiveGasRight_PV = g4.PhysicalVolume(
-    name="sensitiveGasRight",
-    logicalVolume=sensitiveGasRight_LV,
+driftGasLeft_LV = g4.LogicalVolume(
+    name="driftGasLeft_LV",
+    solid=driftLeftGas,
+    material=gas_material,
+    registry=reg
+)
+
+driftGasLeft_PV = g4.PhysicalVolume(
+    name="driftGasLeft",
+    logicalVolume=driftGasLeft_LV,
+    motherVolume=innerGas_LV,
+    rotation=[0, 0, 0],
+    position=[0, 0, driftLeftGasGap/2 + cathodeSideThickness],
+    registry=reg
+)
+
+transferGasLeft_LV = g4.LogicalVolume(
+    name="transferGasLeft_LV",
+    solid=transferGasSolid,
+    material=gas_material,
+    registry=reg
+)
+
+transferGasLeft_PV = g4.PhysicalVolume(
+    name="transferGasLeft",
+    logicalVolume=transferGasLeft_LV,
+    motherVolume=innerGas_LV,
+    rotation=[0, 0, 0],
+    position=[0, 0, driftLeftGasGap + cathodeSideThickness + gem.gemCopperFoilThickness*2 + gem.gemKaptonFoilThickness + transferGasGap/2],
+    registry=reg
+)
+
+driftGasRight_LV = g4.LogicalVolume(
+    name="driftGasRight_LV",
+    solid=driftRightGas,
+    material=gas_material,
+    registry=reg
+)
+
+driftGasRight_PV = g4.PhysicalVolume(
+    name="driftGasRight",
+    logicalVolume=driftGasRight_LV,
     motherVolume=innerGas_LV,
     rotation=[0, 0, 0],
     position=[0, 0, -(driftRightGasGap/2 + cathodeSideThickness)],
@@ -216,16 +249,6 @@ sensitiveGasRight_PV = g4.PhysicalVolume(
 )
 
 # Create the physical volumes
-
-if RIGHT_GEM:
-    gemRight_PV = g4.PhysicalVolume(
-        name="gemRight",
-        logicalVolume=gem_assembly,
-        motherVolume=innerGas_LV,
-        rotation=[0, 0, 0],
-        position=[0, 0, -gem_position_z],
-        registry=reg
-    )
 
 micromegasRight_PV = g4.PhysicalVolume(
     name="micromegasRight",
@@ -236,15 +259,15 @@ micromegasRight_PV = g4.PhysicalVolume(
     registry=reg
 )
 
-if LEFT_GEM:
-    gemLeft_PV = g4.PhysicalVolume(
-        name="gemLeft",
-        logicalVolume=gem_assembly,
-        motherVolume=innerGas_LV,
-        rotation=[np.pi, 0, 0],
-        position=[0, 0, gem_position_z],
-        registry=reg
-    )
+
+gemLeft_PV = g4.PhysicalVolume(
+    name="gemLeft",
+    logicalVolume=gem_assembly,
+    motherVolume=innerGas_LV,
+    rotation=[np.pi, 0, 0],
+    position=[0, 0, gem_position_z],
+    registry=reg
+)
 
 micromegasLeft_PV = g4.PhysicalVolume(
     name="micromegasLeft",
@@ -289,7 +312,7 @@ reg.setWorld(world.name)
 import argparse
 parser = argparse.ArgumentParser()
 parser.add_argument("--childless", action="store_true", default=False)
-defaultName = f"trexdm_{GAS}_cathode-{CATHODE_TYPE}_GEM-{'left' if LEFT_GEM else ''}{'-right' if RIGHT_GEM else ''}_leftCalib-{'open' if LEFT_CALIBRATION_OPEN else 'closed'}_rightCalib-{'open' if RIGHT_CALIBRATION_OPEN else 'closed'}{'_simplifiedMM' if SIMPLIFY_MM_GEOMETRY else ''}.gdml"
+defaultName = f"trexdm_{GAS}_cathode-{CATHODE_TYPE}_leftCalib-{'open' if LEFT_CALIBRATION_OPEN else 'closed'}_rightCalib-{'open' if RIGHT_CALIBRATION_OPEN else 'closed'}{'_simplifiedMM' if SIMPLIFY_MM_GEOMETRY else ''}.gdml"
 parser.add_argument("-f", "--file", type=str, default=defaultName, help="Output GDML file name")
 
 args = parser.parse_args()
