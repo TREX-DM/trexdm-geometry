@@ -52,7 +52,7 @@ def generate_vessel_assembly(name="vessel_assembly", registry=None, left_calibra
 
     argon_element = g4.nist_element_2geant4Element("G4_Ar")
     argon = g4.MaterialCompound("ArgonGas",
-                                density=1.63897,
+                                density=0.00163897,
                                 state="gas",
                                 #temperature=293.15,
                                 #temperature_unit="K",
@@ -63,7 +63,7 @@ def generate_vessel_assembly(name="vessel_assembly", registry=None, left_calibra
     argon.add_element_massfraction(argon_element, 1)
     neon_element = g4.nist_element_2geant4Element("G4_Ne")
     neon = g4.MaterialCompound("NeonGas",
-                                density=0.8282,
+                                density=0.0008282,
                                 state="gas",
                                 #temperature=293.15,
                                 #temperature_unit="K",
@@ -76,7 +76,7 @@ def generate_vessel_assembly(name="vessel_assembly", registry=None, left_calibra
     hydrogen = g4.nist_material_2geant4Material("G4_H")
     carbon = g4.nist_material_2geant4Material("G4_C")
     isobutanegas = g4.MaterialCompound("IsobutaneGas",
-                                       density=2.38467,
+                                       density=0.00238467,
                                        #temperature=293.15,
                                        #temperature_unit="K",
                                       #pressure=1,
@@ -88,7 +88,7 @@ def generate_vessel_assembly(name="vessel_assembly", registry=None, left_calibra
     isobutanegas.add_material(carbon, 0.8265819278538703)
     if gas == "Argon1%Isobutane1bar":
         gas_material = g4.MaterialCompound("Argon1%Isobutane1bar",
-                                           density=1.61882,
+                                           density=0.00161882,
                                            state="gas",
                                            #temperature=298.15,
                                            #temperature_unit="K",
@@ -101,7 +101,7 @@ def generate_vessel_assembly(name="vessel_assembly", registry=None, left_calibra
         gas_material.add_material(isobutanegas, 0.0145)
     elif gas == "Argon1%Isobutane1.1bar":
         gas_material = g4.MaterialCompound("Argon1%Isobutane1.1bar",
-                                           density=1.78070,
+                                           density=0.00178070,
                                            state="gas",
                                            #temperature=298.15,
                                            #temperature_unit="K",
@@ -114,7 +114,7 @@ def generate_vessel_assembly(name="vessel_assembly", registry=None, left_calibra
         gas_material.add_material(isobutanegas, 0.0145)
     elif gas == "Argon2%Isobutane1.1bar":
         gas_material = g4.MaterialCompound("Argon2%Isobutane1.1bar",
-                                           density=1.78877,
+                                           density=0.00178877,
                                            state="gas",
                                            #temperature=298.15,
                                            #temperature_unit="K",
@@ -127,11 +127,37 @@ def generate_vessel_assembly(name="vessel_assembly", registry=None, left_calibra
         gas_material.add_material(isobutanegas, 0.0289)
     elif gas == "Neon2%Isobutane1.1bar":
         gas_material = g4.MaterialCompound("Neon2%Isobutane1.1bar",
-                                           density=0.91108,
+                                           density=0.00091108,
                                            state="gas",
                                            #temperature=298.15,
                                            #temperature_unit="K",
                                            #pressure=1.1,
+                                           #pressure_unit="bar",
+                                           number_of_components=2,
+                                           registry=reg
+                                           )
+        gas_material.add_material(neon, 0.9445)
+        gas_material.add_material(isobutanegas, 0.0555)
+    elif gas == "Neon2%Isobutane2bar":
+        gas_material = g4.MaterialCompound("Neon2%Isobutane2bar",
+                                           density=0.00165651,
+                                           state="gas",
+                                           #temperature=298.15,
+                                           #temperature_unit="K",
+                                           #pressure=2,
+                                           #pressure_unit="bar",
+                                           number_of_components=2,
+                                           registry=reg
+                                           )
+        gas_material.add_material(neon, 0.9445)
+        gas_material.add_material(isobutanegas, 0.0555)
+    elif gas == "Neon2%Isobutane4bar":
+        gas_material = g4.MaterialCompound("Neon2%Isobutane4bar",
+                                           density=0.00331302,
+                                           state="gas",
+                                           #temperature=298.15,
+                                           #temperature_unit="K",
+                                           #pressure=4,
                                            #pressure_unit="bar",
                                            number_of_components=2,
                                            registry=reg
