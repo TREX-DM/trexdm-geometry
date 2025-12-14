@@ -43,6 +43,7 @@ outerGas_LV = utils.get_logical_volume_by_name("outerGas_LV", reg)
 innerGas_LV = utils.get_logical_volume_by_name("gas_LV", reg)
 
 gem_position_z = vessel.vesselLength/2 - micromegas.capSupportFinalHeight - micromegas.mMBaseThickness  - micromegas.mMBoardThickness - gem.gemmMSeparatorThickness - gem.gemKaptonFoilThickness/2
+mM_position_z = vessel.vesselLength/2 - micromegas.capSupportFinalHeight - 0.5*micromegas.mMBaseThickness
 
 if CATHODE_TYPE == "plain":
     cathodeLeftSideThickness = fieldcage.cathodeKaptonThickness + fieldcage.cathodeCuThickness*2
@@ -117,7 +118,7 @@ micromegasRight_PV = g4.PhysicalVolume(
     logicalVolume=micromegas_assembly,
     motherVolume=innerGas_LV,
     rotation=[0, 0, 0],
-    position=[0, 0, -(vessel.vesselLength/2 - micromegas.capSupportFinalHeight - 0.5*micromegas.mMBaseThickness)],
+    position=[0, 0, -mM_position_z],
     registry=reg
 )
 
@@ -135,7 +136,7 @@ micromegasLeft_PV = g4.PhysicalVolume(
     logicalVolume=micromegas_assembly,
     motherVolume=innerGas_LV,
     rotation=[np.pi, 0, 0],
-    position=[0, 0, vessel.vesselLength/2 - micromegas.capSupportFinalHeight - 0.5*micromegas.mMBaseThickness],
+    position=[0, 0, mM_position_z],
     registry=reg
 )
 
