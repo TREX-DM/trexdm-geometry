@@ -52,6 +52,9 @@ def generate_shielding_assembly_by_parts(name="shielding_assembly", open_calibra
     air = g4.MaterialPredefined("G4_AIR", reg)
     """
 
+    copperCageYpos = -castleSizeY/2 + leadThickness + copperCageOutSizeY/2
+    leadCageYpos = -castleSizeY/2 + leadSizeY/2
+
     leadCage0 = g4.solid.Box(
         name="leadCage0",
         pX=leadSizeX,
@@ -75,7 +78,7 @@ def generate_shielding_assembly_by_parts(name="shielding_assembly", open_calibra
             name="leadCage1",
             obj1=leadCage0,
             obj2=leadBlock,
-            tra2 =[[0, 0, 0], [leadSizeX/2 - leadBlockLength/2, 0, calibrationHoleZpos]],
+            tra2 =[[0, 0, 0], [leadSizeX/2 - leadBlockLength/2, -leadCageYpos, calibrationHoleZpos]],
             registry=reg
         )
 
@@ -83,7 +86,7 @@ def generate_shielding_assembly_by_parts(name="shielding_assembly", open_calibra
             name="leadCage2",
             obj1=leadCage1,
             obj2=leadBlock,
-            tra2 =[[0, 0, 0], [leadSizeX/2 - leadBlockLength/2, 0, -calibrationHoleZpos]],
+            tra2 =[[0, 0, 0], [leadSizeX/2 - leadBlockLength/2, -leadCageYpos, -calibrationHoleZpos]],
             registry=reg
         )
 
@@ -112,7 +115,7 @@ def generate_shielding_assembly_by_parts(name="shielding_assembly", open_calibra
         name="copperCage1",
         obj1=copperCage0,
         obj2=calibrationHole,
-        tra2 =[[0, 90*np.pi/180, 0], [copperCageOutSizeX/2 - copperCageThickness/2, 0, +calibrationHoleZpos]],
+        tra2 =[[0, 90*np.pi/180, 0], [copperCageOutSizeX/2 - copperCageThickness/2, -copperCageYpos, +calibrationHoleZpos]],
         registry=reg
     )
 
@@ -120,7 +123,7 @@ def generate_shielding_assembly_by_parts(name="shielding_assembly", open_calibra
         name="copperCage2",
         obj1=copperCage1,
         obj2=calibrationHole,
-        tra2 =[[0, 90*np.pi/180, 0], [copperCageOutSizeX/2 - copperCageThickness/2, 0, -calibrationHoleZpos]],
+        tra2 =[[0, 90*np.pi/180, 0], [copperCageOutSizeX/2 - copperCageThickness/2, -copperCageYpos, -calibrationHoleZpos]],
         registry=reg
     )
 
@@ -212,7 +215,7 @@ def generate_shielding_assembly_by_parts(name="shielding_assembly", open_calibra
     leadCage_PV = g4.PhysicalVolume(
         name="leadCage",
         rotation=[0, 0, 0],
-        position=[0, -castleSizeY/2 + leadSizeY/2, 0],
+        position=[0, leadCageYpos, 0],
         logicalVolume=leadCage_LV,
         motherVolume=shielding_assembly,
         registry=reg
@@ -221,7 +224,7 @@ def generate_shielding_assembly_by_parts(name="shielding_assembly", open_calibra
     copperCage_PV = g4.PhysicalVolume(
         name="copperCage",
         rotation=[0, 0, 0],
-        position=[0, -castleSizeY/2 + leadThickness + copperCageOutSizeY/2, 0],
+        position=[0, copperCageYpos, 0],
         logicalVolume=copperCage_LV,
         motherVolume=shielding_assembly,
         registry=reg
