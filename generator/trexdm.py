@@ -13,6 +13,7 @@ import utils
 
 LEFT_CALIBRATION_OPEN = True
 RIGHT_CALIBRATION_OPEN = True
+OPEN_CALIBRATION_LEAD_BLOCKS = False
 GAS = "Neon2%Isobutane1.1bar"
 CATHODE_TYPE = "wired"  # "wired" or "plain"
 SIMPLIFY_MM_GEOMETRY = False
@@ -27,7 +28,7 @@ ws   = g4.solid.Box("ws",5,5,5,reg, "m")
 world  = g4.LogicalVolume(ws, galactic,"world",reg)
 
 # Generate the assemblies
-shielding.generate_shielding_assembly_by_parts(registry=reg)
+shielding.generate_shielding_assembly_by_parts(open_calibration_lead_block=OPEN_CALIBRATION_LEAD_BLOCKS, registry=reg)
 vessel.generate_vessel_assembly(registry=reg, left_calibration_is_open=LEFT_CALIBRATION_OPEN, right_calibration_is_open=RIGHT_CALIBRATION_OPEN, gas=GAS)
 micromegas.generate_micromegas_assembly(registry=reg, is_right_side=True, simple_geometry=SIMPLIFY_MM_GEOMETRY)
 gem.generate_gem_assembly(registry=reg, is_right_side=True)
