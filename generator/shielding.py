@@ -1,5 +1,6 @@
 import vtk
 import pyg4ometry
+import numpy as np
 from pyg4ometry import geant4 as g4
 import utils
 
@@ -9,6 +10,9 @@ copperCageThickness = 50.0
 copperCageOutSizeX = 700.0
 copperCageOutSizeY = 750.0
 copperCageOutSizeZ = 900.0
+calibrationHoleRadius = 25 # diameter match the thickness of a lead block (50 mm)
+calibrationHoleZpos = 80 # it should be the same as vessel.calibrationHoleZpos
+
 
 outerGasSizeX  = copperCageOutSizeX - 2 * copperCageThickness
 outerGasSizeY  = copperCageOutSizeY - copperCageThickness
@@ -62,7 +66,35 @@ def generate_shielding_assembly_by_parts(name="shielding_assembly", registry=Non
         lunit="mm",
         registry=reg
     )
-    
+
+    calibrationHole = g4.solid.Tubs(
+        name="calibrationHole",
+        pRMin=0,
+        pRMax=calibrationHoleRadius,
+        pDz=copperCageThickness + 0.01,
+        pSPhi=0,
+        pDPhi=360,
+        aunit="deg",
+        lunit="mm",
+        registry=reg
+    )
+
+    copperCage1 = g4.solid.Subtraction(
+        name="copperCage1",
+        obj1=copperCage0,
+        obj2=calibrationHole,
+        tra2 =[[0, 90*np.pi/180, 0], [copperCageOutSizeX/2 - copperCageThickness/2, 0, +calibrationHoleZpos]],
+        registry=reg
+    )
+
+    copperCage2 = g4.solid.Subtraction(
+        name="copperCage2",
+        obj1=copperCage1,
+        obj2=calibrationHole,
+        tra2 =[[0, 90*np.pi/180, 0], [copperCageOutSizeX/2 - copperCageThickness/2, 0, -calibrationHoleZpos]],
+        registry=reg
+    )
+
     outerGasBox = g4.solid.Box(
         name="outerGasBox",
         pX=outerGasSizeX,
@@ -82,7 +114,7 @@ def generate_shielding_assembly_by_parts(name="shielding_assembly", registry=Non
     
     copperCage = g4.solid.Subtraction(
         name="copperCage",
-        obj1=copperCage0,
+        obj1=copperCage2,
         obj2=outerGasBox,
         tra2=[[0, 0, 0], [0, copperCageOutSizeY/2 - outerGasSizeY/2, 0]],
         registry=reg
@@ -303,7 +335,7 @@ if __name__ == "__main__":
     parser.add_argument("--gdml", action="store_true")
     args = parser.parse_args()
 
-    reg = generate_shielding_assembly("shielding_assembly")
+    reg = generate_shielding_assembly_by_parts("shielding_assembly")
     shielding_assembly = utils.get_logical_volume_by_name("shielding_assembly", reg)
 
     if args.gdml:
