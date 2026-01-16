@@ -13,6 +13,9 @@ copperCageOutSizeZ = 900.0
 calibrationHoleRadius = 25 # diameter match the thickness of a lead block (50 mm)
 calibrationHoleZpos = 80 # it should be the same as vessel.calibrationHoleZpos
 
+leadBlockThickness = 50
+leadBlockLength = 200
+leadBlockWidth = 100
 
 outerGasSizeX  = copperCageOutSizeX - 2 * copperCageThickness
 outerGasSizeY  = copperCageOutSizeY - copperCageThickness
@@ -31,7 +34,7 @@ copperTopSizeX  = leadSizeX
 copperTopSizeY  = copperCageThickness
 copperTopSizeZ  = leadSizeZ
 
-def generate_shielding_assembly_by_parts(name="shielding_assembly", registry=None):
+def generate_shielding_assembly_by_parts(name="shielding_assembly", open_calibration_lead_block=False, registry=None):
     # Registry
     if registry is None:
         reg = g4.Registry()
@@ -57,7 +60,33 @@ def generate_shielding_assembly_by_parts(name="shielding_assembly", registry=Non
         lunit="mm",
         registry=reg
     )
-    
+
+    leadBlock = g4.solid.Box(
+        name="leadBlock",
+        pX=leadBlockLength + 0.01, # to ensure complete subtraction
+        pY=leadBlockWidth,
+        pZ=leadBlockThickness,
+        lunit="mm",
+        registry=reg
+    )
+
+    if open_calibration_lead_block:
+        leadCage1 = g4.solid.Subtraction(
+            name="leadCage1",
+            obj1=leadCage0,
+            obj2=leadBlock,
+            tra2 =[[0, 0, 0], [leadSizeX/2 - leadBlockLength/2, 0, calibrationHoleZpos]],
+            registry=reg
+        )
+
+        leadCage2 = g4.solid.Subtraction(
+            name="leadCage2",
+            obj1=leadCage1,
+            obj2=leadBlock,
+            tra2 =[[0, 0, 0], [leadSizeX/2 - leadBlockLength/2, 0, -calibrationHoleZpos]],
+            registry=reg
+        )
+
     copperCage0 = g4.solid.Box(
         name="copperCage0",
         pX=copperCageOutSizeX,
@@ -106,7 +135,7 @@ def generate_shielding_assembly_by_parts(name="shielding_assembly", registry=Non
 
     leadCage = g4.solid.Subtraction(
         name="leadCage",
-        obj1=leadCage0,
+        obj1=leadCage2 if open_calibration_lead_block else leadCage0,
         obj2=copperCage0,
         tra2=[[0, 0, 0], [0, -leadSizeY/2 + leadThickness + copperCageOutSizeY/2, 0]],
         registry=reg
@@ -335,7 +364,7 @@ if __name__ == "__main__":
     parser.add_argument("--gdml", action="store_true")
     args = parser.parse_args()
 
-    reg = generate_shielding_assembly_by_parts("shielding_assembly")
+    reg = generate_shielding_assembly_by_parts("shielding_assembly", True)
     shielding_assembly = utils.get_logical_volume_by_name("shielding_assembly", reg)
 
     if args.gdml:
