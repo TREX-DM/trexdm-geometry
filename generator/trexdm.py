@@ -313,7 +313,16 @@ reg.setWorld(world.name)
 import argparse
 parser = argparse.ArgumentParser()
 parser.add_argument("--childless", action="store_true", default=False)
-defaultName = f"trexdm_{GAS}_cathode-{CATHODE_TYPE}_leftCalib-{'open' if LEFT_CALIBRATION_OPEN else 'closed'}_rightCalib-{'open' if RIGHT_CALIBRATION_OPEN else 'closed'}{'_simplifiedMM' if SIMPLIFY_MM_GEOMETRY else ''}.gdml"
+defaultName = (
+    f"trexdm"
+    f"_{GAS}"
+    f"_cathode-{CATHODE_TYPE}"
+    f"_leftCalib-{'open' if LEFT_CALIBRATION_OPEN else 'closed'}"
+    f"_rightCalib-{'open' if RIGHT_CALIBRATION_OPEN else 'closed'}"
+    f"{'_simplifiedMM' if SIMPLIFY_MM_GEOMETRY else ''}"
+    f"{'_calLeadBlocks-open' if OPEN_CALIBRATION_LEAD_BLOCKS else ''}"
+    f".gdml"
+)
 parser.add_argument("-f", "--file", type=str, default=defaultName, help="Output GDML file name")
 
 args = parser.parse_args()
