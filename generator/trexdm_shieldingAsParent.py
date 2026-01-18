@@ -29,13 +29,13 @@ ws   = g4.solid.Box("ws",1.5,1.5,1.5,reg, "m")
 world  = g4.LogicalVolume(ws, air,"world",reg)
 
 # Generate the assemblies
-shielding.generate_shielding_assembly_by_parts(open_calibration_lead_block=OPEN_CALIBRATION_LEAD_BLOCKS, registry=reg)
+shielding.generate_shielding_volume(open_calibration_lead_block=OPEN_CALIBRATION_LEAD_BLOCKS, registry=reg)
 vessel.generate_vessel_assembly(registry=reg, left_calibration_is_open=LEFT_CALIBRATION_OPEN, right_calibration_is_open=RIGHT_CALIBRATION_OPEN, gas=GAS)
 micromegas.generate_micromegas_assembly(registry=reg, is_right_side=True, simple_geometry=SIMPLIFY_MM_GEOMETRY)
 gem.generate_gem_assembly(registry=reg, is_right_side=True)
 fieldcage.generate_fieldcage_assembly(registry=reg, cathode_type=CATHODE_TYPE)
 
-shielding_assembly = utils.get_logical_volume_by_name("shielding_assembly", reg)
+shielding_LV = utils.get_logical_volume_by_name("shielding_LV", reg)
 vessel_assembly = utils.get_logical_volume_by_name("vessel_assembly", reg)
 micromegas_assembly = utils.get_logical_volume_by_name("micromegas_assembly", reg)
 gem_assembly = utils.get_logical_volume_by_name("gem_assembly", reg)
@@ -291,7 +291,7 @@ vesselassembly_PV = g4.PhysicalVolume(
 
 shielding_PV = g4.PhysicalVolume(
     name="shielding",
-    logicalVolume=shielding_assembly,
+    logicalVolume=shielding_LV,
     motherVolume=world,
     rotation=[0, 0, 0],
     position=[0, 0, 0],
@@ -315,7 +315,7 @@ import argparse
 parser = argparse.ArgumentParser()
 parser.add_argument("--childless", action="store_true", default=False)
 defaultName = (
-    f"trexdm"
+    f"trexdm_shieldingAsParent"
     f"_{GAS}"
     f"_cathode-{CATHODE_TYPE}"
     f"_leftCalib-{'open' if LEFT_CALIBRATION_OPEN else 'closed'}"
