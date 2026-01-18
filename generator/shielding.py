@@ -259,7 +259,7 @@ def generate_shielding_assembly_by_parts(name="shielding_assembly", open_calibra
 
     return reg
 
-def generate_shielding_assembly(name="shielding_assembly", registry=None):
+def generate_shielding_volume(name="shielding_LV", open_calibration_lead_block=False, registry=None):
     """
     Generates the shielding geometry for the TREX-DM detector.
     Returns a Geant4 Registry containing the shielding geometry.
@@ -287,14 +287,43 @@ def generate_shielding_assembly(name="shielding_assembly", registry=None):
             reg,
             "mm"
         )
-    outerGas = g4.solid.Box(
-            "outerGas",
+
+    calibrationHole = g4.solid.Tubs(
+        name="calibrationHole",
+        pRMin=0,
+        pRMax=calibrationHoleRadius,
+        pDz=copperCageThickness,
+        pSPhi=0,
+        pDPhi=360,
+        aunit="deg",
+        lunit="mm",
+        registry=reg
+    )
+
+    outerGas0 = g4.solid.Box(
+            "outerGas0",
             outerGasSizeX,
             outerGasSizeY,
             outerGasSizeZ,
             reg,
             "mm"
         )
+
+    outerGas1 = g4.solid.Union(
+        name="outerGas1",
+        obj1=outerGas0,
+        obj2=calibrationHole,
+        tra2 =[[0, 90*np.pi/180, 0], [outerGasSizeX/2 + copperCageThickness/2, 0, +calibrationHoleZpos]],
+        registry=reg
+    )
+
+    outerGas = g4.solid.Union(
+        name="outerGas",
+        obj1=outerGas1,
+        obj2=calibrationHole,
+        tra2 =[[0, 90*np.pi/180, 0], [outerGasSizeX/2 + copperCageThickness/2, 0, -calibrationHoleZpos]],
+        registry=reg
+    )
 
     copperTop = g4.solid.Box(
         "copperTop",
@@ -304,24 +333,45 @@ def generate_shielding_assembly(name="shielding_assembly", registry=None):
         reg,
         "mm"
     )
+
     castleBox = g4.solid.Box(
-        "castleBox",
+        "castleBox0" if open_calibration_lead_block else "castleBox",
         castleSizeX,
         castleSizeY,
         castleSizeZ,
         reg,
         "mm"
     )
-    
-    shielding_assembly = g4.AssemblyVolume(
-        name=name,
-        registry=reg,
-        addRegistry=True
-    )
+
+    if open_calibration_lead_block:
+        leadBlock = g4.solid.Box(
+            name="leadBlock",
+            pX=leadBlockLength, # to ensure complete subtraction
+            pY=leadBlockWidth,
+            pZ=leadBlockThickness,
+            lunit="mm",
+            registry=reg
+        )
+        castleBox1 = g4.solid.Subtraction(
+            name="castleBox1",
+            obj1=castleBox,
+            obj2=leadBlock,
+            tra2 =[[0, 0, 0], [castleSizeX/2 - leadBlockLength/2, 0, calibrationHoleZpos]],
+            registry=reg
+        )
+
+        castleBox = g4.solid.Subtraction(
+            name="castleBox",
+            obj1=castleBox1,
+            obj2=leadBlock,
+            tra2 =[[0, 0, 0], [castleSizeX/2 - leadBlockLength/2, 0, -calibrationHoleZpos]],
+            registry=reg
+        )
+
     outerGas_LV = g4.LogicalVolume(outerGas, air, "outerGas_LV", reg)
     copperCage_LV = g4.LogicalVolume(copperCage, copper, "copperCage_LV", reg)
     copperTop_LV = g4.LogicalVolume(copperTop, copper, "copperTop_LV", reg)
-    leadShielding_LV = g4.LogicalVolume(castleBox, lead, "leadShielding_LV", reg)
+    leadShielding_LV = g4.LogicalVolume(castleBox, lead, name, reg)
 
     copperCage_PV = g4.PhysicalVolume(
         rotation=[0,0,0],
@@ -348,14 +398,6 @@ def generate_shielding_assembly(name="shielding_assembly", registry=None):
         registry=reg
     )
 
-    leadShielding_PV = g4.PhysicalVolume(
-        rotation=[0,0,0],
-        position=[0,0,0],
-        name="leadShielding",
-        logicalVolume=leadShielding_LV,
-        motherVolume=shielding_assembly,
-        registry=reg
-    )
 
     return reg
 
@@ -367,12 +409,16 @@ if __name__ == "__main__":
     parser.add_argument("--gdml", action="store_true")
     args = parser.parse_args()
 
-    reg = generate_shielding_assembly_by_parts("shielding_assembly", True)
-    shielding_assembly = utils.get_logical_volume_by_name("shielding_assembly", reg)
+    #reg = generate_shielding_assembly_by_parts("shielding_assembly", True)
+    #shielding = utils.get_logical_volume_by_name("shielding_assembly", reg)
+
+    reg = generate_shielding_volume("shielding_LV", open_calibration_lead_block=True)
+    shielding = utils.get_logical_volume_by_name("shielding_LV", reg)
+
 
     if args.gdml:
         galactic = g4.nist_material_2geant4Material("G4_Galactic")
-        assembly_LV = shielding_assembly.logicalVolume(material=galactic)
+        assembly_LV = shielding.logicalVolume(material=galactic)
         reg.setWorld(assembly_LV.name)
         w = pyg4ometry.gdml.Writer()
         w.addDetector(reg)
@@ -380,6 +426,6 @@ if __name__ == "__main__":
 
     if args.vis:
         v = pyg4ometry.visualisation.VtkViewerColouredMaterial()
-        v.addLogicalVolume(shielding_assembly)
+        v.addLogicalVolume(shielding)
         v.addAxes(200)
         v.view()
