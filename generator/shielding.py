@@ -280,13 +280,13 @@ def generate_shielding_volume(name="shielding_LV", open_calibration_lead_block=F
     """
 
     copperCage = g4.solid.Box(
-            "copperCage",
-            copperCageOutSizeX,
-            copperCageOutSizeY,
-            copperCageOutSizeZ,
-            reg,
-            "mm"
-        )
+        name="copperCage",
+        pX=copperCageOutSizeX,
+        pY=copperCageOutSizeY,
+        pZ=copperCageOutSizeZ,
+        registry=reg,
+        lunit="mm"
+    )
 
     calibrationHole = g4.solid.Tubs(
         name="calibrationHole",
@@ -301,13 +301,13 @@ def generate_shielding_volume(name="shielding_LV", open_calibration_lead_block=F
     )
 
     outerGas0 = g4.solid.Box(
-            "outerGas0",
-            outerGasSizeX,
-            outerGasSizeY,
-            outerGasSizeZ,
-            reg,
-            "mm"
-        )
+        name="outerGas0",
+        pX=outerGasSizeX,
+        pY=outerGasSizeY,
+        pZ=outerGasSizeZ,
+        registry=reg,
+        lunit="mm"
+    )
 
     outerGas1 = g4.solid.Union(
         name="outerGas1",
@@ -326,21 +326,21 @@ def generate_shielding_volume(name="shielding_LV", open_calibration_lead_block=F
     )
 
     copperTop = g4.solid.Box(
-        "copperTop",
-        copperTopSizeX,
-        copperTopSizeY,
-        copperTopSizeZ,
-        reg,
-        "mm"
+        name="copperTop",
+        pX=copperTopSizeX,
+        pY=copperTopSizeY,
+        pZ=copperTopSizeZ,
+        registry=reg,
+        lunit="mm"
     )
 
     castleBox = g4.solid.Box(
-        "castleBox0" if open_calibration_lead_block else "castleBox",
-        castleSizeX,
-        castleSizeY,
-        castleSizeZ,
-        reg,
-        "mm"
+        name="castleBox0" if open_calibration_lead_block else "castleBox",
+        pX=castleSizeX,
+        pY=castleSizeY,
+        pZ=castleSizeZ,
+        registry=reg,
+        lunit="mm"
     )
 
     if open_calibration_lead_block:
@@ -368,10 +368,30 @@ def generate_shielding_volume(name="shielding_LV", open_calibration_lead_block=F
             registry=reg
         )
 
-    outerGas_LV = g4.LogicalVolume(outerGas, air, "outerGas_LV", reg)
-    copperCage_LV = g4.LogicalVolume(copperCage, copper, "copperCage_LV", reg)
-    copperTop_LV = g4.LogicalVolume(copperTop, copper, "copperTop_LV", reg)
-    leadShielding_LV = g4.LogicalVolume(castleBox, lead, name, reg)
+    outerGas_LV = g4.LogicalVolume(
+        name="outerGas_LV",
+        solid=outerGas,
+        material=air,
+        registry=reg
+    )
+    copperCage_LV = g4.LogicalVolume(
+        name="copperCage_LV",
+        solid=copperCage,
+        material=copper,
+        registry=reg
+    )
+    copperTop_LV = g4.LogicalVolume(
+        name="copperTop_LV",
+        solid=copperTop,
+        material=copper,
+        registry=reg
+    )
+    leadShielding_LV = g4.LogicalVolume(
+        name=name,
+        solid=castleBox,
+        material=lead,
+        registry=reg
+    )
 
     copperCage_PV = g4.PhysicalVolume(
         rotation=[0,0,0],
