@@ -356,7 +356,7 @@ def generate_shielding_volume(name="shielding_LV", open_calibration_lead_block=F
             name="castleBox1",
             obj1=castleBox,
             obj2=leadBlock,
-            tra2 =[[0, 0, 0], [castleSizeX/2 - leadBlockLength/2, 0, calibrationHoleZpos]],
+            tra2 =[[0, 0, 0], [castleSizeX/2 - leadBlockLength/2, copperCageThickness, calibrationHoleZpos]],
             registry=reg
         )
 
@@ -364,7 +364,7 @@ def generate_shielding_volume(name="shielding_LV", open_calibration_lead_block=F
             name="castleBox",
             obj1=castleBox1,
             obj2=leadBlock,
-            tra2 =[[0, 0, 0], [castleSizeX/2 - leadBlockLength/2, 0, -calibrationHoleZpos]],
+            tra2 =[[0, 0, 0], [castleSizeX/2 - leadBlockLength/2, copperCageThickness, -calibrationHoleZpos]],
             registry=reg
         )
 
