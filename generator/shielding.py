@@ -34,6 +34,18 @@ copperTopSizeX  = leadSizeX
 copperTopSizeY  = copperCageThickness
 copperTopSizeZ  = leadSizeZ
 
+peFloorThickness = 400
+peRoofThickness = 400
+peTankWidth = 750 # the tank in front of the calibration ports is made from polyethylene blocks instead of water
+
+waterTankThickness = 400
+waterTankHeight = 1700
+waterTanksWheelsHeight = 100
+waterTankDistanceToCastleX1 = 400 # distance to the lead castle at the calibration ports part
+waterTankDistanceToCastleX2 = 150 # distance to the lead castle at the opposite part
+waterTankDistanceToCastleZ = 500 # space needed for the electronics
+
+
 def generate_shielding_assembly_by_parts(name="shielding_assembly", open_calibration_lead_block=False, registry=None):
     # Registry
     if registry is None:
@@ -421,6 +433,178 @@ def generate_shielding_volume(name="shielding_LV", open_calibration_lead_block=F
 
     return reg
 
+
+def generate_neutron_shielding_assembly(name="neutron_shielding_assembly", registry=None):
+    # Registry
+    if registry is None:
+        reg = g4.Registry()
+    else:
+        reg = registry  
+
+    # Materials
+    polyethylene = g4.nist_material_2geant4Material("G4_POLYETHYLENE")
+    water = g4.nist_material_2geant4Material("G4_WATER")
+
+    peBase = g4.solid.Box(
+        name="peBase",
+        pX=castleSizeX,
+        pY=peFloorThickness,
+        pZ=castleSizeZ,
+        lunit="mm",
+        registry=reg
+    )
+
+    waterTanksHV = g4.solid.Box(
+        name="waterTanksHV",
+        pX=waterTankThickness,
+        pY=waterTankHeight,
+        pZ=castleSizeZ + 2*waterTankDistanceToCastleZ + 2*waterTankThickness,
+        lunit="mm",
+        registry=reg
+    )
+    waterTanksElectronics = g4.solid.Box(
+        name="waterTanksElectronics",
+        pX=waterTankDistanceToCastleX1 + castleSizeX + waterTankDistanceToCastleX2,
+        pY=waterTankHeight,
+        pZ=waterTankThickness,
+        lunit="mm",
+        registry=reg
+    )
+
+    waterTankCalibrationSizeZ = (castleSizeZ + 2*waterTankDistanceToCastleZ + 2*waterTankThickness - peTankWidth)/2
+    waterTanksCalibration = g4.solid.Box(
+        name="waterTanksCalibration",
+        pX=waterTankThickness,
+        pY=waterTankHeight,
+        pZ=waterTankCalibrationSizeZ,
+        lunit="mm",
+        registry=reg
+    )
+    peTankCalibration = g4.solid.Box(
+        name="peTankCalibration",
+        pX=waterTankThickness, # same as water tank thickness
+        pY=waterTankHeight, # same as water tank height
+        pZ=peTankWidth,
+        lunit="mm",
+        registry=reg
+    )
+
+    neutron_shielding_assembly = g4.AssemblyVolume(
+        name=name,
+        registry=reg,
+        addRegistry=True
+    )
+
+    peBase_LV = g4.LogicalVolume(
+        name="peBase_LV",
+        solid=peBase,
+        material=polyethylene,
+        registry=reg
+    )
+
+    waterTanksHV_LV = g4.LogicalVolume(
+        name="waterTanksHV_LV",
+        solid=waterTanksHV,
+        material=water,
+        registry=reg
+    )
+
+    waterTanksElectronics_LV = g4.LogicalVolume(
+        name="waterTanksElectronics_LV",
+        solid=waterTanksElectronics,
+        material=water,
+        registry=reg
+    )
+
+    waterTanksCalibration_LV = g4.LogicalVolume(
+        name="waterTanksCalibration_LV",
+        solid=waterTanksCalibration,
+        material=water,
+        registry=reg
+    )
+
+    peTankCalibration_LV = g4.LogicalVolume(
+        name="peTankCalibration_LV",
+        solid=peTankCalibration,
+        material=polyethylene,
+        registry=reg
+    )
+
+    # physical volumes
+    yPos = -castleSizeY/2 - peFloorThickness + waterTanksWheelsHeight + waterTankHeight/2
+    peFloor_PV = g4.PhysicalVolume(
+        name="peFloor",
+        rotation=[0, 0, 0],
+        position=[0, -castleSizeY/2 - peFloorThickness/2, 0],
+        logicalVolume=peBase_LV,
+        motherVolume=neutron_shielding_assembly,
+        registry=reg
+    )
+
+    peRoof_PV = g4.PhysicalVolume(
+        name="peRoof",
+        rotation=[0, 0, 0],
+        position=[0, castleSizeY/2 + peRoofThickness/2, 0],
+        logicalVolume=peBase_LV,
+        motherVolume=neutron_shielding_assembly,
+        registry=reg
+    )
+
+    waterTanksHV_PV = g4.PhysicalVolume(
+        name="waterTanksHV",
+        rotation=[0, 0, 0],
+        position=[-castleSizeX/2 - waterTankDistanceToCastleX2 - waterTankThickness/2, yPos, 0],
+        logicalVolume=waterTanksHV_LV,
+        motherVolume=neutron_shielding_assembly,
+        registry=reg
+    )
+
+    waterTanksElectronics_PV = g4.PhysicalVolume(
+        name="waterTanksElectronicsLeft",
+        rotation=[0, 0, 0],
+        position=[(waterTankDistanceToCastleX1 - waterTankDistanceToCastleX2)/2, yPos, castleSizeZ/2 + waterTankDistanceToCastleZ + waterTankThickness/2],
+        logicalVolume=waterTanksElectronics_LV,
+        motherVolume=neutron_shielding_assembly,
+        registry=reg
+    )
+
+    waterTanksElectronicsRight_PV = g4.PhysicalVolume(
+        name="waterTanksElectronicsRight",
+        rotation=[0, 0, 0],
+        position=[(waterTankDistanceToCastleX1 - waterTankDistanceToCastleX2)/2, yPos, - (castleSizeZ/2 + waterTankDistanceToCastleZ + waterTankThickness/2)],
+        logicalVolume=waterTanksElectronics_LV,
+        motherVolume=neutron_shielding_assembly,
+        registry=reg
+    )
+
+    waterTanksCalibrationLeft_PV = g4.PhysicalVolume(
+        name="waterTanksCalibrationLeft",
+        rotation=[0, 0, 0],
+        position=[castleSizeX/2 + waterTankDistanceToCastleX1 + waterTankThickness/2, yPos, castleSizeZ/2 + waterTankDistanceToCastleZ + waterTankThickness - waterTankCalibrationSizeZ/2],
+        logicalVolume=waterTanksCalibration_LV,
+        motherVolume=neutron_shielding_assembly,
+        registry=reg
+    )
+
+    waterTanksCalibrationRight_PV = g4.PhysicalVolume(
+        name="waterTanksCalibrationRight",
+        rotation=[0, 0, 0],
+        position=[castleSizeX/2 + waterTankDistanceToCastleX1 + waterTankThickness/2, yPos, - (castleSizeZ/2 + waterTankDistanceToCastleZ + waterTankThickness - waterTankCalibrationSizeZ/2)],
+        logicalVolume=waterTanksCalibration_LV,
+        motherVolume=neutron_shielding_assembly,
+        registry=reg
+    )
+
+    peTankCalibration_PV = g4.PhysicalVolume(
+        name="peTankCalibration",
+        rotation=[0, 0, 0],
+        position=[castleSizeX/2 + waterTankDistanceToCastleX1 + waterTankThickness/2, yPos, 0],
+        logicalVolume=peTankCalibration_LV,
+        motherVolume=neutron_shielding_assembly,
+        registry=reg
+    )
+
+    return reg
 
 if __name__ == "__main__":
     import argparse
