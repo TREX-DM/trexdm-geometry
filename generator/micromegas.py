@@ -44,7 +44,7 @@ capSupportColumnThicknessB = 12
 capSupportColumnThicknessC = capSupportColumnLengthC # mm. this is a diameter in reality
 
 capSupportColumnProtrusionAtoB = 2.5 # mm
-capSupportColumnBtoBase = -1 # mm. In the CAD it is -1 mm, but it is adjustable in real life. Negative means that the column B starts below the base, positive means that it starts above the base.
+capSupportColumnBtoBase = -2 # mm. In the CAD it is -1 mm, but it is adjustable in real life. Negative means that the column B starts below the base, positive means that it starts above the base.
 
 capSupportColumnCtoTriangularSupport = 5.45 + 5.05 # mm. 5.05mm should be the columnCradius (6mm) but the hole of the triangular support is smaller (5.05mm radius) in the CAD
 
@@ -460,7 +460,7 @@ def generate_limandes(name="limande", suffix="", thickness_in_mm=1, thickness_be
 
     return reg
 
-def generate_micromegas_assembly(name="micromegas_assembly", registry=None, is_right_side=True):
+def generate_micromegas_assembly(name="micromegas_assembly", registry=None, is_right_side=True, simple_geometry=False):
     """
     Generates the micromegas assembly with all its components.
     param name: Name of the assembly volume.
@@ -593,122 +593,123 @@ def generate_micromegas_assembly(name="micromegas_assembly", registry=None, is_r
         registry=reg
     )
 
-    ### Micromegas to Cap separator (and support)
-    mMTriangularSupportSquare = g4.solid.Box(
-        name="mMTriangularSupportSquare",
-        pX=mMTriangularSupportSquareLength,
-        pY=mMTriangularSupportSquareLength,
-        pZ=mMTriangularSupportThickness,
-        lunit="mm",
-        registry=reg
-    )
-    mMTriangularSupportSquareCut = g4.solid.Box(
-        name="mMTriangularSupportSquareCut",
-        pX=mMTriangularSupportSquareLength*1.414,  # sqrt(2) * length
-        pY=mMTriangularSupportSquareLength*1.414,  # sqrt(2) * length
-        pZ=mMTriangularSupportThickness,
-        lunit="mm",
-        registry=reg
-    )
-    mMTriangularSupport = g4.solid.Subtraction(
-        name="mMTriangularSupport",
-        obj1=mMTriangularSupportSquare,
-        obj2=mMTriangularSupportSquareCut,
-        tra2=[[0, 0, 45*3.1416/180], [mMTriangularSupportSquareLength/2, mMTriangularSupportSquareLength/2, 0]],
-        registry=reg
-    )
+    if not simple_geometry:
+        ### Micromegas to Cap separator (and support)
+        mMTriangularSupportSquare = g4.solid.Box(
+            name="mMTriangularSupportSquare",
+            pX=mMTriangularSupportSquareLength,
+            pY=mMTriangularSupportSquareLength,
+            pZ=mMTriangularSupportThickness,
+            lunit="mm",
+            registry=reg
+        )
+        mMTriangularSupportSquareCut = g4.solid.Box(
+            name="mMTriangularSupportSquareCut",
+            pX=mMTriangularSupportSquareLength*1.414,  # sqrt(2) * length
+            pY=mMTriangularSupportSquareLength*1.414,  # sqrt(2) * length
+            pZ=mMTriangularSupportThickness + 0.001,  # to ensure cut
+            lunit="mm",
+            registry=reg
+        )
+        mMTriangularSupport = g4.solid.Subtraction(
+            name="mMTriangularSupport",
+            obj1=mMTriangularSupportSquare,
+            obj2=mMTriangularSupportSquareCut,
+            tra2=[[0, 0, 45*3.1416/180], [mMTriangularSupportSquareLength/2, mMTriangularSupportSquareLength/2, 0]],
+            registry=reg
+        )
 
-    capSupportBase0 = g4.solid.Box(
-        name="capSupportBase0",
-        pX=capSupportBaseLength,
-        pY=capSupportBaseHeight,
-        pZ=capSupportBaseThickness,
-        lunit="mm",
-        registry=reg
-    )
-    capSupportBaseCut = g4.solid.Box(
-        name="capSupportBaseCut",
-        pX=capSupportBaseCutLength,
-        pY=capSupportBaseCutHeight,
-        pZ=capSupportBaseThickness,
-        lunit="mm",
-        registry=reg
-    )
+        capSupportBase0 = g4.solid.Box(
+            name="capSupportBase0",
+            pX=capSupportBaseLength,
+            pY=capSupportBaseHeight,
+            pZ=capSupportBaseThickness,
+            lunit="mm",
+            registry=reg
+        )
+        capSupportBaseCut = g4.solid.Box(
+            name="capSupportBaseCut",
+            pX=capSupportBaseCutLength,
+            pY=capSupportBaseCutHeight,
+            pZ=capSupportBaseThickness,
+            lunit="mm",
+            registry=reg
+        )
 
-    capSupportBase = g4.solid.Subtraction(
-        name="capSupportBase",
-        obj1=capSupportBase0,
-        obj2=capSupportBaseCut,
-        tra2=[[0, 0, 0], [0, capSupportBaseHeight/2 - capSupportBaseCutHeight/2, 0]],
-        registry=reg
-    )
+        capSupportBase = g4.solid.Subtraction(
+            name="capSupportBase",
+            obj1=capSupportBase0,
+            obj2=capSupportBaseCut,
+            tra2=[[0, 0, 0], [0, capSupportBaseHeight/2 - capSupportBaseCutHeight/2, 0]],
+            registry=reg
+        )
 
-    capSupportColumnA = g4.solid.Box(
-        name="capSupportColumnA",
-        pX=capSupportColumnLengthA,
-        pY=capSupportColumnThicknessA,
-        pZ=capSupportColumnHeightA,
-        lunit="mm",
-        registry=reg
-    )
-    capSupportColumnB = g4.solid.Box(
-        name="capSupportColumnB",
-        pX=capSupportColumnLengthB,
-        pY=capSupportColumnThicknessB,
-        pZ=capSupportColumnHeightB,
-        lunit="mm",
-        registry=reg
-    )
-    capSupportColumnC = g4.solid.Tubs(
-        name="capSupportColumnC",
-        pRMin=0,
-        pRMax=capSupportColumnThicknessC/2,
-        pDz=capSupportColumnHeightC,
-        pSPhi=0,
-        pDPhi=360,
-        aunit="deg",
-        lunit="mm",
-        registry=reg
-    )
+        capSupportColumnA = g4.solid.Box(
+            name="capSupportColumnA",
+            pX=capSupportColumnLengthA,
+            pY=capSupportColumnThicknessA,
+            pZ=capSupportColumnHeightA,
+            lunit="mm",
+            registry=reg
+        )
+        capSupportColumnB = g4.solid.Box(
+            name="capSupportColumnB",
+            pX=capSupportColumnLengthB,
+            pY=capSupportColumnThicknessB,
+            pZ=capSupportColumnHeightB,
+            lunit="mm",
+            registry=reg
+        )
+        capSupportColumnC = g4.solid.Tubs(
+            name="capSupportColumnC",
+            pRMin=0,
+            pRMax=capSupportColumnThicknessC/2,
+            pDz=capSupportColumnHeightC,
+            pSPhi=0,
+            pDPhi=360,
+            aunit="deg",
+            lunit="mm",
+            registry=reg
+        )
 
-    capSupportBaseA = g4.solid.Union(
-        name="capSupportBaseA",
-        obj1=capSupportBase,
-        obj2=capSupportColumnA,
-        tra2=[[0, 0, 0], [0, -capSupportBaseHeight/2 + capSupportColumnThicknessA/2, capSupportBaseThickness/2 +capSupportColumnHeightA/2]],
-        registry=reg
-    )
+        capSupportBaseA = g4.solid.Union(
+            name="capSupportBaseA",
+            obj1=capSupportBase,
+            obj2=capSupportColumnA,
+            tra2=[[0, 0, 0], [0, -capSupportBaseHeight/2 + capSupportColumnThicknessA/2, capSupportBaseThickness/2 +capSupportColumnHeightA/2]],
+            registry=reg
+        )
 
-    capSupportBaseACutted = g4.solid.Subtraction(
-        name="capSupportBaseACutted",
-        obj1=capSupportBaseA,
-        obj2=capSupportColumnB,
-        tra2=[[0, 0, 0], [0, -capSupportBaseHeight/2 + capSupportColumnThicknessB/2 -capSupportColumnProtrusionAtoB, -capSupportBaseThickness/2 + capSupportColumnHeightB/2]],
-        registry=reg
-    )
-    capSupportColumnBC = g4.solid.Union(
-        name="capSupportColumnBC",
-        obj1=capSupportColumnB,
-        obj2=capSupportColumnC,
-        tra2=[[0, 0, 0], [0, 0, capSupportColumnHeightB/2 + capSupportColumnHeightC/2]],
-        registry=reg
-    )
+        capSupportBaseACutted = g4.solid.Subtraction(
+            name="capSupportBaseACutted",
+            obj1=capSupportBaseA,
+            obj2=capSupportColumnB,
+            tra2=[[0, 0, 0], [0, -capSupportBaseHeight/2 + capSupportColumnThicknessB/2 -capSupportColumnProtrusionAtoB, -capSupportBaseThickness/2 + capSupportColumnHeightB/2]],
+            registry=reg
+        )
+        capSupportColumnBC = g4.solid.Union(
+            name="capSupportColumnBC",
+            obj1=capSupportColumnB,
+            obj2=capSupportColumnC,
+            tra2=[[0, 0, 0], [0, 0, capSupportColumnHeightB/2 + capSupportColumnHeightC/2]],
+            registry=reg
+        )
 
-    capSupportBaseColumn = g4.solid.Union(
-        name="capSupportBaseColumn",
-        obj1=capSupportBaseACutted,
-        obj2=capSupportColumnBC,
-        tra2=[[0, 0, 0], [0, -capSupportBaseHeight/2 + capSupportColumnThicknessB/2 - capSupportColumnProtrusionAtoB, capSupportBaseThickness/2 + capSupportColumnHeightB/2 + capSupportColumnBtoBase]],
-        registry=reg
-    )
+        capSupportBaseColumn = g4.solid.Union(
+            name="capSupportBaseColumn",
+            obj1=capSupportBaseACutted,
+            obj2=capSupportColumnBC,
+            tra2=[[0, 0, 0], [0, -capSupportBaseHeight/2 + capSupportColumnThicknessB/2 - capSupportColumnProtrusionAtoB, capSupportBaseThickness/2 + capSupportColumnHeightB/2 + capSupportColumnBtoBase]],
+            registry=reg
+        )
 
-    mMSupport = g4.solid.Union(
-        name="mMSupport",
-        obj1=capSupportBaseColumn,
-        obj2=mMTriangularSupport,
-        tra2=[[0, 0, -135*3.1416/180], [0, - capSupportColumnCtoTriangularSupport - capSupportBaseHeight/2 + capSupportColumnThicknessB/2-capSupportColumnProtrusionAtoB, capSupportBaseThickness/2 + capSupportColumnHeightB + capSupportColumnHeightC + capSupportColumnBtoBase + mMTriangularSupportThickness/2 ]],
-        registry=reg
-    )
+        mMSupport = g4.solid.Union(
+            name="mMSupport",
+            obj1=capSupportBaseColumn,
+            obj2=mMTriangularSupport,
+            tra2=[[0, 0, -135*3.1416/180], [0, - capSupportColumnCtoTriangularSupport - capSupportBaseHeight/2 + capSupportColumnThicknessB/2-capSupportColumnProtrusionAtoB, capSupportBaseThickness/2 + capSupportColumnHeightB + capSupportColumnHeightC + capSupportColumnBtoBase + mMTriangularSupportThickness/2 ]],
+            registry=reg
+        )
 
     ### Roller
     rollerCylinder = g4.solid.Tubs(
@@ -774,12 +775,13 @@ def generate_micromegas_assembly(name="micromegas_assembly", registry=None, is_r
     mMBoardCopper = utils.get_solid_by_name("mMBoardCopper", reg)
     mMBoardKapton = utils.get_solid_by_name("mMBoardKapton", reg)
 
-    generate_limandes(name="limande", suffix="Copper", thickness_in_mm=limandeThickness, thickness_below_in_mm=0, is_right_side=is_right_side, registry=reg)
-    generate_limandes(name="limandeInner", suffix="Kapton", thickness_in_mm=limandeThickness - limandeCopperThickness*2, thickness_below_in_mm=limandeCopperThickness, is_right_side=is_right_side, registry=reg)
-    limandeA = utils.get_solid_by_name("limandeA", reg)
-    limandeB = utils.get_solid_by_name("limandeB", reg)
-    limandeInnerA = utils.get_solid_by_name("limandeInnerA", reg)
-    limandeInnerB = utils.get_solid_by_name("limandeInnerB", reg)
+    if not simple_geometry:
+        generate_limandes(name="limande", suffix="Copper", thickness_in_mm=limandeThickness, thickness_below_in_mm=0, is_right_side=is_right_side, registry=reg)
+        generate_limandes(name="limandeInner", suffix="Kapton", thickness_in_mm=limandeThickness - limandeCopperThickness*2, thickness_below_in_mm=limandeCopperThickness, is_right_side=is_right_side, registry=reg)
+        limandeA = utils.get_solid_by_name("limandeA", reg)
+        limandeB = utils.get_solid_by_name("limandeB", reg)
+        limandeInnerA = utils.get_solid_by_name("limandeInnerA", reg)
+        limandeInnerB = utils.get_solid_by_name("limandeInnerB", reg)
 
 
     ### JOIN THE SOLIDS INTO THE ASSEMBLY
@@ -808,12 +810,13 @@ def generate_micromegas_assembly(name="micromegas_assembly", registry=None, is_r
         name="mMTeflonSpacerPad_LV",
         registry=reg
     )
-    mMSupport_LV = g4.LogicalVolume(
-        solid=mMSupport,
-        material=copper,
-        name="mMSupport_LV",
-        registry=reg
-    )
+    if not simple_geometry:
+        mMSupport_LV = g4.LogicalVolume(
+            solid=mMSupport,
+            material=copper,
+            name="mMSupport_LV",
+            registry=reg
+        )
     roller_LV = g4.LogicalVolume(
         solid=roller,
         material=teflon,
@@ -853,31 +856,32 @@ def generate_micromegas_assembly(name="micromegas_assembly", registry=None, is_r
         registry=reg
     )
     
-    limandeA_LV = g4.LogicalVolume(
-        solid=limandeA,
-        material=copper,
-        name="limandeA_LV",
-        registry=reg
-    )
-    limandeB_LV = g4.LogicalVolume(
-        solid=limandeB,
-        material=copper,
-        name="limandeB_LV",
-        registry=reg
-    )
-    
-    limandeInnerA_LV = g4.LogicalVolume(
-        solid=limandeInnerA,
-        material=kapton,
-        name="limandeInnerA_LV",
-        registry=reg
-    )
-    limandeInnerB_LV = g4.LogicalVolume(
-        solid=limandeInnerB,
-        material=kapton,
-        name="limandeInnerB_LV",
-        registry=reg
-    )
+    if not simple_geometry:
+        limandeA_LV = g4.LogicalVolume(
+            solid=limandeA,
+            material=copper,
+            name="limandeA_LV",
+            registry=reg
+        )
+        limandeB_LV = g4.LogicalVolume(
+            solid=limandeB,
+            material=copper,
+            name="limandeB_LV",
+            registry=reg
+        )
+        
+        limandeInnerA_LV = g4.LogicalVolume(
+            solid=limandeInnerA,
+            material=kapton,
+            name="limandeInnerA_LV",
+            registry=reg
+        )
+        limandeInnerB_LV = g4.LogicalVolume(
+            solid=limandeInnerB,
+            material=kapton,
+            name="limandeInnerB_LV",
+            registry=reg
+        )
 
 
     # Create the physical volumes and add them to the assembly
@@ -885,7 +889,7 @@ def generate_micromegas_assembly(name="micromegas_assembly", registry=None, is_r
     mMBase_PV = g4.PhysicalVolume(
         rotation=side_rot.tolist(),
         position=[0, 0, 0],
-        name="mMBase_PV",
+        name="mMBase",
         logicalVolume=mMBase_LV,
         motherVolume=micromegas_assembly,
         registry=reg
@@ -896,7 +900,7 @@ def generate_micromegas_assembly(name="micromegas_assembly", registry=None, is_r
     mMTeflonSpacerPad1_PV = g4.PhysicalVolume(
         rotation=[0, 0, 0],
         position=[0, teflonspacerpad_pos_xory, side_z_dir*teflonspacerpad_pos_z],
-        name="mMTeflonSpacerPad1_PV",
+        name="mMTeflonSpacerPad1",
         logicalVolume=mMTeflonSpacerPad_LV,
         motherVolume=micromegas_assembly,
         registry=reg
@@ -904,7 +908,7 @@ def generate_micromegas_assembly(name="micromegas_assembly", registry=None, is_r
     mMTeflonSpacerPad2_PV = g4.PhysicalVolume(
         rotation=[0, 0, 0],
         position=[0, -teflonspacerpad_pos_xory, side_z_dir*teflonspacerpad_pos_z],
-        name="mMTeflonSpacerPad2_PV",
+        name="mMTeflonSpacerPad2",
         logicalVolume=mMTeflonSpacerPad_LV,
         motherVolume=micromegas_assembly,
         registry=reg
@@ -912,7 +916,7 @@ def generate_micromegas_assembly(name="micromegas_assembly", registry=None, is_r
     mMTeflonSpacerPad3_PV = g4.PhysicalVolume(
         rotation=[0, 0, 90*np.pi/180],
         position=[teflonspacerpad_pos_xory, 0, side_z_dir*teflonspacerpad_pos_z],
-        name="mMTeflonSpacerPad3_PV",
+        name="mMTeflonSpacerPad3",
         logicalVolume=mMTeflonSpacerPad_LV,
         motherVolume=micromegas_assembly,
         registry=reg
@@ -920,7 +924,7 @@ def generate_micromegas_assembly(name="micromegas_assembly", registry=None, is_r
     mMTeflonSpacerPad4_PV = g4.PhysicalVolume(
         rotation=[0, 0, 90*np.pi/180],
         position=[-teflonspacerpad_pos_xory, 0, side_z_dir*teflonspacerpad_pos_z],
-        name="mMTeflonSpacerPad4_PV",
+        name="mMTeflonSpacerPad4",
         logicalVolume=mMTeflonSpacerPad_LV,
         motherVolume=micromegas_assembly,
         registry=reg
@@ -932,7 +936,7 @@ def generate_micromegas_assembly(name="micromegas_assembly", registry=None, is_r
     mMBaseClosingBracket1_PV = g4.PhysicalVolume(
         rotation=[0, 0, 0],
         position=[0, closingbracket_pos_xory, side_z_dir*closingbracket_pos_z],
-        name="mMBaseClosingBracket1_PV",
+        name="mMBaseClosingBracket1",
         logicalVolume=mMBaseClosingBracket_LV,
         motherVolume=micromegas_assembly,
         registry=reg
@@ -940,7 +944,7 @@ def generate_micromegas_assembly(name="micromegas_assembly", registry=None, is_r
     mMBaseClosingBracket2_PV = g4.PhysicalVolume(
         rotation=[0, 0, 0],
         position=[0, -closingbracket_pos_xory, side_z_dir*closingbracket_pos_z],
-        name="mMBaseClosingBracket2_PV",
+        name="mMBaseClosingBracket2",
         logicalVolume=mMBaseClosingBracket_LV,
         motherVolume=micromegas_assembly,
         registry=reg
@@ -948,7 +952,7 @@ def generate_micromegas_assembly(name="micromegas_assembly", registry=None, is_r
     mMBaseClosingBracket_3_PV = g4.PhysicalVolume(
         rotation=[0, 0, 90*np.pi/180],
         position=[closingbracket_pos_xory, 0, side_z_dir*closingbracket_pos_z],
-        name="mMBaseClosingBracket3_PV",
+        name="mMBaseClosingBracket3",
         logicalVolume=mMBaseClosingBracket_LV,
         motherVolume=micromegas_assembly,
         registry=reg
@@ -956,7 +960,7 @@ def generate_micromegas_assembly(name="micromegas_assembly", registry=None, is_r
     mMBaseClosingBracket_4_PV = g4.PhysicalVolume(
         rotation=[0, 0, 90*np.pi/180],
         position=[-closingbracket_pos_xory, 0, side_z_dir*closingbracket_pos_z],
-        name="mMBaseClosingBracket4_PV",
+        name="mMBaseClosingBracket4",
         logicalVolume=mMBaseClosingBracket_LV,
         motherVolume=micromegas_assembly,
         registry=reg
@@ -965,7 +969,7 @@ def generate_micromegas_assembly(name="micromegas_assembly", registry=None, is_r
     mMBaseTeflonRoller1_PV = g4.PhysicalVolume(
         rotation=(np.array([90*3.1416/180, 0, 0]) + side_rot).tolist(),
         position=[-mMBaseLength/2, 0, side_z_dir*(mMBaseThickness/2 + rollerCutShift)],
-        name="mMBaseTeflonRoller1_PV",
+        name="mMBaseTeflonRoller1",
         logicalVolume=roller_LV,
         motherVolume=micromegas_assembly,
         registry=reg
@@ -973,38 +977,38 @@ def generate_micromegas_assembly(name="micromegas_assembly", registry=None, is_r
     mMBaseTeflonRoller2_PV = g4.PhysicalVolume(
         rotation=(np.array([-90*3.1416/180, 0, np.pi]) + side_rot).tolist(),
         position=[mMBaseLength/2, 0, side_z_dir*(mMBaseThickness/2 + rollerCutShift)],
-        name="mMBaseTeflonRoller2_PV",
+        name="mMBaseTeflonRoller2",
         logicalVolume=roller_LV,
         motherVolume=micromegas_assembly,
         registry=reg
     )
 
-
-    ### Micromegas support
-    mMSupportDistanceToCenter_XorY = 220.79/2 #mm
-    mMSupport_pos_z = mMBaseThickness/2 + capSupportBaseThickness/2 + capSupportColumnHeightB + capSupportColumnHeightC + capSupportColumnBtoBase + mMTriangularSupportThickness
-    mMSupport1_PV = g4.PhysicalVolume(
-        rotation=(np.array([0, 0, side_z_dir*45*np.pi/180]) + side_rot).tolist(),  # 45 degrees rotation
-        position=[-side_z_dir*mMSupportDistanceToCenter_XorY, side_z_dir*mMSupportDistanceToCenter_XorY, side_z_dir*mMSupport_pos_z],
-        name="mMSupport1_PV",
-        logicalVolume=mMSupport_LV,
-        motherVolume=micromegas_assembly,
-        registry=reg
-    )
-    mMSupport2_PV = g4.PhysicalVolume(
-        rotation=(np.array([0, 0, -side_z_dir*135*np.pi/180]) + side_rot).tolist(),  # 45 degrees rotation
-        position=[side_z_dir*mMSupportDistanceToCenter_XorY, -side_z_dir*mMSupportDistanceToCenter_XorY, side_z_dir*mMSupport_pos_z],
-        name="mMSupport2_PV",
-        logicalVolume=mMSupport_LV,
-        motherVolume=micromegas_assembly,
-        registry=reg
-    )
-    #print("height of the support: ", mMSupport_pos_z-mMBaseThickness/2+capSupportBaseThickness/2, " mm")
+    if not simple_geometry:
+        ### Micromegas support
+        mMSupportDistanceToCenter_XorY = 220.79/2 #mm
+        mMSupport_pos_z = mMBaseThickness/2 + capSupportBaseThickness/2 + capSupportColumnHeightB + capSupportColumnHeightC + capSupportColumnBtoBase + mMTriangularSupportThickness
+        mMSupport1_PV = g4.PhysicalVolume(
+            rotation=(np.array([0, 0, side_z_dir*45*np.pi/180]) + side_rot).tolist(),  # 45 degrees rotation
+            position=[-side_z_dir*mMSupportDistanceToCenter_XorY, side_z_dir*mMSupportDistanceToCenter_XorY, side_z_dir*mMSupport_pos_z],
+            name="mMSupport1",
+            logicalVolume=mMSupport_LV,
+            motherVolume=micromegas_assembly,
+            registry=reg
+        )
+        mMSupport2_PV = g4.PhysicalVolume(
+            rotation=(np.array([0, 0, -side_z_dir*135*np.pi/180]) + side_rot).tolist(),  # 45 degrees rotation
+            position=[side_z_dir*mMSupportDistanceToCenter_XorY, -side_z_dir*mMSupportDistanceToCenter_XorY, side_z_dir*mMSupport_pos_z],
+            name="mMSupport2",
+            logicalVolume=mMSupport_LV,
+            motherVolume=micromegas_assembly,
+            registry=reg
+        )
+        #print("height of the support: ", mMSupport_pos_z-mMBaseThickness/2+capSupportBaseThickness/2, " mm")
 
     mMCopperFoilLayer2_PV = g4.PhysicalVolume(
         rotation=[0, 0, 0],
         position=[0, 0, mMBoardThickness/2 - mMKaptonFoilThickness - mMCopperFoilThickness -mMKaptonFoilThickness - mMCopperFoilThickness/2],
-        name="mMCopperFoilLayer2_PV",
+        name="mMCopperFoilLayer2",
         logicalVolume=mMCopperFoil_LV,
         motherVolume=mMBoardKapton_LV,
         registry=reg
@@ -1012,7 +1016,7 @@ def generate_micromegas_assembly(name="micromegas_assembly", registry=None, is_r
     mMCopperFoilLayer3_PV = g4.PhysicalVolume(
         rotation=[0, 0, 0],
         position=[0, 0, mMBoardThickness/2 - mMKaptonFoilThickness - mMCopperFoilThickness*2 - mMKaptonFoilThickness*2 - mMCopperFoilThickness/2],
-        name="mMCopperFoilLayer3_PV",
+        name="mMCopperFoilLayer3",
         logicalVolume=mMCopperFoil_LV,
         motherVolume=mMBoardKapton_LV,
         registry=reg
@@ -1021,7 +1025,7 @@ def generate_micromegas_assembly(name="micromegas_assembly", registry=None, is_r
     mMBoardKapton_PV = g4.PhysicalVolume(
         rotation=[0, 0, 0],
         position=[0, 0, 0],
-        name="mMBoardKapton_PV",
+        name="mMBoardKapton",
         logicalVolume=mMBoardKapton_LV,
         motherVolume=mMBoardCopper_LV,
         registry=reg
@@ -1030,63 +1034,64 @@ def generate_micromegas_assembly(name="micromegas_assembly", registry=None, is_r
     mMBoardCopper_PV = g4.PhysicalVolume(
         rotation=side_rot.tolist(),
         position=[0, 0, -side_z_dir*(mMBaseThickness/2 + mMBoardThickness/2)],
-        name="mMBoardCopper_PV",
+        name="mMBoardCopper",
         logicalVolume=mMBoardCopper_LV,
         motherVolume=micromegas_assembly,
         registry=reg
     )
 
-    limandeInnerA_PV = g4.PhysicalVolume(
-        rotation=[0, 0, 0],
-        position=[0, 0, 0],
-        name="limandeInnerA_PV",
-        logicalVolume=limandeInnerA_LV,
-        motherVolume=limandeA_LV,
-        registry=reg
-    )
-    limandeInnerB_PV = g4.PhysicalVolume(
-        rotation=[0, 0, 0],
-        position=[0, 0, 0],
-        name="limandeInnerB_PV",
-        logicalVolume=limandeInnerB_LV,
-        motherVolume=limandeB_LV,
-        registry=reg
-    )
-    
-    limande_z_pos = side_z_dir*(mMBaseThickness/2 + mMBaseBracketThickness + mMTeflonSpacerPadThickness + mMBoardThickness + limandeThickness/2)
-    limande_x_or_y = mMBaseLength/2 - mMBaseEndToBracketDistance - limandeBracketSideWidth/2
-    limande1_PV = g4.PhysicalVolume(
-        rotation=[0, 0, 0],
-        position=[0, -limande_x_or_y, limande_z_pos],
-        name="limande1_PV",
-        logicalVolume=limandeA_LV,
-        motherVolume=micromegas_assembly,
-        registry=reg
-    )
-    limande2_PV = g4.PhysicalVolume(
-        rotation=[0, 0, np.pi],
-        position=[0, +limande_x_or_y, limande_z_pos],
-        name="limande2_PV",
-        logicalVolume=limandeA_LV,
-        motherVolume=micromegas_assembly,
-        registry=reg
-    )
-    limande3_PV = g4.PhysicalVolume(
-        rotation=[0, 0, -np.pi/2],
-        position=[+limande_x_or_y, 0, limande_z_pos],
-        name="limande3_PV",
-        logicalVolume=limandeB_LV,
-        motherVolume=micromegas_assembly,
-        registry=reg
-    )
-    limande4_PV = g4.PhysicalVolume(
-        rotation=[0, 0, +np.pi/2],
-        position=[-limande_x_or_y, 0, limande_z_pos],
-        name="limande4_PV",
-        logicalVolume=limandeB_LV,
-        motherVolume=micromegas_assembly,
-        registry=reg
-    )
+    if not simple_geometry:
+        limandeInnerA_PV = g4.PhysicalVolume(
+            rotation=[0, 0, 0],
+            position=[0, 0, 0],
+            name="limandeInnerA",
+            logicalVolume=limandeInnerA_LV,
+            motherVolume=limandeA_LV,
+            registry=reg
+        )
+        limandeInnerB_PV = g4.PhysicalVolume(
+            rotation=[0, 0, 0],
+            position=[0, 0, 0],
+            name="limandeInnerB",
+            logicalVolume=limandeInnerB_LV,
+            motherVolume=limandeB_LV,
+            registry=reg
+        )
+        
+        limande_z_pos = side_z_dir*(mMBaseThickness/2 + mMBaseBracketThickness + mMTeflonSpacerPadThickness + mMBoardThickness + limandeThickness/2)
+        limande_x_or_y = mMBaseLength/2 - mMBaseEndToBracketDistance - limandeBracketSideWidth/2
+        limande1_PV = g4.PhysicalVolume(
+            rotation=[0, 0, 0],
+            position=[0, -limande_x_or_y, limande_z_pos],
+            name="limande1",
+            logicalVolume=limandeA_LV,
+            motherVolume=micromegas_assembly,
+            registry=reg
+        )
+        limande2_PV = g4.PhysicalVolume(
+            rotation=[0, 0, np.pi],
+            position=[0, +limande_x_or_y, limande_z_pos],
+            name="limande2",
+            logicalVolume=limandeA_LV,
+            motherVolume=micromegas_assembly,
+            registry=reg
+        )
+        limande3_PV = g4.PhysicalVolume(
+            rotation=[0, 0, -np.pi/2],
+            position=[+limande_x_or_y, 0, limande_z_pos],
+            name="limande3",
+            logicalVolume=limandeB_LV,
+            motherVolume=micromegas_assembly,
+            registry=reg
+        )
+        limande4_PV = g4.PhysicalVolume(
+            rotation=[0, 0, +np.pi/2],
+            position=[-limande_x_or_y, 0, limande_z_pos],
+            name="limande4",
+            logicalVolume=limandeB_LV,
+            motherVolume=micromegas_assembly,
+            registry=reg
+        )
 
     return reg
 
