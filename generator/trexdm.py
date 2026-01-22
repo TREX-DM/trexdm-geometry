@@ -16,6 +16,7 @@ RIGHT_CALIBRATION_OPEN = True
 OPEN_CALIBRATION_LEAD_BLOCKS = False
 GAS = "Neon2%Isobutane1.1bar"
 CATHODE_TYPE = "wired"  # "wired" or "plain"
+ADD_NEUTRON_SHIELDING = True
 SIMPLIFY_MM_GEOMETRY = False
 
 
@@ -25,17 +26,21 @@ reg = g4.Registry()
 #galactic = g4.nist_material_2geant4Material("G4_Galactic")
 air = g4.nist_material_2geant4Material("G4_AIR")
 # world solid and logical
-ws   = g4.solid.Box("ws",1.5,1.5,1.5,reg, "m")
+ws   = g4.solid.Box("ws",5,5,5,reg, "m")
 world  = g4.LogicalVolume(ws, air,"world",reg)
 
 # Generate the assemblies
 shielding.generate_shielding_assembly_by_parts(open_calibration_lead_block=OPEN_CALIBRATION_LEAD_BLOCKS, registry=reg)
+if ADD_NEUTRON_SHIELDING:
+    shielding.generate_neutron_shielding_assembly(registry=reg)
 vessel.generate_vessel_assembly(registry=reg, left_calibration_is_open=LEFT_CALIBRATION_OPEN, right_calibration_is_open=RIGHT_CALIBRATION_OPEN, gas=GAS)
 micromegas.generate_micromegas_assembly(registry=reg, is_right_side=True, simple_geometry=SIMPLIFY_MM_GEOMETRY)
 gem.generate_gem_assembly(registry=reg, is_right_side=True)
 fieldcage.generate_fieldcage_assembly(registry=reg, cathode_type=CATHODE_TYPE)
 
 shielding_assembly = utils.get_logical_volume_by_name("shielding_assembly", reg)
+if ADD_NEUTRON_SHIELDING:
+    neutron_shielding_assembly = utils.get_logical_volume_by_name("neutron_shielding_assembly", reg)
 vessel_assembly = utils.get_logical_volume_by_name("vessel_assembly", reg)
 micromegas_assembly = utils.get_logical_volume_by_name("micromegas_assembly", reg)
 gem_assembly = utils.get_logical_volume_by_name("gem_assembly", reg)
@@ -298,6 +303,17 @@ shielding_PV = g4.PhysicalVolume(
     registry=reg
 )
 
+
+if ADD_NEUTRON_SHIELDING:
+    neutron_shielding_PV = g4.PhysicalVolume(
+        name="neutronShielding",
+        logicalVolume=neutron_shielding_assembly,
+        motherVolume=world,
+        rotation=[0, 0, 0],
+        position=[0, 0, 0],
+        registry=reg
+    )
+
 fieldcage_PV = g4.PhysicalVolume(
     name="fieldcage",
     logicalVolume=fieldcage_assembly,
@@ -322,6 +338,7 @@ defaultName = (
     f"_rightCalib-{'open' if RIGHT_CALIBRATION_OPEN else 'closed'}"
     f"{'_simplifiedMM' if SIMPLIFY_MM_GEOMETRY else ''}"
     f"{'_calLeadBlocks-open' if OPEN_CALIBRATION_LEAD_BLOCKS else ''}"
+    f"{'_neutronShielding' if ADD_NEUTRON_SHIELDING else ''}"
     f".gdml"
 )
 parser.add_argument("-f", "--file", type=str, default=defaultName, help="Output GDML file name")
